@@ -65,18 +65,6 @@ public class HouseholdBehaviour implements Serializable {
 
     //----- General behaviour -----//
 
-	/**
-	 * Compute the monthly non-essential or optional consumption by a household. It is calibrated so that the output
-     * wealth distribution fits the ONS wealth data for Great Britain.
-	 *
-	 * @param bankBalance Household's liquid wealth
-     * @param annualGrossTotalIncome Household's annual gross total income
-	 */
-	//public double getDesiredConsumption(double bankBalance, double annualGrossTotalIncome) {
-	//	return config.CONSUMPTION_FRACTION*Math.max(bankBalance - getDesiredBankBalance(annualGrossTotalIncome), 0.0);
-	//}
-
-	
 	// alternative consumption function	 
 	//TODO is this only non-essential consumption? 
 	// if changing this back to the default consumption function, input to this function has to be
