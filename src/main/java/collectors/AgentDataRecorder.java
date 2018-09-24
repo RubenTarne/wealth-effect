@@ -180,7 +180,7 @@ public class AgentDataRecorder extends CollectorBase{
             dataArray[1][h.id-oldestID] = h.getAge();
             double equityPositionHH = dataArray[2][h.id-oldestID] = h.getEquityPosition();
             dataArray[3][h.id-oldestID] = equityPositionHH - bankBalanceHH;
-            dataArray[4][h.id-oldestID] = h.behaviour.getDesiredConsumption(h.getBankBalance(), h.getAnnualGrossTotalIncome());
+            dataArray[4][h.id-oldestID] = h.behaviour.getDesiredConsumption(h.getBankBalance(), h.getMonthlyDisposableIncome(), h.getEquityPosition());
             dataArray[5][h.id-oldestID] = h.getAnnualGrossTotalIncome();
             dataArray[6][h.id-oldestID] = h.getMonthlyDisposableIncome();
             dataArray[7][h.id-oldestID] = h.behaviour.getDesiredBankBalance(h.getAnnualGrossTotalIncome());

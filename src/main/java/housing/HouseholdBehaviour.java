@@ -72,10 +72,43 @@ public class HouseholdBehaviour implements Serializable {
 	 * @param bankBalance Household's liquid wealth
      * @param annualGrossTotalIncome Household's annual gross total income
 	 */
-	public double getDesiredConsumption(double bankBalance, double annualGrossTotalIncome) {
-		return config.CONSUMPTION_FRACTION*Math.max(bankBalance - getDesiredBankBalance(annualGrossTotalIncome), 0.0);
-	}
+	//public double getDesiredConsumption(double bankBalance, double annualGrossTotalIncome) {
+	//	return config.CONSUMPTION_FRACTION*Math.max(bankBalance - getDesiredBankBalance(annualGrossTotalIncome), 0.0);
+	//}
 
+	
+	// alternative consumption function	 
+	//TODO is this only non-essential consumption? 
+	// if changing this back to the default consumption function, input to this function has to be
+	// adopted in Household and AgentRecorder class.
+	// the value 0.07, is this for the month? or for the year?
+	/**
+	 * 
+	 * @param bankBalance Household's liquid wealth
+	 * @param disposableIncome Household's monthly disposable income
+	 * @param equityPosition Household's equity Position 
+	 * @return desired Consumption of household
+	 */
+	public double getDesiredConsumption(double bankBalance, double disposableIncome, double equityPosition) {
+		// how fast do households adjust their consumption 
+	  
+		double adaptionSpeed = 0.1;
+		// what is the ratio of liquid wealth to disposable income that the household wants to hold?
+		double precautionaryMotive = 2;
+		// different wealth effect for positive and negative equity
+		if (equityPosition > 0){
+			System.out.println("consumption is: " + (Math.min(disposableIncome + adaptionSpeed*(bankBalance - precautionaryMotive*disposableIncome)+ 0.007*equityPosition, bankBalance)));
+			return Math.min(disposableIncome + adaptionSpeed*(bankBalance - precautionaryMotive*disposableIncome)+ 0.007*equityPosition, bankBalance);
+		}
+		// deviating from Erlingsson (2015) I use a stronger effect of negative equity on consumption
+		else{
+			return Math.min(disposableIncome + adaptionSpeed*(bankBalance - precautionaryMotive*disposableIncome)+ 0.014*equityPosition, bankBalance);
+		} 
+		  
+	 }
+
+
+	
 	/**
      * Minimum bank balance each household is willing to have at the end of the month for the whole population to match
      * the wealth distribution obtained from the household survey (LCFS). In particular, in line with the Wealth and
