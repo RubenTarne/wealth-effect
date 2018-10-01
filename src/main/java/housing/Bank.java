@@ -74,9 +74,11 @@ public class Bank implements Serializable {
 	
 	/**
 	 * Redo all necessary monthly calculations and reset counters.
+	 * supplyTarget increases now with the HPA expectation
+	 * implement: (1+Model.housingMarketStats.getLongTermHPA()*config.HPA_EXPECTATION_FACTOR)*
 	 */
 	public void step(int totalPopulation) {
-		supplyTarget = config.BANK_CREDIT_SUPPLY_TARGET*totalPopulation;
+		supplyTarget = (1+Model.housingMarketStats.getLongTermHPA()*config.HPA_EXPECTATION_FACTOR)*(config.BANK_CREDIT_SUPPLY_TARGET*totalPopulation);
 		setMortgageInterestRate(recalculateInterestRate());
 		resetMonthlyCounters();
 	}
@@ -189,15 +191,30 @@ public class Bank implements Serializable {
 			// --- affordability constraint TODO: affordability for BTL?
 			affordable_principal = Math.max(0.0,config.CENTRAL_BANK_AFFORDABILITY_COEFF*h.getMonthlyNetTotalIncome())
                     / getMonthlyPaymentFactor(isHome);
+//			//RUBEN see if affordability constraint is actually relevant
+//			if(affordable_principal<approval.principal) {
+//				System.out.println("the affordability constraint is tighter than the LTV constraint. Model time: " + Model.getTime());
+//				
+//			}
 			approval.principal = Math.min(approval.principal, affordable_principal);
 
 			// --- lti constraint
 			lti_principal = h.getAnnualGrossEmploymentIncome()*getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome);
 			approval.principal = Math.min(approval.principal, lti_principal);
+			
+//			//RUBEN see if lti constraint is actually relevant
+//			if(lti_principal<approval.principal) {
+//				System.out.println("the lti constraint is tighter than the LTV and affordability constraint. Model time: " + Model.getTime());
+//			}
 		} else {
 			// --- BTL ICR constraint
 			icr_principal = Model.rentalMarketStats.getExpAvFlowYield()*housePrice
                     /(Model.centralBank.getInterestCoverRatioLimit(isHome)*config.CENTRAL_BANK_BTL_STRESSED_INTEREST);
+			
+			//RUBEN see if ICR constraint is actually relevant
+			//if(icr_principal<approval.principal) {
+			//	System.out.println("the ICR constraint for BTL is tighter than the LTV constraint. Model time: " + Model.getTime());
+			//}
 			approval.principal = Math.min(approval.principal, icr_principal);
 		}
 		

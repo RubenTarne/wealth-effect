@@ -77,21 +77,34 @@ public class HouseholdBehaviour implements Serializable {
 	 * @param equityPosition Household's equity Position 
 	 * @return desired Consumption of household
 	 */
-	public double getDesiredConsumption(double bankBalance, double disposableIncome, double equityPosition) {
-		// how fast do households adjust their consumption 
-	  
-		double adaptionSpeed = 0.1;
-		// what is the ratio of liquid wealth to disposable income that the household wants to hold?
-		double precautionaryMotive = 2;
-		// different wealth effect for positive and negative equity
-		if (equityPosition > 0){
-			System.out.println("consumption is: " + (Math.min(disposableIncome + adaptionSpeed*(bankBalance - precautionaryMotive*disposableIncome)+ 0.007*equityPosition, bankBalance)));
-			return Math.min(disposableIncome + adaptionSpeed*(bankBalance - precautionaryMotive*disposableIncome)+ 0.007*equityPosition, bankBalance);
+
+	public double getDesiredConsumption(double bankBalance, double disposableIncome, double propertyValues, 
+										double totalDebt, double equityPosition) {
+		double consumptionFraction = 0.7;
+		// these are monthly values! 
+		double wealthEffect = 0.0;
+		// consumption function without essential consumption
+		double consumption = consumptionFraction*disposableIncome 
+							 + wealthEffect*(1*bankBalance-disposableIncome + 0.5*propertyValues + 0.5*totalDebt);
+		// if HH wants to consume more than it has in cash, then limit to cash (otherwise bankrupt)
+		if(consumption > bankBalance) return(bankBalance);
+		// double minConsumption = config.ESSENTIAL_CONSUMPTION_FRACTION*config.GOVERNMENT_MONTHLY_INCOME_SUPPORT;
+		double minConsumption = 0.0;
+		// if consumption is very low or negative (due to high debt), consume at least either essential consumption
+		// but not more than the actual bank balance to avoid bankruptcy
+		if(consumption < minConsumption) {
+			return Math.min(minConsumption, bankBalance);
 		}
-		// deviating from Erlingsson (2015) I use a stronger effect of negative equity on consumption
-		else{
-			return Math.min(disposableIncome + adaptionSpeed*(bankBalance - precautionaryMotive*disposableIncome)+ 0.014*equityPosition, bankBalance);
-		} 
+		else {
+			return consumption;
+		}
+		
+//		if (equityPosition > 0){
+//		}
+//		
+//		else{
+//
+//		} 
 		  
 	 }
 
