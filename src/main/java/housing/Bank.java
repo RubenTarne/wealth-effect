@@ -74,13 +74,17 @@ public class Bank implements Serializable {
 	
 	/**
 	 * Redo all necessary monthly calculations and reset counters.
-	 * supplyTarget increases now with the HPA expectation
+	 * supplyTarget increases now linear with the HPA expectation
 	 * implement: (1+Model.housingMarketStats.getLongTermHPA()*config.HPA_EXPECTATION_FACTOR)*
 	 */
 	public void step(int totalPopulation) {
-		supplyTarget = (1+Model.housingMarketStats.getLongTermHPA()*config.HPA_EXPECTATION_FACTOR)*(config.BANK_CREDIT_SUPPLY_TARGET*totalPopulation);
+		supplyTarget = creditSupplyTarget(totalPopulation);
 		setMortgageInterestRate(recalculateInterestRate());
 		resetMonthlyCounters();
+	}
+	
+	public double creditSupplyTarget(int totalPopulation) {
+		return (1+Model.housingMarketStats.getLongTermHPA()*config.HPA_EXPECTATION_FACTOR)*(config.BANK_CREDIT_SUPPLY_TARGET*totalPopulation);
 	}
 	
 	/**
