@@ -117,7 +117,7 @@ public class HouseholdStats extends CollectorBase {
         for (Household h : Model.households) {
         	//RUBEN sum up the consumption and calculate the savings, count hh with negative euqity
         	// For alternative consumption function, I added the input "getEquityPosition()" and "getMonthlyDisposableIncome()"
-        	double householdConsumption = h.behaviour.getDesiredConsumption(h.getBankBalance(), h.getAnnualGrossTotalIncome());
+        	double householdConsumption = h.behaviour.getDesiredConsumption(h.getBankBalance(), h.getMonthlyDisposableIncome(), h.getPropertyValue(), h.getTotalDebt(), h.getEquityPosition());
         	totalConsumption += householdConsumption;
             totalSavings += (h.getMonthlyDisposableIncome()*Model.config.constants.MONTHS_IN_YEAR)-householdConsumption;
             if (h.getEquityPosition() < 0) {

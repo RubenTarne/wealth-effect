@@ -88,7 +88,11 @@ public class Household implements IHouseOwner, Serializable {
         // Add monthly disposable income (net total income minus essential consumption and housing expenses) to bank balance
         bankBalance += getMonthlyDisposableIncome();
         // Consume based on monthly disposable income (after essential consumption and house payments have been subtracted)
-        bankBalance -= behaviour.getDesiredConsumption(getBankBalance(), getAnnualGrossTotalIncome()); // Old implementation: if(isFirstTimeBuyer() || !isInSocialHousing()) bankBalance -= behaviour.getDesiredConsumption(getBankBalance(), getAnnualGrossTotalIncome());
+        bankBalance -= behaviour.getDesiredConsumption(getBankBalance(), 
+        												getMonthlyDisposableIncome(), 
+        												getPropertyValue(), 
+        												getTotalDebt(),
+        												getEquityPosition()); // Old implementation: if(isFirstTimeBuyer() || !isInSocialHousing()) bankBalance -= behaviour.getDesiredConsumption(getBankBalance(), getAnnualGrossTotalIncome());
         // Deal with bankruptcies
         // TODO: Improve bankruptcy procedures (currently, simple cash injection), such as terminating contracts!
         if (bankBalance < 0.0) {
@@ -544,6 +548,45 @@ public class Household implements IHouseOwner, Serializable {
         return Model.housingMarketStats.getExpAvSalePriceForQuality(home.getQuality())
                 - mortgageFor(home).principal;
     }
+    
+    // method for the consumption function in householdBehaviour to get house and investment mark-to-market value
+    public double getPropertyValue() {
+    	double totalValue = 0.0;
+    	if(!isHomeowner())return(totalValue); //BTL investors are always homeowners as well
+    	// add value of home
+    	totalValue += Model.housingMarketStats.getExpAvSalePriceForQuality(home.getQuality());
+    	// add value of all investment properties
+    	if(nInvestmentProperties() > 1) {
+    		for (House h: housePayments.keySet()) {
+                if (h.owner == this && h.resident !=this) {
+                	totalValue += Model.housingMarketStats.getExpAvSalePriceForQuality(h.getQuality());	
+                }
+    		}
+    	}
+    	return totalValue;
+    }
+    
+    // method for the consumption function in householdBehaviour to get total debt of the household.
+    // returns a negative value
+    public double getTotalDebt() {
+    	double totalDebt = 0.0;
+    	// TODO check if households without a home can have outstanding loans under any circumstances
+    	if(!isHomeowner())return(totalDebt);
+    	// add principal outstanding on home
+    	totalDebt -= mortgageFor(home).principal;
+    	if(nInvestmentProperties() > 0) {
+    		// if house is owned by investor AND it is not the home then..
+    		for (House h: housePayments.keySet()) {
+                if (h.owner == this && h.resident !=this) {
+                	totalDebt -= mortgageFor(h).principal;
+                }
+    		}
+    		return totalDebt;
+    	} 
+    	
+    	return totalDebt;
+    }
+    
     
     // get investment property equity for BTL investors
     double getInvestmentEquity() {

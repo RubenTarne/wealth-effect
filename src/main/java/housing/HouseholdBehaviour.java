@@ -65,17 +65,51 @@ public class HouseholdBehaviour implements Serializable {
 
     //----- General behaviour -----//
 
+	// alternative consumption function	 
+	//TODO is this only non-essential consumption? 
+	// if changing this back to the default consumption function, input to this function has to be
+	// adopted in Household and AgentRecorder class.
+	// the value 0.07, is this for the month? or for the year?
 	/**
-	 * Compute the monthly non-essential or optional consumption by a household. It is calibrated so that the output
-     * wealth distribution fits the ONS wealth data for Great Britain.
-	 *
+	 * 
 	 * @param bankBalance Household's liquid wealth
-     * @param annualGrossTotalIncome Household's annual gross total income
+	 * @param disposableIncome Household's monthly disposable income
+	 * @param equityPosition Household's equity Position 
+	 * @return desired Consumption of household
 	 */
-	public double getDesiredConsumption(double bankBalance, double annualGrossTotalIncome) {
-		return config.CONSUMPTION_FRACTION*Math.max(bankBalance - getDesiredBankBalance(annualGrossTotalIncome), 0.0);
-	}
 
+	public double getDesiredConsumption(double bankBalance, double disposableIncome, double propertyValues, 
+										double totalDebt, double equityPosition) {
+		double consumptionFraction = 0.7;
+		// these are monthly values! 
+		double wealthEffect = 0.0;
+		// consumption function without essential consumption
+		double consumption = consumptionFraction*disposableIncome 
+							 + wealthEffect*(1*bankBalance-disposableIncome + 0.5*propertyValues + 0.5*totalDebt);
+		// if HH wants to consume more than it has in cash, then limit to cash (otherwise bankrupt)
+		if(consumption > bankBalance) return(bankBalance);
+		// double minConsumption = config.ESSENTIAL_CONSUMPTION_FRACTION*config.GOVERNMENT_MONTHLY_INCOME_SUPPORT;
+		double minConsumption = 0.0;
+		// if consumption is very low or negative (due to high debt), consume at least either essential consumption
+		// but not more than the actual bank balance to avoid bankruptcy
+		if(consumption < minConsumption) {
+			return Math.min(minConsumption, bankBalance);
+		}
+		else {
+			return consumption;
+		}
+		
+//		if (equityPosition > 0){
+//		}
+//		
+//		else{
+//
+//		} 
+		  
+	 }
+
+
+	
 	/**
      * Minimum bank balance each household is willing to have at the end of the month for the whole population to match
      * the wealth distribution obtained from the household survey (LCFS). In particular, in line with the Wealth and
