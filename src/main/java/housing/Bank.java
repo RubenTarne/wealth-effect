@@ -285,20 +285,21 @@ public class Bank {
         max_price = ltv_max_price = max_downpayment/(1.0 - getLoanToValueLimit(h.isFirstTimeBuyer(), isHome));
 
         if(config.allCreditConstraintsActive) {
-        	if(isHome) { // No LTI nor affordability constraints for BTL investors
-        		// Affordability constraint
-        		affordability_max_price = max_downpayment + Math.max(0.0, config.CENTRAL_BANK_AFFORDABILITY_COEFF
-        				*h.getMonthlyNetTotalIncome())/getMonthlyPaymentFactor(isHome);
-        		max_price = Math.min(ltv_max_price, affordability_max_price);
-        		// Loan-To-Income constraint
-        		lti_max_price = h.getAnnualGrossEmploymentIncome()*getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome)
-        				+ max_downpayment;
-        		max_price = Math.min(max_price, lti_max_price);
-        	} else {
-        		// Interest-Cover-Ratio constraint
-        		icr_max_price = max_downpayment/(1.0 - Model.rentalMarketStats.getExpAvFlowYield()
-        				/(Model.centralBank.getInterestCoverRatioLimit(isHome)*config.CENTRAL_BANK_BTL_STRESSED_INTEREST));
-        		max_price = Math.min(ltv_max_price,  icr_max_price);
+		if(isHome) { // No LTI nor affordability constraints for BTL investors
+			// Affordability constraint
+            affordability_max_price = max_downpayment + Math.max(0.0, config.CENTRAL_BANK_AFFORDABILITY_COEFF
+                    *h.getMonthlyNetTotalIncome())/getMonthlyPaymentFactor(isHome);
+			max_price = Math.min(max_price, affordability_max_price);
+            // Loan-To-Income constraint
+			lti_max_price = h.getAnnualGrossEmploymentIncome()*getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome)
+                    + max_downpayment;
+			max_price = Math.min(max_price, lti_max_price);
+		} else {
+		    // Interest-Cover-Ratio constraint
+			icr_max_price = max_downpayment/(1.0 - Model.rentalMarketStats.getExpAvFlowYield()
+                    /(Model.centralBank.getInterestCoverRatioLimit(isHome)*config.CENTRAL_BANK_BTL_STRESSED_INTEREST));
+			if (icr_max_price < 0.0) icr_max_price = Double.POSITIVE_INFINITY; // When rental yield is larger than interest rate times ICR, then ICR does never constrain
+            max_price = Math.min(max_price,  icr_max_price);
         	}
         }
         // First part of the DECISION DATA SH output
