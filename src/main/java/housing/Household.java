@@ -218,6 +218,15 @@ public class Household implements IHouseOwner {
 //        	//	System.out.println("MonthlyDisposableIncome is negative: " + monthlyDisposableIncome);
 //        	}
         }
+        // households in social housing pay rent equal to average local authority rent prices for England from 2013-14 
+    	// https://data.london.gov.uk/dataset/local-authority-average-rents
+        // = 82.44 pounds of WEEKLY rent 
+        // TODO this is yearly rental cost of 3,957.12 pounds per year and can therefore be higher than private rents
+        if(home==null) {
+        	monthlyDisposableIncome -= 4*82.44;
+        	// in case disposable income becomes negative, assume the government covering the rent, so households don't dissave
+        	if(monthlyDisposableIncome<0) monthlyDisposableIncome=0;
+        }
         monthlyDisposableIncome -= monthlyPayments;
         return monthlyDisposableIncome;
     }
