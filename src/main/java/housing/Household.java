@@ -271,37 +271,34 @@ public class Household implements IHouseOwner {
     //----- Methods for house owners -----//
 
     /**
-     * Decide what to do with a house h owned by the household:
+     * Decide what to do with a house owned by the household:
      * - if the household lives in the house, decide whether to sell it or not
-     * - if the house is up for sale, rethink its offer price, and possibly put it up for rent instead (only BTL investors)
+     * - if the house is up for sale, rethink its offer price, and possibly take it out of the sales market if price is
+     *   below mortgage debt
      * - if the house is up for rent, rethink the rent demanded
      *
      * @param house A house owned by the household
      */
     private void manageHouse(House house) {
-        HouseOfferRecord forSale, forRent;
-        double newPrice;
-        
-        forSale = house.getSaleRecord();
-        if(forSale != null) { // reprice house for sale
-            newPrice = behaviour.rethinkHouseSalePrice(forSale);
-            if(newPrice > mortgageFor(house).principal) {
+        // If house is for sale (on sale market)...
+        HouseOfferRecord forSale = house.getSaleRecord();
+        if (forSale != null) { // reprice house for sale
+            // ...then update its price, if the new price is above the mortgage debt on this house
+            double newPrice = behaviour.rethinkHouseSalePrice(forSale);
+            if (newPrice > mortgageFor(house).principal) {
                 Model.houseSaleMarket.updateOffer(forSale, newPrice);
+            // ...otherwise, remove the offer from the sale market (note that investment properties will continue to be rented out)
             } else {
                 Model.houseSaleMarket.removeOffer(forSale);
-                // TODO: Is first condition redundant?
-                if(house  != home && house.resident == null) {
-                    Model.houseRentalMarket.offer(house, behaviour.buyToLetRent(house.getQuality()), false);
-                }
             }
-        } else if(decideToSellHouse(house)) { // put house on market?
-            if(house.isOnRentalMarket()) Model.houseRentalMarket.removeOffer(house.getRentalRecord());
-            putHouseForSale(house);
-        }
-        
-        forRent = house.getRentalRecord();
-        if(forRent != null) { // reprice house for rent
-            newPrice = behaviour.rethinkBuyToLetRent(forRent);
+        // Otherwise, if the house is not currently for sale, decide whether to sell it or not
+        } else if (decideToSellHouse(house)) putHouseForSale(house);
+
+        // If house is for rent (on rental market)...
+        HouseOfferRecord forRent = house.getRentalRecord();
+        if (forRent != null) {
+            // ...then update its price
+            double newPrice = behaviour.rethinkBuyToLetRent(forRent);
             Model.houseRentalMarket.updateOffer(forRent, newPrice);
         }        
     }
@@ -378,6 +375,8 @@ public class Household implements IHouseOwner {
             } else if (sale.getHouse().resident == null) { // put empty buy-to-let house on rental market
                 Model.houseRentalMarket.offer(sale.getHouse(), behaviour.buyToLetRent(sale.getQuality()),
                         false);
+            } else {
+                System.out.println("Strange: Bought a home with a resident");
             }
             isFirstTimeBuyer = false;
         }
@@ -400,7 +399,7 @@ public class Household implements IHouseOwner {
         }
         // Fourth, if the house is still being offered on the rental market, withdraw the offer
         if (sale.getHouse().isOnRentalMarket()) {
-            Model.houseRentalMarket.removeOffer(sale);
+            Model.houseRentalMarket.removeOffer(sale.getHouse().getRentalRecord());
         }
         // Fifth, if the house is the household's home, then the household moves out and becomes temporarily homeless...
         if (sale.getHouse() == home) {
@@ -414,25 +413,23 @@ public class Household implements IHouseOwner {
         }
     }
     
-    /********************************************************
-     * A BTL investor receives this message when a tenant moves
-     * out of one of its buy-to-let houses.
-     * 
-     * The household simply puts the house back on the rental
-     * market.
-     ********************************************************/
+    /**
+     * A BTL investor receives this message when a tenant moves out of one of its buy-to-let houses. The household
+     * simply puts the house back on the rental market.
+     */
     @Override
     public void endOfLettingAgreement(House h, PaymentAgreement contract) {
-        monthlyGrossRentalIncome -= contract.monthlyPayment;
-
-        // put house back on rental market
+        // TODO: Not sure if these checks are really needed here
+        // Check that this household is the owner of the corresponding house
         if(!housePayments.containsKey(h)) {
             System.out.println("Strange: I don't own this house in endOfLettingAgreement");
         }
-//        if(h.resident != null) System.out.println("Strange: renting out a house that has a resident");        
-//        if(h.resident != null && h.resident == h.owner) System.out.println("Strange: renting out a house that belongs to a homeowner");        
+        // Check that the house is not currently being already offered in the rental market
         if(h.isOnRentalMarket()) System.out.println("Strange: got endOfLettingAgreement on house on rental market");
-        if(!h.isOnMarket()) Model.houseRentalMarket.offer(h, behaviour.buyToLetRent(h.getQuality()), false);
+        // Remove the old rental contract from the landlord's list of rental contracts
+        rentalContracts.remove(h);
+        // Put house back on rental market
+        Model.houseRentalMarket.offer(h, behaviour.buyToLetRent(h.getQuality()), false);
     }
 
     /**********************************************************
@@ -441,9 +438,9 @@ public class Household implements IHouseOwner {
      * inform landlord and delete rental agreement.
      **********************************************************/
     private void endTenancy() {
+        home.resident = null;
         home.owner.endOfLettingAgreement(home, housePayments.get(home));
         housePayments.remove(home);
-        home.resident = null;
         home = null;
     }
     
@@ -460,29 +457,29 @@ public class Household implements IHouseOwner {
         home = null;        
     }
 
-    /********************************************************
-     * Do all the stuff necessary when this household moves
-     * in to rented accommodation (i.e. set up a regular
-     * payment contract. At present we use a MortgageApproval).
-     ********************************************************/
-    void completeHouseRental(HouseOfferRecord sale) {
-        if(sale.getHouse().owner != this) { // if renting own house, no need for contract
-            RentalAgreement rent = new RentalAgreement();
-            rent.monthlyPayment = sale.getPrice();
-            rent.nPayments = config.TENANCY_LENGTH_AVERAGE
-                    + prng.nextInt(2*config.TENANCY_LENGTH_EPSILON + 1) - config.TENANCY_LENGTH_EPSILON;
-//            rent.principal = rent.monthlyPayment*rent.nPayments;
-            housePayments.put(sale.getHouse(), rent);
-        }
+    /**
+     * Do everything necessary when this household moves in to rented accommodation, such as setting up a regular
+     * payment contract.
+     *
+     * @return The rental agreement, for passing it to the landlord
+     */
+    RentalAgreement completeHouseRental(HouseOfferRecord sale) {
+        // Check if renter same as owner, if renter already has a home and if the house is already occupied
+        if (sale.getHouse().owner == this) System.out.println("Strange: I'm trying to rent a house I own!");
         if(home != null) System.out.println("Strange: I'm renting a house but not homeless");
+        if(sale.getHouse().resident != null) System.out.println("Strange: tenant moving into an occupied house");
+        // Create a new rental agreement with the agreed price and with a random length between a minimum and a maximum
+        RentalAgreement rent = new RentalAgreement();
+        rent.monthlyPayment = sale.getPrice();
+        rent.nPayments = config.TENANCY_LENGTH_AVERAGE + prng.nextInt(2*config.TENANCY_LENGTH_EPSILON + 1)
+                - config.TENANCY_LENGTH_EPSILON;
+        // Add the rental agreement to the house payments object of the tenant household
+        housePayments.put(sale.getHouse(), rent);
+        // Set the house as the tenant's home and the tenant as the house's resident
         home = sale.getHouse();
-        if(sale.getHouse().resident != null) {
-            System.out.println("Strange: tenant moving into an occupied house");
-            if(sale.getHouse().resident == this) System.out.println("...It's me!");
-            if(sale.getHouse().owner == this) System.out.println("...It's my house!");
-            if(sale.getHouse().owner == sale.getHouse().resident) System.out.println("...It's a homeowner!");
-        }
         sale.getHouse().resident = this;
+        // Return the rental agreement for passing it to the landlord
+        return rent;
     }
 
     /********************************************************
@@ -563,35 +560,36 @@ public class Household implements IHouseOwner {
         PaymentAgreement payment;
         // Iterate over these house-paymentAgreement pairs
         while (paymentIt.hasNext()) {
-        	entry = paymentIt.next();
-        	h = entry.getKey();
-        	payment = entry.getValue();
-        	// If the deceased household owns the house, then...
-        	if (h.owner == this) {
-        		// ...first, withdraw the house from any market where it is currently being offered
-        		if (h.isOnRentalMarket()) Model.houseRentalMarket.removeOffer(h.getRentalRecord());
-        		if (h.isOnMarket()) Model.houseSaleMarket.removeOffer(h.getSaleRecord());
-        		// ...then, if there is a resident in the house...
-        		if (h.resident != null) {
-        			// ...and this resident is different from the deceased household, then this resident must be a
-        			// tenant, who must get evicted
-        			if (h.resident != this) {
-        				h.resident.getEvicted(); // TODO: Explain in paper that renters always get evicted, not just if heir needs the house
-        				// ...otherwise, if the resident is the deceased household, remove it from the house
-        			} else {
-        				h.resident = null;
-        			}
-        		}
-        		// ...finally, transfer the property to the beneficiary household
-        		beneficiary.inheritHouse(h, ((MortgageAgreement) payment).purchasePrice);
-        		// Otherwise, if the deceased household does not own the house but it is living in it, then it must have
-        		// been renting it: end the letting agreement
-        	} else if (h == home) {
-        		h.owner.endOfLettingAgreement(h, housePayments.get(h));
-        		h.resident = null;
-        	}
-        	// If payment agreement is a mortgage, then try to pay off as much as possible from the deceased household's bank balance
-        	if (payment instanceof MortgageAgreement) {
+            entry = paymentIt.next();
+            h = entry.getKey();
+            payment = entry.getValue();
+            // If the deceased household owns the house, then...
+            if (h.owner == this) {
+                // ...first, withdraw the house from any market where it is currently being offered
+                if (h.isOnRentalMarket()) Model.houseRentalMarket.removeOffer(h.getRentalRecord());
+                if (h.isOnMarket()) Model.houseSaleMarket.removeOffer(h.getSaleRecord());
+                // ...then, if there is a resident in the house...
+                if (h.resident != null) {
+                    // ...and this resident is different from the deceased household, then this resident must be a
+                    // tenant, who must get evicted
+                    if (h.resident != this) {
+                        h.resident.getEvicted(); // TODO: Explain in paper that renters always get evicted, not just if heir needs the house
+                    // ...otherwise, if the resident is the deceased household, remove it from the house
+                    } else {
+                        h.resident = null;
+                    }
+                }
+                // ...finally, transfer the property to the beneficiary household
+                beneficiary.inheritHouse(h, ((MortgageAgreement) payment).purchasePrice);
+            // Otherwise, if the deceased household does not own the house but it is living in it, then it must have
+            // been renting it: end the letting agreement
+            } else if (h == home) {
+                h.resident = null;
+                home = null;
+                h.owner.endOfLettingAgreement(h, housePayments.get(h));
+            }
+            // If payment agreement is a mortgage, then try to pay off as much as possible from the deceased household's bank balance
+            if (payment instanceof MortgageAgreement) {
         		double payoff = ((MortgageAgreement) payment).payoff(beneficiary);
         		double bankBalanceBeforePayoff = bankBalance;
         		bankBalance -= payoff;
@@ -632,10 +630,9 @@ public class Household implements IHouseOwner {
         nullMortgage.downPayment = 0.0;
         nullMortgage.monthlyInterestRate = 0.0;
         nullMortgage.monthlyPayment = 0.0;
-        nullMortgage.principal = 0.0;
+        nullMortgage.principal = 0.0; // If changed, trigger to re-try selling must be added to manageHouse, otherwise non-BTL households could keep BTL properties indefinitely
         nullMortgage.purchasePrice = oldPurchasePrice;
         // Become the owner of the inherited house and include it in my housePayments list (with a null mortgage)
-        // TODO: Make sure the paper correctly explains that no debt is inherited
         housePayments.put(h, nullMortgage);
         h.owner = this;
         // Check for residents in the inherited house
@@ -656,13 +653,13 @@ public class Household implements IHouseOwner {
             // ...decide whether to sell the inherited house
             if(decideToSellHouse(h)) {
                 putHouseForSale(h);
-            // ...or rent it out
-            } else if(h.resident == null) {
-                Model.houseRentalMarket.offer(h, behaviour.buyToLetRent(h.getQuality()), false);
             }
-        // If being an owner-occupier, put inherited house for sale
+            // ...and put it to rent (temporarily, if trying to sell it, or permanently, if not trying to sell it)
+            Model.houseRentalMarket.offer(h, behaviour.buyToLetRent(h.getQuality()), false);
+        // If being an owner-occupier, put inherited house for sale and also for rent temporarily
         } else {
             putHouseForSale(h);
+            Model.houseRentalMarket.offer(h, behaviour.buyToLetRent(h.getQuality()), false);
         }
     }
 
