@@ -433,7 +433,7 @@ public class HouseholdBehaviour {
 			}
 		}
 		// ...always decide to buy if owning no investment property yet
-		if (me.getNProperties() < 1) { 
+		if (me.getNProperties() < 2) { 
 			// record some DECISION DATA BTL
 			if(config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
 				Model.agentDecisionRecorder.recordNoInvestmentPropertyYet(me);
