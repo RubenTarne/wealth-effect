@@ -74,7 +74,7 @@ public class TransactionRecorder {
 		}
 		if (sale.getHouse().owner instanceof Household) {
 			Household seller = (Household) sale.getHouse().owner;
-			outfile.print(
+			outfile.println(
 					seller.id + ", " +
 					seller.getAge() + ", " +
 					seller.behaviour.isPropertyInvestor() + ", " +

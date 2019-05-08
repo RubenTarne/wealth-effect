@@ -40,6 +40,7 @@ public class Household implements IHouseOwner {
 
     private House                           home;
     private Map<House, PaymentAgreement>    housePayments = new TreeMap<>(); // Houses owned and their payment agreements
+    private Map<House, RentalAgreement> 	rentalContracts = new TreeMap<>(); // Houses rented out by this landlord and their payment agreements
     private Config                          config = Model.config; // Passes the Model's configuration parameters object to a private field
     private MersenneTwister                 prng;
     private double                          age; // Age of the household representative person
@@ -245,8 +246,24 @@ public class Household implements IHouseOwner {
     }
 
     /**
+     * For the purpose of affordability checks for non-BTL households, a monthly net employment income is needed. This
+     * makes sure that no rental income is accounted for, which non-BTL households can temporarily receive as a result
+     * of temporarily renting out inherited properties while they manage to sell them. Thus, this subtracts the monthly
+     * aliquot part of all due taxes (without any finance cost relief) from the monthly gross employment income
+     * (ignoring any rental income). Note that only income tax on employment income and national insurance contributions
+     * are implemented (no capital gains tax)!
+     */
+    double getMonthlyNetEmploymentIncome() {
+        return getMonthlyGrossEmploymentIncome()
+                - (Model.government.incomeTaxDue(annualGrossEmploymentIncome)  // Income tax
+                + Model.government.class1NICsDue(annualGrossEmploymentIncome))  // National insurance contributions
+                /config.constants.MONTHS_IN_YEAR;
+    }
+
+    /**
      * Adds up all interests paid on buy-to-let properties currently rented by this household, for the purpose of
-     * obtaining tax relief on these costs
+     * obtaining tax relief on these costs. Note that this algorithm assumes buy-to-let investors always have interest
+     * only mortgages, and that non BTL households inheriting properties never inherit any debt on these properties
      */
     private double getAnnualFinanceCosts() {
         double financeCosts = 0.0;
@@ -262,11 +279,25 @@ public class Household implements IHouseOwner {
     }
 
     /**
-     * Adds up all sources of (gross) income on a monthly basis: employment and property income
+     * Annualised gross total income, i.e., both employment and rental income
      */
-    public double getMonthlyGrossTotalIncome() { return monthlyGrossEmploymentIncome + monthlyGrossRentalIncome; }
-
     public double getAnnualGrossTotalIncome() { return getMonthlyGrossTotalIncome()*config.constants.MONTHS_IN_YEAR; }
+
+    /**
+     * Adds up all sources of (gross) income on a monthly basis, i.e., both employment and rental income
+     */
+    public double getMonthlyGrossTotalIncome() { return monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome(); }
+
+    /**
+     * Adds up this month's rental income from all currently owned and rented properties
+     */
+    public double getMonthlyGrossRentalIncome() {
+        double monthlyGrossRentalIncome = 0.0;
+        for(RentalAgreement rentalAgreement: rentalContracts.values()) {
+            monthlyGrossRentalIncome += rentalAgreement.nextPayment();
+        }
+        return monthlyGrossRentalIncome;
+    }
 
     //----- Methods for house owners -----//
 
@@ -408,7 +439,7 @@ public class Household implements IHouseOwner {
         // ...otherwise, if the house has a resident, it must be a renter, who must get evicted, also the rental income
         // corresponding to this tenancy must be subtracted from the owner's monthly rental income
         } else if (sale.getHouse().resident != null) {
-            monthlyGrossRentalIncome -= sale.getHouse().resident.housePayments.get(sale.getHouse()).monthlyPayment;
+        	rentalContracts.remove(sale.getHouse());
             sale.getHouse().resident.getEvicted();
         }
     }
@@ -529,11 +560,8 @@ public class Household implements IHouseOwner {
      * property
      */
     @Override
-    public void completeHouseLet(HouseOfferRecord sale) {
-        if(sale.getHouse().isOnMarket()) {
-            Model.houseSaleMarket.removeOffer(sale.getHouse().getSaleRecord());
-        }
-        monthlyGrossRentalIncome += sale.getPrice();
+    public void completeHouseLet(HouseOfferRecord sale, RentalAgreement rentalAgreement) {
+        rentalContracts.put(sale.getHouse(), rentalAgreement);
     }
 
     /////////////////////////////////////////////////////////
