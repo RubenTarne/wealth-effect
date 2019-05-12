@@ -30,6 +30,8 @@ public class MicroDataRecorder {
     private PrintWriter outfileDebtConsumption;
     private PrintWriter outfileSavingForDeleveraging;
     private PrintWriter outfileBTL;
+    private PrintWriter outfileFTB;
+    private PrintWriter outfileAge;
 
     //------------------------//
     //----- Constructors -----//
@@ -47,7 +49,8 @@ public class MicroDataRecorder {
                                                  boolean recordMonthlyGrossRentalIncome, boolean recordDebt,
                                                  boolean recordConsumption, boolean recordIncomeConsumption,
                                                  boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
-                                                 boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL) {
+                                                 boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL, 
+                                                 boolean recordFTB, boolean recordAge) {
         if (recordBankBalance) {
             try {
                 outfileBankBalance = new PrintWriter(outputFolder + "BankBalance-run" + nRun
@@ -168,6 +171,22 @@ public class MicroDataRecorder {
         		e.printStackTrace();
         	}
         }
+        if(recordFTB) {
+        	try {
+        		outfileFTB = new PrintWriter(outputFolder + 
+        				"isFTB-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordAge) {
+        	try {
+        		outfileAge = new PrintWriter(outputFolder + 
+        				"Age-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
     }
 
     void timeStampSingleRunSingleVariableFiles(int time, boolean recordBankBalance, boolean recordHousingWealth,
@@ -177,7 +196,7 @@ public class MicroDataRecorder {
                                                boolean recordConsumption, boolean recordIncomeConsumption,
                                                boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                                                boolean recordDebtConsumption, boolean recordSavingForDeleveraging,
-                                               boolean recordBTL) {
+                                               boolean recordBTL, boolean recordFTB, boolean recordAge) {
         if (time % Model.config.microDataRecordIntervall == 0 && time >= Model.config.TIME_TO_START_RECORDING) {
             if (recordBankBalance) {
                 if (time != 0) {
@@ -269,6 +288,18 @@ public class MicroDataRecorder {
             	}
             	outfileBTL.print(time);
             }
+            if (recordFTB) {
+            	if (time != 0) {
+            		outfileFTB.println("");
+            	}
+            	outfileFTB.print(time);
+            }
+            if (recordAge) {
+            	if (time != 0) {
+            		outfileAge.println("");
+            	}
+            	outfileAge.print(time);
+            }
         }
     }
 	
@@ -332,12 +363,21 @@ public class MicroDataRecorder {
 		if(isBTL)outfileBTL.print(", " + 1);
 		else outfileBTL.print(", " + 0);
     }
+    void recordFTB(int time, boolean isFTB) {
+		if(isFTB)outfileFTB.print(", " + 1);
+		else outfileFTB.print(", " + 0);
+    }
+    void recordAge(int time, double Age) {
+    	outfileAge.print(", " + Age);
+    }
+
 
 	public void finishRun(boolean recordBankBalance, boolean recordHousingWealth, boolean recordNHousesOwned,
                           boolean recordSavingRate, boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
                           boolean recordMonthlyGrossRentalIncome, boolean recordDebt, boolean recordConsumption, 
                           boolean recordIncomeConsumption, boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
-                          boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL) {
+                          boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL,
+                          boolean recordFTB, boolean recordAge) {
         if (recordBankBalance) {
             outfileBankBalance.close();
         }
@@ -382,6 +422,12 @@ public class MicroDataRecorder {
         }
         if (recordBTL) {
         	outfileBTL.close();
+        }
+        if (recordFTB) {
+        	outfileFTB.close();
+        }
+        if (recordAge) {
+        	outfileAge.close();
         }
 	}
 }

@@ -204,7 +204,8 @@ public class HouseholdStats {
                 config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate, config.recordMonthlyGrossTotalIncome,
                 config.recordMonthlyGrossEmploymentIncome, config.recordMonthlyGrossRentalIncome,
                 config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, config.recordFinancialWealthConsumption, 
-                config.recordHousingWealthConsumption, config.recordDebtConsumption, config.recordSavingForDeleveraging, config.recordBTL);
+                config.recordHousingWealthConsumption, config.recordDebtConsumption, config.recordSavingForDeleveraging, config.recordBTL,
+                config.recordFTB, config.recordAge);
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
         	
@@ -349,6 +350,12 @@ public class HouseholdStats {
         		}
         		if(config.recordBTL) {
         			Model.microDataRecorder.recordBTL(Model.getTime(), h.behaviour.isPropertyInvestor());
+        		}
+        		if(config.recordFTB) {
+        			Model.microDataRecorder.recordFTB(Model.getTime(), h.isFirstTimeBuyer());
+        		}
+        		if(config.recordAge) {
+        			Model.microDataRecorder.recordAge(Model.getTime(), h.getAge());
         		}
 
         	}

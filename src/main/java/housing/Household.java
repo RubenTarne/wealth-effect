@@ -740,7 +740,7 @@ public class Household implements IHouseOwner {
 
     public boolean isInSocialHousing() { return home == null; }
 
-    boolean isFirstTimeBuyer() { return isFirstTimeBuyer; }
+    public boolean isFirstTimeBuyer() { return isFirstTimeBuyer; }
 
     public boolean isBankrupt() { return isBankrupt; }
 

@@ -30,3 +30,15 @@ src/config-files/
 # ignore figures
 *.eps
 *.pdf
+
+sigma\.csv
+
+results\.csv
+
+parameter-inputs\.csv
+
+muStar\.csv
+
+mu\.csv
+
+morris-input\.csv

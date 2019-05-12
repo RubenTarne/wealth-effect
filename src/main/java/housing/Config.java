@@ -51,6 +51,9 @@ public class Config {
     public boolean recordDebtConsumption;			// True to write individual households consumption induced by their debt levels
     public boolean recordSavingForDeleveraging; 		// True to write individual households consumption reduction induced by negative equity
     public boolean recordBTL; 				// True to write "1" if agent is BTL
+    public boolean recordFTB;				// True to write "1" if agent is FTB
+	public boolean recordAge;				// True to write age of agent 
+
 
     
     // Decision equations
