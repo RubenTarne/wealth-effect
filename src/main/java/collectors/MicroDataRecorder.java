@@ -31,6 +31,7 @@ public class MicroDataRecorder {
     private PrintWriter outfileSavingForDeleveraging;
     private PrintWriter outfileBTL;
     private PrintWriter outfileFTB;
+    private PrintWriter outfileInFirstHome;
     private PrintWriter outfileAge;
 
     //------------------------//
@@ -50,7 +51,7 @@ public class MicroDataRecorder {
                                                  boolean recordConsumption, boolean recordIncomeConsumption,
                                                  boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                                                  boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL, 
-                                                 boolean recordFTB, boolean recordAge) {
+                                                 boolean recordFTB, boolean recordInFirstHome, boolean recordAge) {
         if (recordBankBalance) {
             try {
                 outfileBankBalance = new PrintWriter(outputFolder + "BankBalance-run" + nRun
@@ -179,6 +180,14 @@ public class MicroDataRecorder {
         		e.printStackTrace();
         	}
         }
+        if(recordInFirstHome) {
+        	try {
+        		outfileFTB = new PrintWriter(outputFolder + 
+        				"isInFirstHome-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
         if(recordAge) {
         	try {
         		outfileAge = new PrintWriter(outputFolder + 
@@ -196,7 +205,7 @@ public class MicroDataRecorder {
                                                boolean recordConsumption, boolean recordIncomeConsumption,
                                                boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                                                boolean recordDebtConsumption, boolean recordSavingForDeleveraging,
-                                               boolean recordBTL, boolean recordFTB, boolean recordAge) {
+                                               boolean recordBTL, boolean recordFTB, boolean recordInFirstHome, boolean recordAge) {
         if (time % Model.config.microDataRecordIntervall == 0 && time >= Model.config.TIME_TO_START_RECORDING) {
             if (recordBankBalance) {
                 if (time != 0) {
@@ -294,6 +303,12 @@ public class MicroDataRecorder {
             	}
             	outfileFTB.print(time);
             }
+            if (recordInFirstHome) {
+            	if (time != 0) {
+            		outfileInFirstHome.println("");
+            	}
+            	outfileInFirstHome.print(time);
+            }            
             if (recordAge) {
             	if (time != 0) {
             		outfileAge.println("");
@@ -367,6 +382,10 @@ public class MicroDataRecorder {
 		if(isFTB)outfileFTB.print(", " + 1);
 		else outfileFTB.print(", " + 0);
     }
+    void recordInFirstHome(int time, boolean inFirstHome) {
+		if(inFirstHome)outfileInFirstHome.print(", " + 1);
+		else outfileInFirstHome.print(", " + 0);
+    }
     void recordAge(int time, double Age) {
     	outfileAge.print(", " + Age);
     }
@@ -377,7 +396,7 @@ public class MicroDataRecorder {
                           boolean recordMonthlyGrossRentalIncome, boolean recordDebt, boolean recordConsumption, 
                           boolean recordIncomeConsumption, boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                           boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL,
-                          boolean recordFTB, boolean recordAge) {
+                          boolean recordFTB, boolean recordInFirstHome, boolean recordAge) {
         if (recordBankBalance) {
             outfileBankBalance.close();
         }
@@ -425,6 +444,9 @@ public class MicroDataRecorder {
         }
         if (recordFTB) {
         	outfileFTB.close();
+        }
+        if (recordInFirstHome) {
+        	outfileInFirstHome.close();
         }
         if (recordAge) {
         	outfileAge.close();

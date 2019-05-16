@@ -354,6 +354,9 @@ public class HouseholdStats {
         		if(config.recordFTB) {
         			Model.microDataRecorder.recordFTB(Model.getTime(), h.isFirstTimeBuyer());
         		}
+        		if(config.recordInFirstHome){
+        			Model.microDataRecorder.recordInFirstHome(Model.getTime(), h.isInFirstHome());
+        		}
         		if(config.recordAge) {
         			Model.microDataRecorder.recordAge(Model.getTime(), h.getAge());
         		}

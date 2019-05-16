@@ -146,7 +146,8 @@ public class Model {
             		|| config.recordMonthlyGrossTotalIncome || config.recordMonthlyGrossEmploymentIncome
             		|| config.recordMonthlyGrossRentalIncome || config.recordDebt || config.recordConsumption || config.recordIncomeConsumption 
             		|| config.recordFinancialWealthConsumption || config.recordHousingWealthConsumption
-            		|| config.recordDebtConsumption|| config.recordSavingForDeleveraging || config.recordBTL || config.recordFTB || config.recordAge
+            		|| config.recordDebtConsumption|| config.recordSavingForDeleveraging || config.recordBTL || config.recordFTB 
+            		||config.recordInFirstHome || config.recordAge
             		) {
                 microDataRecorder.openSingleRunSingleVariableFiles(nSimulation, config.recordBankBalance,
                         config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate,
@@ -154,7 +155,7 @@ public class Model {
                         config.recordMonthlyGrossRentalIncome, config.recordDebt, config.recordConsumption, 
                         config.recordIncomeConsumption, config.recordFinancialWealthConsumption,
                         config.recordHousingWealthConsumption, config.recordDebtConsumption, config.recordSavingForDeleveraging,
-                		config.recordBTL, config.recordFTB, config.recordAge);
+                		config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge);
             }
             
             // For each simulation, open the AgentData files
@@ -200,7 +201,7 @@ public class Model {
                         config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, 
                         config.recordFinancialWealthConsumption, config.recordHousingWealthConsumption, 
                         config.recordDebtConsumption, config.recordSavingForDeleveraging, config.recordBTL,
-                        config.recordFTB, config.recordAge);
+                        config.recordFTB, config.recordInFirstHome, config.recordAge);
             }
 		}
 

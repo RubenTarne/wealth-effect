@@ -52,6 +52,7 @@ public class Config {
     public boolean recordSavingForDeleveraging; 		// True to write individual households consumption reduction induced by negative equity
     public boolean recordBTL; 				// True to write "1" if agent is BTL
     public boolean recordFTB;				// True to write "1" if agent is FTB
+    public boolean recordInFirstHome;		// true to write "1" if agent is living in its first home it has bought
 	public boolean recordAge;				// True to write age of agent 
 
 

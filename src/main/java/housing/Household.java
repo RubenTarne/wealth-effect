@@ -48,6 +48,7 @@ public class Household implements IHouseOwner {
     private double                          monthlyGrossRentalIncome; // Keeps track of monthly rental income, as only tenants keep a reference to the rental contract, not landlords
     private double                          savingRate; // (disposableIncome - nonEssentialConsumption)/grossTotalIncome
     private boolean                         isFirstTimeBuyer;
+    private boolean							isInFirstHome;
     private boolean                         isBankrupt;
     private double 							monthlyPayments;
     private double							principalPaidBack; // records how much of mortgage principal this household paid back this period
@@ -412,6 +413,12 @@ public class Household implements IHouseOwner {
             } else {
                 System.out.println("Strange: Bought a home with a resident");
             }
+            // In order to be able to understand if a household is living in its first home, check if it was a firstTimeBuyerBefore
+            // and deactivate when it was no first time buyer
+            if(isFirstTimeBuyer==true) {
+            	isInFirstHome = true;
+            } else { isInFirstHome = false;}
+            
             isFirstTimeBuyer = false;
         }
     }
@@ -741,6 +748,8 @@ public class Household implements IHouseOwner {
     public boolean isInSocialHousing() { return home == null; }
 
     public boolean isFirstTimeBuyer() { return isFirstTimeBuyer; }
+    
+    public boolean isInFirstHome() {return isInFirstHome;}
 
     public boolean isBankrupt() { return isBankrupt; }
 
