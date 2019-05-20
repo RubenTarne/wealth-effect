@@ -53,6 +53,22 @@ public class CoreIndicators {
 		return sumS90/sumTotalNetWealth;
 	}
 	
+	// the Palmer index calculates the ratio of the wealth share of the top 10% to that of the bottom 40%
+	double getPalmerIndex() {
+		// get the sorted array of total net wealth of every household
+		double[] sortedNetWealth = Model.householdStats.totalNetWealth.getSortedValues();
+		long numberAgents = Model.householdStats.totalNetWealth.getN();
+		int arrayPositionTop10 = (int) (numberAgents-(numberAgents/10));
+		int arrayPositionBottom40 = (int) (numberAgents/2.5);
+		// extract the wealth positions of the agents in question into an extra array
+		double[] S90Array = Arrays.copyOfRange(sortedNetWealth, arrayPositionTop10, (int) numberAgents) ;
+		double[] S40Array = Arrays.copyOfRange(sortedNetWealth, 0, arrayPositionBottom40);
+		// total wealth of top 10 and of bottom 40 %
+		double sumS90 = DoubleStream.of(S90Array).parallel().sum();
+		double sumS40 = DoubleStream.of(S40Array).parallel().sum();
+		return sumS90/sumS40;
+	}
+	
 	// number of bankruptcies
 	int getNumberBankruptcies() {
 		return Model.householdStats.getnNonBTLBankruptcies() + Model.householdStats.getnBTLBankruptcies();

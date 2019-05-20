@@ -28,6 +28,7 @@ public class Recorder {
     
     private PrintWriter HPI;
     private PrintWriter top10NetTotalWealthShare;
+    private PrintWriter palmerIndex;
     private PrintWriter numberBankruptcies;
     private PrintWriter shareEmptyHouses;
     private PrintWriter BTLMarketShare;
@@ -71,6 +72,8 @@ public class Recorder {
             	HPI = new PrintWriter(outputFolder + "coreIndicator-HPI.csv",
                 		"UTF-8");
             	top10NetTotalWealthShare = new PrintWriter(outputFolder + "coreIndicator-top10NetTotalWealthShare.csv",
+                		"UTF-8");
+            	palmerIndex = new PrintWriter(outputFolder + "coreIndicator-palmerIndex.csv",
                 		"UTF-8");
             	numberBankruptcies = new PrintWriter(outputFolder + "coreIndicator-numberBankruptcies.csv",
                 		"UTF-8");
@@ -191,6 +194,7 @@ public class Recorder {
                 // ...write value separation for core indicators (except for time 0)
             	HPI.print(", ");
             	top10NetTotalWealthShare.print(", ");
+            	palmerIndex.print(", ");
             	numberBankruptcies.print(", ");
             	shareEmptyHouses.print(", ");
             	BTLMarketShare.print(", ");
@@ -219,6 +223,7 @@ public class Recorder {
             // Write core indicators results
             HPI.print(Model.coreIndicators.getHPI());
             top10NetTotalWealthShare.print(Model.coreIndicators.getS90TotalNetWealth());
+            palmerIndex.print(Model.coreIndicators.getPalmerIndex());
             numberBankruptcies.print(Model.coreIndicators.getNumberBankruptcies());
         	shareEmptyHouses.print(Model.coreIndicators.getShareEmptyHouses());
         	BTLMarketShare.print(Model.coreIndicators.getBTLMarketShare());
@@ -358,6 +363,7 @@ public class Recorder {
         if (recordCoreIndicators) {
             HPI.println("");
             top10NetTotalWealthShare.println("");
+            palmerIndex.println("");
             numberBankruptcies.println("");
             shareEmptyHouses.println("");
             BTLMarketShare.println("");
@@ -394,6 +400,7 @@ public class Recorder {
         if (recordCoreIndicators) {
         	HPI.close();
         	top10NetTotalWealthShare.close();
+        	palmerIndex.close();
         	numberBankruptcies.close();
         	shareEmptyHouses.close();
         	BTLMarketShare.close();
