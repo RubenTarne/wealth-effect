@@ -73,6 +73,7 @@ public class Household implements IHouseOwner {
         this.age = age;
         home = null;
         isFirstTimeBuyer = true;
+        isInFirstHome = false;
         isBankrupt = false;
         id = ++id_pool;
         incomePercentile = this.prng.nextDouble();
@@ -413,12 +414,20 @@ public class Household implements IHouseOwner {
             } else {
                 System.out.println("Strange: Bought a home with a resident");
             }
+
             // In order to be able to understand if a household is living in its first home, check if it was a firstTimeBuyerBefore
-            // and deactivate when it was no first time buyer
+            // and deactivate when it was no first time buyer          
             if(isFirstTimeBuyer==true) {
             	isInFirstHome = true;
+                // If a BTL investor bought her first property, don't consider them as inFirstHome anymore
+            	// As getNProperties is counted with the help of "housePayments", put 2 here for a BTL investor that 
+                // has more than one property
+                if(getNProperties()>2 && behaviour.isPropertyInvestor()) {
+                	isInFirstHome = false;
+                }
+                
             } else { isInFirstHome = false;}
-            
+
             isFirstTimeBuyer = false;
         }
     }

@@ -182,7 +182,7 @@ public class MicroDataRecorder {
         }
         if(recordInFirstHome) {
         	try {
-        		outfileFTB = new PrintWriter(outputFolder + 
+        		outfileInFirstHome = new PrintWriter(outputFolder + 
         				"isInFirstHome-run" + nRun + ".csv", "UTF-8");
         	} catch(FileNotFoundException | UnsupportedEncodingException e) {
         		e.printStackTrace();

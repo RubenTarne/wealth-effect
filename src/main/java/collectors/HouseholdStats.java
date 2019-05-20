@@ -205,7 +205,7 @@ public class HouseholdStats {
                 config.recordMonthlyGrossEmploymentIncome, config.recordMonthlyGrossRentalIncome,
                 config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, config.recordFinancialWealthConsumption, 
                 config.recordHousingWealthConsumption, config.recordDebtConsumption, config.recordSavingForDeleveraging, config.recordBTL,
-                config.recordFTB, config.recordAge);
+                config.recordFTB, config.recordInFirstHome, config.recordAge);
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
         	
