@@ -202,10 +202,10 @@ public class HouseholdStats {
         // Time stamp householdStats mesoRecorders
         Model.microDataRecorder.timeStampSingleRunSingleVariableFiles(Model.getTime(), config.recordBankBalance,
                 config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate, config.recordMonthlyGrossTotalIncome,
-                config.recordMonthlyGrossEmploymentIncome, config.recordMonthlyGrossRentalIncome,
-                config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, config.recordFinancialWealthConsumption, 
-                config.recordHousingWealthConsumption, config.recordDebtConsumption, config.recordSavingForDeleveraging, config.recordBTL,
-                config.recordFTB, config.recordInFirstHome, config.recordAge);
+                config.recordMonthlyGrossEmploymentIncome, config.recordMonthlyGrossRentalIncome, config.recordMonthlyDisposableIncome,
+                config.recordMonthlyMortgagePayments, config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, 
+                config.recordFinancialWealthConsumption, config.recordHousingWealthConsumption, config.recordDebtConsumption, 
+                config.recordSavingForDeleveraging, config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge);
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
         	
@@ -320,6 +320,12 @@ public class HouseholdStats {
         		}
         		if(config.recordMonthlyGrossRentalIncome) {
         			Model.microDataRecorder.recordMonthlyGrossRentalIncome(Model.getTime(), h.returnMonthlyGrossRentalIncome());
+        		}
+        		if(config.recordMonthlyDisposableIncome) {
+        			Model.microDataRecorder.recordMonthlyDisposableIncome(Model.getTime(), h.returnMonthlyDisposableIncome());
+        		}
+        		if(config.recordMonthlyMortgagePayments) {
+        			Model.microDataRecorder.recordMonthlyMortgagePayments(Model.getTime(), (h.getPrincipalPaidBack()+h.getInterestPaidBack()));
         		}
         		if(config.recordDebt) {
         			Model.microDataRecorder.recordDebt(Model.getTime(), h.getTotalDebt());

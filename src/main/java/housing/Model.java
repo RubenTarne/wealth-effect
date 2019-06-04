@@ -144,7 +144,8 @@ public class Model {
             if (config.recordBankBalance || config.recordNHousesOwned 
             		|| config.recordHousingWealth || config.recordSavingRate
             		|| config.recordMonthlyGrossTotalIncome || config.recordMonthlyGrossEmploymentIncome
-            		|| config.recordMonthlyGrossRentalIncome || config.recordDebt || config.recordConsumption || config.recordIncomeConsumption 
+            		|| config.recordMonthlyGrossRentalIncome || config.recordMonthlyDisposableIncome || config.recordMonthlyMortgagePayments
+            		|| config.recordDebt || config.recordConsumption || config.recordIncomeConsumption 
             		|| config.recordFinancialWealthConsumption || config.recordHousingWealthConsumption
             		|| config.recordDebtConsumption|| config.recordSavingForDeleveraging || config.recordBTL || config.recordFTB 
             		||config.recordInFirstHome || config.recordAge
@@ -152,7 +153,8 @@ public class Model {
                 microDataRecorder.openSingleRunSingleVariableFiles(nSimulation, config.recordBankBalance,
                         config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate,
                         config.recordMonthlyGrossTotalIncome, config.recordMonthlyGrossEmploymentIncome,
-                        config.recordMonthlyGrossRentalIncome, config.recordDebt, config.recordConsumption, 
+                        config.recordMonthlyGrossRentalIncome, config.recordMonthlyDisposableIncome, config.recordMonthlyMortgagePayments,
+                        config.recordDebt, config.recordConsumption, 
                         config.recordIncomeConsumption, config.recordFinancialWealthConsumption,
                         config.recordHousingWealthConsumption, config.recordDebtConsumption, config.recordSavingForDeleveraging,
                 		config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge);
@@ -198,6 +200,7 @@ public class Model {
                 microDataRecorder.finishRun(config.recordBankBalance, config.recordHousingWealth,
                         config.recordNHousesOwned, config.recordSavingRate, config.recordMonthlyGrossTotalIncome,
                         config.recordMonthlyGrossEmploymentIncome, config.recordMonthlyGrossRentalIncome,
+                        config.recordMonthlyDisposableIncome, config.recordMonthlyMortgagePayments,
                         config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, 
                         config.recordFinancialWealthConsumption, config.recordHousingWealthConsumption, 
                         config.recordDebtConsumption, config.recordSavingForDeleveraging, config.recordBTL,

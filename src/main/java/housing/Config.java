@@ -41,6 +41,8 @@ public class Config {
     public boolean recordMonthlyGrossTotalIncome; 	// True to write individual household monthly gross total income
     public boolean recordMonthlyGrossEmploymentIncome; // True to write individual household monthly gross employment income
     public boolean recordMonthlyGrossRentalIncome;	// True to write individual household monthly gross rental income
+    public boolean recordMonthlyDisposableIncome;	// True to write individual household monthly disposable income
+    public boolean recordMonthlyMortgagePayments;	// True to write individual households monthly mortgage payments (interest and principal)
     public boolean recordAgentData;					// True to write micro data for each agent each period
     public boolean recordAgentDecisions; 			// True to write data from agent decision methods
     public boolean recordDebt;					// True to write individual household debt (after market clearing) (boolean)

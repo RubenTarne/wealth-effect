@@ -22,6 +22,8 @@ public class MicroDataRecorder {
     private PrintWriter outfileMonthlyGrossTotalIncome;
     private PrintWriter outfileMonthlyGrossEmploymentIncome;
     private PrintWriter outfileMonthlyGrossRentalIncome;
+    private PrintWriter outfileMonthlyDisposableIncome;
+    private PrintWriter outfileMonthlyMortgagePayments;
     private PrintWriter outfileDebt;
     private PrintWriter outfileConsumption;
     private PrintWriter outfileIncomeConsumption;
@@ -47,7 +49,8 @@ public class MicroDataRecorder {
     public void openSingleRunSingleVariableFiles(int nRun, boolean recordBankBalance, boolean recordInitTotalWealth,
                                                  boolean recordNHousesOwned, boolean recordSavingRate,
                                                  boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
-                                                 boolean recordMonthlyGrossRentalIncome, boolean recordDebt,
+                                                 boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome,
+                                                 boolean recordMonthlyMortgagePayments, boolean recordDebt,
                                                  boolean recordConsumption, boolean recordIncomeConsumption,
                                                  boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                                                  boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL, 
@@ -96,6 +99,22 @@ public class MicroDataRecorder {
         	try {
         		outfileMonthlyGrossEmploymentIncome = new PrintWriter(outputFolder + 
         				"MonthlyGrossEmploymentIncome-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordMonthlyDisposableIncome) {
+        	try {
+        		outfileMonthlyDisposableIncome = new PrintWriter(outputFolder + 
+        				"MonthlyDisposableIncome-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordMonthlyMortgagePayments) {
+        	try {
+        		outfileMonthlyMortgagePayments = new PrintWriter(outputFolder + 
+        				"MonthlyMortgagePayments-run" + nRun + ".csv", "UTF-8");
         	} catch(FileNotFoundException | UnsupportedEncodingException e) {
         		e.printStackTrace();
         	}
@@ -201,7 +220,8 @@ public class MicroDataRecorder {
     void timeStampSingleRunSingleVariableFiles(int time, boolean recordBankBalance, boolean recordHousingWealth,
                                                boolean recordNHousesOwned, boolean recordSavingRate, 
                                                boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
-                                               boolean recordMonthlyGrossRentalIncome, boolean recordDebt,
+                                               boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome,
+                                               boolean recordMonthlyMortgagePayments, boolean recordDebt,
                                                boolean recordConsumption, boolean recordIncomeConsumption,
                                                boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                                                boolean recordDebtConsumption, boolean recordSavingForDeleveraging,
@@ -248,6 +268,18 @@ public class MicroDataRecorder {
             		outfileMonthlyGrossRentalIncome.println("");
             	}
             	outfileMonthlyGrossRentalIncome.print(time);
+            }
+            if (recordMonthlyDisposableIncome) {
+            	if (time != 0) {
+            		outfileMonthlyDisposableIncome.println("");
+            	}
+            	outfileMonthlyDisposableIncome.print(time);
+            }
+            if (recordMonthlyMortgagePayments) {
+            	if (time != 0) {
+            		outfileMonthlyMortgagePayments.println("");
+            	}
+            	outfileMonthlyMortgagePayments.print(time);
             }
             if (recordDebt) {
             	if (time != 0) {
@@ -346,6 +378,14 @@ public class MicroDataRecorder {
     	outfileMonthlyGrossRentalIncome.print(", " + monthlyGrossRentalIncome);
     }
     
+    void recordMonthlyDisposableIncome(int time, double monthlyDisposableIncome) {
+    	outfileMonthlyDisposableIncome.print(", " + monthlyDisposableIncome);
+    }
+    
+    void recordMonthlyMortgagePayments(int time, double monthlyMortgagePayments) {
+    	outfileMonthlyMortgagePayments.print(", " + monthlyMortgagePayments);
+    }
+    
     void recordDebt(int time, double debt) {
     	outfileDebt.print(", " + debt);
     }
@@ -393,7 +433,8 @@ public class MicroDataRecorder {
 
 	public void finishRun(boolean recordBankBalance, boolean recordHousingWealth, boolean recordNHousesOwned,
                           boolean recordSavingRate, boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
-                          boolean recordMonthlyGrossRentalIncome, boolean recordDebt, boolean recordConsumption, 
+                          boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome,
+                          boolean recordMonthlyMortgagePayments, boolean recordDebt, boolean recordConsumption, 
                           boolean recordIncomeConsumption, boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                           boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL,
                           boolean recordFTB, boolean recordInFirstHome, boolean recordAge) {
@@ -417,6 +458,12 @@ public class MicroDataRecorder {
         }
         if (recordMonthlyGrossRentalIncome) {
         	outfileMonthlyGrossRentalIncome.close();
+        }
+        if (recordMonthlyDisposableIncome) {
+        	outfileMonthlyDisposableIncome.close();
+        }
+        if (recordMonthlyMortgagePayments) {
+        	outfileMonthlyMortgagePayments.close();
         }
         if (recordDebt) {
         	outfileDebt.close();
