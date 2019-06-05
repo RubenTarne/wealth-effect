@@ -3,6 +3,8 @@ package collectors;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import housing.Config;
 import housing.Model;
@@ -351,11 +353,11 @@ public class MicroDataRecorder {
     }
 	
     void recordBankBalance(int time, double bankBalance) {
-    	outfileBankBalance.print(", " + bankBalance);
+    	outfileBankBalance.print(", " + round(bankBalance, 3));
     }
 
     void recordHousingWealth(int time, double housingWealth) {
-    	outfileHousingWealth.print(", " + housingWealth);
+    	outfileHousingWealth.print(", " + round(housingWealth,3));
     }
 
     void recordNHousesOwned(int time, int nHousesOwned) {
@@ -367,51 +369,51 @@ public class MicroDataRecorder {
     }
     
     void recordMonthlyGrossTotalIncome(int time, double monthlyGrossTotalIncome) {
-    	outfileMonthlyGrossTotalIncome.print(", " + monthlyGrossTotalIncome);
+    	outfileMonthlyGrossTotalIncome.print(", " + round(monthlyGrossTotalIncome,3));
     }
     
     void recordMonthlyGrossEmploymentIncome(int time, double monthlyGrossEmploymentIncome) {
-    	outfileMonthlyGrossEmploymentIncome.print(", " + monthlyGrossEmploymentIncome);
+    	outfileMonthlyGrossEmploymentIncome.print(", " + round(monthlyGrossEmploymentIncome,3));
     }
     
     void recordMonthlyGrossRentalIncome(int time, double monthlyGrossRentalIncome) {
-    	outfileMonthlyGrossRentalIncome.print(", " + monthlyGrossRentalIncome);
+    	outfileMonthlyGrossRentalIncome.print(", " + round(monthlyGrossRentalIncome,3));
     }
     
     void recordMonthlyDisposableIncome(int time, double monthlyDisposableIncome) {
-    	outfileMonthlyDisposableIncome.print(", " + monthlyDisposableIncome);
+    	outfileMonthlyDisposableIncome.print(", " + round(monthlyDisposableIncome,3));
     }
     
     void recordMonthlyMortgagePayments(int time, double monthlyMortgagePayments) {
-    	outfileMonthlyMortgagePayments.print(", " + monthlyMortgagePayments);
+    	outfileMonthlyMortgagePayments.print(", " + round(monthlyMortgagePayments,3));
     }
     
     void recordDebt(int time, double debt) {
-    	outfileDebt.print(", " + debt);
+    	outfileDebt.print(", " + round(debt,3));
     }
     
     void recordConsumption(int time, double consumption) {
-		outfileConsumption.print(", " + consumption);
+		outfileConsumption.print(", " + round(consumption,3));
 	}
     
     void recordIncomeConsumption(int time, double consumption) {
-		outfileIncomeConsumption.print(", " + consumption);
+		outfileIncomeConsumption.print(", " + round(consumption,3));
     }
     
     void recordFinancialWealthConsumption(int time, double consumption) {
-		outfileFinancialWealthConsumption.print(", " + consumption);
+		outfileFinancialWealthConsumption.print(", " + round(consumption,3));
     }
     
     void recordHousingWealthConsumption(int time, double consumption) {
-    	outfileHousingWealthConsumption.print(", " + consumption);
+    	outfileHousingWealthConsumption.print(", " + round(consumption,3));
     }
     
     void recordDebtConsumption(int time, double consumption) {
-		outfileDebtConsumption.print(", " + consumption);
+		outfileDebtConsumption.print(", " + round(consumption,3));
     }
     
     void recordSavingForDeleveraging(int time, double savingForDeleveraging) {
-    	outfileSavingForDeleveraging.print(", " + savingForDeleveraging);
+    	outfileSavingForDeleveraging.print(", " + round(savingForDeleveraging,3));
     }
     
     void recordBTL(int time, boolean isBTL) {
@@ -498,5 +500,13 @@ public class MicroDataRecorder {
         if (recordAge) {
         	outfileAge.close();
         }
+	}
+	
+	public static double round(double value, int places) {
+	    if (places < 0) throw new IllegalArgumentException();
+
+	    BigDecimal bd = new BigDecimal(value);
+	    bd = bd.setScale(places, RoundingMode.HALF_UP);
+	    return bd.doubleValue();
 	}
 }
