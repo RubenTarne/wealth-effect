@@ -59,7 +59,8 @@ public class Household implements IHouseOwner {
     private double							monthlyTaxesPaid; // records the monthly taxes paid (including tax relief)
     private double 							monthlyNICPaid; // records national insurance contributions
     private double 							cashInjection; // records the amount of cash injection when household goes bankrupt
-
+    private double							netHouseTransactionRevenue; // records the households income due to the sale of a house or household expenditure for buying a house (negative value)
+    
     //------------------------//
     //----- Constructors -----//
     //------------------------//
@@ -111,6 +112,7 @@ public class Household implements IHouseOwner {
     	rentalPayment = 0.0;
     	cashInjection = 0.0;
     	monthlyPayments = 0.0;
+    	netHouseTransactionRevenue = 0.0;
     	// record bankBalance very beginning of period
     	Model.householdStats.recordBankBalanceVeryBeginningOfPeriod(bankBalance);
         // Update annual and monthly gross employment income
@@ -404,6 +406,8 @@ public class Household implements IHouseOwner {
             System.out.println("me = "+this);
         } else {
             bankBalance -= mortgage.downPayment;
+            // record the effect of this transaction on the bank balance
+            netHouseTransactionRevenue -= mortgage.downPayment;
             housePayments.put(sale.getHouse(), mortgage);
             if (home == null) { // move in to house
                 home = sale.getHouse();
@@ -437,10 +441,13 @@ public class Household implements IHouseOwner {
      ********************************************************/
     public void completeHouseSale(HouseOfferRecord sale) {
         // First, receive money from sale
-        bankBalance += sale.getPrice();
+    	double salePrice = sale.getPrice();
+        bankBalance += salePrice;
         // Second, find mortgage object and pay off as much outstanding debt as possible given bank balance
         MortgageAgreement mortgage = mortgageFor(sale.getHouse());
-        bankBalance -= mortgage.payoff(bankBalance, this, true);
+        double mortgagePayoff = mortgage.payoff(bankBalance, this, true);
+        bankBalance -= mortgagePayoff;
+        netHouseTransactionRevenue += salePrice - mortgagePayoff;
         // Third, if there is no more outstanding debt, remove the house from the household's housePayments object
         if (mortgage.nPayments == 0) {
             housePayments.remove(sale.getHouse());
@@ -711,6 +718,8 @@ public class Household implements IHouseOwner {
     }
 
     //----- Helpers -----//
+    
+    public int getId() { return id;}
 
     public double getAge() { return age; }
     
@@ -952,6 +961,8 @@ public class Household implements IHouseOwner {
 	public double getMonthlyNICPaid() {
 		return monthlyNICPaid;
 	}
-	
 
+	public double getNetHouseTransactionRevenue() {
+		return netHouseTransactionRevenue;
+	}
 }

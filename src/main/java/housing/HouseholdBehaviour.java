@@ -326,8 +326,9 @@ public class HouseholdBehaviour {
 				- purchasePrice*getLongTermHPAExpectation();
         double costOfRent = Model.rentalMarketStats.getExpAvSalePriceForQuality(newHouseQuality)
                 *config.constants.MONTHS_IN_YEAR;
-        double probabilityPlaceBidOnHousingMarket = sigma(config.SENSITIVITY_RENT_OR_PURCHASE*(costOfRent*(1.0
-                + config.PSYCHOLOGICAL_COST_OF_RENTING) - costOfHouse));
+        double probabilityPlaceBidOnHousingMarket = sigma(config.SENSITIVITY_RENT_OR_PURCHASE*(costOfRent
+//        		*(1.0 + config.PSYCHOLOGICAL_COST_OF_RENTING) 
+        		- costOfHouse));
         boolean placeBidOnHousingMarket = prng.nextDouble() < probabilityPlaceBidOnHousingMarket;
         //continue to record AgentDecision data here. DECISION DATA SH The first part (bank data) is written in the
         // bank.requestApproval method

@@ -205,7 +205,8 @@ public class HouseholdStats {
                 config.recordMonthlyGrossEmploymentIncome, config.recordMonthlyGrossRentalIncome, config.recordMonthlyDisposableIncome,
                 config.recordMonthlyMortgagePayments, config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, 
                 config.recordFinancialWealthConsumption, config.recordHousingWealthConsumption, config.recordDebtConsumption, 
-                config.recordSavingForDeleveraging, config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge);
+                config.recordSavingForDeleveraging, config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge,
+                config.recordTransactionRevenue, config.recordId);
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
         	
@@ -366,7 +367,12 @@ public class HouseholdStats {
         		if(config.recordAge) {
         			Model.microDataRecorder.recordAge(Model.getTime(), h.getAge());
         		}
-
+        		if(config.recordTransactionRevenue) {
+        			Model.microDataRecorder.recordTransactionRevenue(Model.getTime(), h.getNetHouseTransactionRevenue());
+        		}
+        		if(config.recordId) {
+        			Model.microDataRecorder.recordId(Model.getTime(), h.getId());
+        		}
         	}
         }
         // Annualise monthly income data

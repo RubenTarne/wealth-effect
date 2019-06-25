@@ -56,6 +56,8 @@ public class Config {
     public boolean recordFTB;				// True to write "1" if agent is FTB
     public boolean recordInFirstHome;		// true to write "1" if agent is living in its first home it has bought
 	public boolean recordAge;				// True to write age of agent 
+	public boolean recordTransactionRevenue; // True to write expenses and revenues stemming from housing transactions
+	public boolean recordId;					// True to write the agents ID for every period (int)
 
 
     
@@ -119,7 +121,7 @@ public class Config {
     public double PSYCHOLOGICAL_COST_OF_RENTING;   // Annual psychological cost of renting
     double SENSITIVITY_RENT_OR_PURCHASE;    // Sensitivity parameter of the decision between buying and renting
     // Household behaviour parameters: general
-    double BANK_BALANCE_FOR_CASH_DOWNPAYMENT;   // If bankBalance/housePrice is above this, payment will be made fully in cash
+	double BANK_BALANCE_FOR_CASH_DOWNPAYMENT;   // If bankBalance/housePrice is above this, payment will be made fully in cash
     double HPA_EXPECTATION_FACTOR;              // Weight assigned to current trend when computing expectations
     public int HPA_YEARS_TO_CHECK;              // Number of years of the HPI record to check when computing the annual HPA
     // Household behaviour parameters: sale price reduction

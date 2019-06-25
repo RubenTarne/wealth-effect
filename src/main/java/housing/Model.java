@@ -148,16 +148,16 @@ public class Model {
             		|| config.recordDebt || config.recordConsumption || config.recordIncomeConsumption 
             		|| config.recordFinancialWealthConsumption || config.recordHousingWealthConsumption
             		|| config.recordDebtConsumption|| config.recordSavingForDeleveraging || config.recordBTL || config.recordFTB 
-            		||config.recordInFirstHome || config.recordAge
+            		||config.recordInFirstHome || config.recordAge || config.recordTransactionRevenue || config.recordId
             		) {
                 microDataRecorder.openSingleRunSingleVariableFiles(nSimulation, config.recordBankBalance,
                         config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate,
                         config.recordMonthlyGrossTotalIncome, config.recordMonthlyGrossEmploymentIncome,
                         config.recordMonthlyGrossRentalIncome, config.recordMonthlyDisposableIncome, config.recordMonthlyMortgagePayments,
-                        config.recordDebt, config.recordConsumption, 
-                        config.recordIncomeConsumption, config.recordFinancialWealthConsumption,
+                        config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, config.recordFinancialWealthConsumption,
                         config.recordHousingWealthConsumption, config.recordDebtConsumption, config.recordSavingForDeleveraging,
-                		config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge);
+                		config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge, config.recordTransactionRevenue,
+                		config.recordId);
             }
             
             // For each simulation, open the AgentData files
@@ -204,7 +204,8 @@ public class Model {
                         config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, 
                         config.recordFinancialWealthConsumption, config.recordHousingWealthConsumption, 
                         config.recordDebtConsumption, config.recordSavingForDeleveraging, config.recordBTL,
-                        config.recordFTB, config.recordInFirstHome, config.recordAge);
+                        config.recordFTB, config.recordInFirstHome, config.recordAge, config.recordTransactionRevenue,
+                        config.recordId);
             }
 		}
 
