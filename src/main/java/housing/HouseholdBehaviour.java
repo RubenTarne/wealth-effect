@@ -373,7 +373,7 @@ public class HouseholdBehaviour {
 			return false;
 		}
         // ...don't sell while occupied by tenant
-		if(!h.isOnRentalMarket()) return false;
+//		if(!h.isOnRentalMarket()) return false;
 
         // Find the expected equity yield rate of this property as a weighted mix of both rental yield and capital gain
         // times the leverage
@@ -387,7 +387,8 @@ public class HouseholdBehaviour {
 		double leverage = currentMarketPrice/equity;
         // ...find the expected rental yield of this property as its current rental price divided by its current (fair market value) sale price
 		// TODO: ATTENTION ---> This rental yield is not accounting for expected occupancy... shouldn't it?
-		double currentRentalYield = h.getRentalRecord().getPrice()*config.constants.MONTHS_IN_YEAR/currentMarketPrice;
+//		double currentRentalYield = h.getRentalRecord().getPrice()*config.constants.MONTHS_IN_YEAR/currentMarketPrice;
+		double currentRentalYield = Model.rentalMarketStats.getAvFlowYieldForQuality(h.getQuality());
         // ...find the mortgage rate (pounds paid a year per pound of equity)
 		double mortgageRate = mortgage.nextPayment()*config.constants.MONTHS_IN_YEAR/equity;
         // ...finally, find expected equity yield, or yield on equity
@@ -423,7 +424,7 @@ public class HouseholdBehaviour {
 		// Fast decisions...
 		//... with alternative consumption function some BTL investors seem to buy too many houses. Therefore,
 		// they cannot pay the "bills" and go bankrupt every month.
-		// if payments make up more than 50% of monthly Net Total Income, don't invest
+		// if payments make up more than X% of monthly Net Total Income, don't invest
 		if(config.ALTERNATE_CONSUMPTION_FUNCTION) {
 			if((me.getMonthlyPayments()) > config.paymentsToIncome*me.getMonthlyNetTotalIncome()) {
 				// record DECISION DATA BTL
