@@ -182,6 +182,8 @@ public abstract class HousingMarket {
                     // consecutive bids having at least a week between them
                     // TODO: Check this an exponential form, why not (1 - 7/30)^(nBids - 1)?
                     pSuccessfulBid = Math.exp(-nBids*config.derivedParams.MONTHS_UNDER_OFFER);
+                    //TODO with bids over about 1000, p becomes too close to zero, so that geomDist throws an outOfRangeException
+                    if(pSuccessfulBid==0.0) pSuccessfulBid=0.000000000000000001;
                     // Given the previous probability of success (two consecutive bids more than a week apart), find the
                     // number of attempts before a success (number of consecutive bids less than a week apart before two
                     // consecutive bids more than a week apart), which corresponds to a draw from a geometric
