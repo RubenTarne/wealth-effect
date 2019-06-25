@@ -136,7 +136,7 @@ public class Recorder {
     			outfile = new PrintWriter(outputFolder + "Output-run" + nRun + ".csv", "UTF-8");
     			outfile.println("Model time, "
     					// Number of households of each type
-    					+ "nNonBTLHomeless, nBTLHomeless, nHomeless, nRenting, nNonOwner, "
+    					+ "nNonBTLHomeless, nBTLHomeless, nSocialHousing, nRenting, nNonOwner, "
     					+ "nNonBTLOwnerOccupier, nBTLOwnerOccupier, nOwnerOccupier, nActiveBTL, nBTL, nNonBTLBankrupt, "
     					+ "nBTLBankrupt, TotalPopulation, "
     					// Numbers of houses of each type
