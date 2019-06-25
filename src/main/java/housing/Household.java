@@ -325,6 +325,14 @@ public class Household implements IHouseOwner {
                 double newPrice = behaviour.rethinkHouseSalePrice(forSale);
                 if (newPrice > mortgageFor(house).principal) {
                     Model.houseSaleMarket.updateOffer(forSale, newPrice);
+                    // reconsider if to sell investment property at all
+                    // TODO: this implies that most of the time, houses get re-evaluated every month. what is the effect
+                    // on the overall probability to sell/buy houses?
+                    if(behaviour.isPropertyInvestor() && 
+                    		!decideToSellHouse(house)) {
+//                    	System.out.println("propertyInvestor reconsidering!, t = " + Model.getTime()+ " and the HPI is: " + Model.housingMarketStats.getHPI() + " and HPA is: " + Model.housingMarketStats.getLongTermHPA());
+                    	Model.houseSaleMarket.removeOffer(forSale);
+                    }
                 // ...otherwise, remove the offer from the sale market (note that investment properties will continue to be rented out)
                 } else {
                     Model.houseSaleMarket.removeOffer(forSale);
@@ -575,6 +583,7 @@ public class Household implements IHouseOwner {
      * Decide whether to sell ones own house.
      ********************************************************/
     private boolean decideToSellHouse(House h) {
+    	// only enter here when house is home and the house is not investment property
         if(h == home) {
             return(behaviour.decideToSellHome());
         } else {
