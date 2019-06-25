@@ -82,7 +82,8 @@ public class Household implements IHouseOwner {
         // Find initial values for the annual and monthly gross employment income
         annualGrossEmploymentIncome = data.EmploymentIncome.getAnnualGrossEmploymentIncome(age, incomePercentile);
         monthlyGrossEmploymentIncome = annualGrossEmploymentIncome/config.constants.MONTHS_IN_YEAR;
-        bankBalance = data.Wealth.getDesiredBankBalance(getAnnualGrossTotalIncome(), behaviour.getPropensityToSave()); // Desired bank balance is used as initial value for actual bank balance
+        bankBalance = 0.00000001;
+//        bankBalance = data.Wealth.getDesiredBankBalance(getAnnualGrossTotalIncome(), behaviour.getPropensityToSave()); // Desired bank balance is used as initial value for actual bank balance
         // record deposits entering the simulation by initial endowment
         Model.householdStats.recordBankBalanceEndowment(bankBalance);
         monthlyGrossRentalIncome = 0.0;
