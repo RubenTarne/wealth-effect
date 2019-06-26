@@ -65,16 +65,16 @@ public class MortgageAgreement extends PaymentAgreement {
             // ... calculate the principal and interest repayment and record it ...
             h.setPrincipalPaidBack(principalBefore-principal);
             // as there are tiny rounding errors, i subtract a small amount for this test
-            if((principal-0.01)>principalBefore) {
-            	System.out.println("weird, the mortgage volume increased");
-            }
+//            if((principal-0.01)>principalBefore) {
+//            	System.out.println("weird, the mortgage volume (" + principalBefore +") increased by: " + (principal-principalBefore) + ", the interest rate is: " + monthlyInterestRate);
+//            }
             // ... calculate the the interest repayment as the amount of interest accrued this month
             h.setInterestPaidBack(principalBefore*(1.0 + monthlyInterestRate)-principalBefore);
             // as there are tiny rounding errors, I add 0.01 to monthly payments
-            if((principalBefore*(1.0 + monthlyInterestRate)-principalBefore)> (monthlyPayment+0.1) 
-            		&& monthlyPayment != 0.0) {
-            	System.out.println("weird, the monthly payment made was smaller than the increase in credit by the interest rate");
-            }
+//            if((principalBefore*(1.0 + monthlyInterestRate)-principalBefore)> (monthlyPayment+0.1) 
+//            		&& monthlyPayment != 0.0) {
+//            	System.out.println("weird, the monthly payment made (" + monthlyPayment + ") was smaller than the increase in credit by the interest rate");
+//            }
             return monthlyPayment; // ...and return the monthly payment
         }
 	}
