@@ -980,6 +980,10 @@ public class Household implements IHouseOwner {
 	public void resetPrincipalPaidBackForInheritance() {
 		this.principalPaidBackForInheritance = 0.0;
 	}
+	
+	public void resetDebtReliefForBequeather() {
+		this.debtReliefForBequeather = 0.0;
+	}
 
 	public double getMonthlyTaxesPaid() {
 		return monthlyTaxesPaid;
@@ -995,4 +999,18 @@ public class Household implements IHouseOwner {
 
 	public double getDebtReliefForBequeather() {
 		return debtReliefForBequeather;
+	}
+
+	public void setDebtReliefForBequeather(double debtReliefForBequeather) {
+		this.debtReliefForBequeather = debtReliefForBequeather;
+	}
+
+	public double getNewCredit() {
+		return newCredit;
+	}
+
+	public void setNewCredit(double newCredit) {
+		this.newCredit = newCredit;
+	}
+	
 }
