@@ -206,7 +206,9 @@ public class HouseholdStats {
                 config.recordMonthlyMortgagePayments, config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, 
                 config.recordFinancialWealthConsumption, config.recordHousingWealthConsumption, config.recordDebtConsumption, 
                 config.recordSavingForDeleveraging, config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge,
-                config.recordTransactionRevenue, config.recordId);
+                config.recordTransactionRevenue, config.recordId, config.recordNewCredit, config.recordPrincipalRepRegular
+                , config.recordPrincipalRepIrregular, config.recordPrincipalRepSale, config.recordBankcuptcyCashInjection, 
+        		config.recordPrincipalPaidBackInheritance);
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
         	
@@ -373,6 +375,33 @@ public class HouseholdStats {
         		if(config.recordId) {
         			Model.microDataRecorder.recordId(Model.getTime(), h.getId());
         		}
+        		if(config.recordNewCredit) {
+        			Model.microDataRecorder.recordNewCredit(Model.getTime(), h.getNewCredit());
+        		}
+         		if(config.recordPrincipalRepRegular) {
+        			// principal paid back for inheritance is positive, debt relief is positive (negative NEGATIVE bankBalance value is the input
+        			Model.microDataRecorder.recordPrincipalRepRegular(Model.getTime(), h.getPrincipalPaidBack());
+        		}
+        		if(config.recordPrincipalRepIrregular) {
+        			// principal paid back for inheritance is positive, debt relief is positive (negative NEGATIVE bankBalance value is the input
+        			Model.microDataRecorder.recordPrincipalRepIrregular(Model.getTime(), (h.getPrincipalPaidBackForInheritance()
+        					 + h.getDebtReliefForBequeather()));
+        			// the values stored when a household died in the beginning of the period have to be set back to zero here at the end of the period
+        			// TODO so far, this leads to too high values in the first period, as they have not been reset until then
+        			// but only reset to zero here, if recordPrincipalPaidBackInheritance is inactive
+        			if(!config.recordPrincipalPaidBackInheritance)h.resetPrincipalPaidBackForInheritance();
+        			h.resetDebtReliefForBequeather();
+        		}
+        		if(config.recordPrincipalRepSale) {
+        			Model.microDataRecorder.recordPrincipalRepSale(Model.getTime(), h.getPrincipalDueToHouseSale());
+        		} 
+        		if(config.recordBankcuptcyCashInjection) {
+        			Model.microDataRecorder.recordBankcuptcyCashInjection(Model.getTime(), h.getCashInjection());
+        		}    
+        		if(config.recordPrincipalPaidBackInheritance) {
+        			Model.microDataRecorder.recordPrincipalPaidBackInheritance(Model.getTime(), h.getPrincipalPaidBackForInheritance());
+        			h.resetPrincipalPaidBackForInheritance();
+        		}    
         	}
         }
         // Annualise monthly income data

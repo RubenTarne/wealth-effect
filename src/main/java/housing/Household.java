@@ -53,6 +53,7 @@ public class Household implements IHouseOwner {
     private double 							monthlyPayments;
     private double							principalPaidBack; // records how much of mortgage principal this household paid back this period
     private double							principalPaidBackForInheritance; // this records the repayment of principal the bequeather paid back, before passing its wealth on to this household
+    private double							debtReliefForBequeather; // this records the debt reliefed by the bank, as no debt is passed on to the inheriting household (this household)
     private double							principalPaidBackDueToHouseSale; // when a household sells a house with a mortgage on, it gets recorded here
     private double							interestPaidBack; // records how much mortgage interest this household paid back this period
     private double							rentalPayment; // records the rental payment of this period
@@ -60,6 +61,7 @@ public class Household implements IHouseOwner {
     private double 							monthlyNICPaid; // records national insurance contributions
     private double 							cashInjection; // records the amount of cash injection when household goes bankrupt
     private double							netHouseTransactionRevenue; // records the households income due to the sale of a house or household expenditure for buying a house (negative value)
+    private double							newCredit; // new credit (principal) taken out is recorded hereter
     
     //------------------------//
     //----- Constructors -----//
@@ -114,6 +116,7 @@ public class Household implements IHouseOwner {
     	cashInjection = 0.0;
     	monthlyPayments = 0.0;
     	netHouseTransactionRevenue = 0.0;
+    	newCredit = 0.0;
     	// record bankBalance very beginning of period
     	Model.householdStats.recordBankBalanceVeryBeginningOfPeriod(bankBalance);
         // Update annual and monthly gross employment income
@@ -409,6 +412,8 @@ public class Household implements IHouseOwner {
             bankBalance -= mortgage.downPayment;
             // record the effect of this transaction on the bank balance
             netHouseTransactionRevenue -= mortgage.downPayment;
+            // record the new principal taken out
+            newCredit += mortgage.principal;
             housePayments.put(sale.getHouse(), mortgage);
             if (home == null) { // move in to house
                 home = sale.getHouse();
@@ -603,72 +608,85 @@ public class Household implements IHouseOwner {
      * @param beneficiary The household that will inherit the wealth
      */
     void transferAllWealthTo(Household beneficiary) {
-        // Check if beneficiary is the same as the deceased household
-        if (beneficiary == this) { // TODO: I don't think this check is really necessary
-            System.out.println("Strange: I'm transferring all my wealth to myself");
-            System.exit(0);
-        }
-        // Create an iterator over the house-paymentAgreement pairs at the deceased household's housePayments object
-        Iterator<Entry<House, PaymentAgreement>> paymentIt = housePayments.entrySet().iterator();
-        Entry<House, PaymentAgreement> entry;
-        House h;
-        PaymentAgreement payment;
-        // Iterate over these house-paymentAgreement pairs
-        while (paymentIt.hasNext()) {
-            entry = paymentIt.next();
-            h = entry.getKey();
-            payment = entry.getValue();
-            // If the deceased household owns the house, then...
-            if (h.owner == this) {
-                // ...first, withdraw the house from any market where it is currently being offered
-                if (h.isOnRentalMarket()) Model.houseRentalMarket.removeOffer(h.getRentalRecord());
-                if (h.isOnMarket()) Model.houseSaleMarket.removeOffer(h.getSaleRecord());
-                // ...then, if there is a resident in the house...
-                if (h.resident != null) {
-                    // ...and this resident is different from the deceased household, then this resident must be a
-                    // tenant, who must get evicted
-                    if (h.resident != this) {
-                        h.resident.getEvicted(); // TODO: Explain in paper that renters always get evicted, not just if heir needs the house
-                    // ...otherwise, if the resident is the deceased household, remove it from the house
-                    } else {
-                        h.resident = null;
-                    }
-                }
-                // ...finally, transfer the property to the beneficiary household
-                beneficiary.inheritHouse(h, ((MortgageAgreement) payment).purchasePrice);
-            // Otherwise, if the deceased household does not own the house but it is living in it, then it must have
-            // been renting it: end the letting agreement
-            } else if (h == home) {
-                h.resident = null;
-                home = null;
-                h.owner.endOfLettingAgreement(h, housePayments.get(h));
-            }
-            // If payment agreement is a mortgage, then try to pay off as much as possible from the deceased household's bank balance
-            if (payment instanceof MortgageAgreement) {
-        		double payoff = ((MortgageAgreement) payment).payoff(beneficiary);
-        		double bankBalanceBeforePayoff = bankBalance;
-        		bankBalance -= payoff;
-        		// record the payoff of principal at the beneficiaries, as it will otherwise not be recorded. 
-        		// ... if the was higher than the bank balance, then record the amount that was paid off and the rest, which was not...
-        		if(bankBalance < 0.0 && bankBalanceBeforePayoff >= 0.0) {
-        			Model.householdStats.recordPrincipalRepaymentDeceasedHousehold(bankBalanceBeforePayoff);
-        			//beneficiary.setPrincipalPaidBackForInheritance(bankBalanceBeforePayoff);
-        			Model.householdStats.recordDebtReliefDeceasedHousehold(-bankBalance);
-        		// ... if the bank balance was already negative, due to former payoff (like 2nd mortgage), record debt relief as the amount of the principal..
-        		} else if(bankBalance < 0.0 && bankBalanceBeforePayoff < 0.0) {
-        			Model.householdStats.recordDebtReliefDeceasedHousehold(payoff);
-        		//... if the bankBalance is positive, this means no debt was relieved and the bankBalance can be transfered
-        		//... record the principal paid back
-        		} else {
-        			Model.householdStats.recordPrincipalRepaymentDeceasedHousehold(payoff);
-        			//beneficiary.setPrincipalPaidBackForInheritance(payoff);
-        		}
-        	}
-        	// Remove the house-paymentAgreement entry from the deceased household's housePayments object
-        	paymentIt.remove(); // TODO: Not sure this is necessary. Note, though, that this implies erasing all outstanding debt
-        }
-        // Finally, transfer all remaining liquid wealth to the beneficiary household
-        beneficiary.bankBalance += Math.max(0.0, bankBalance);
+//    	if(beneficiary.getId()==44883) {
+//    		System.out.println("44883 is inheriting, time is: " + Model.getTime());
+//    	}
+    	
+    	// Check if beneficiary is the same as the deceased household
+    	if (beneficiary == this) { // TODO: I don't think this check is really necessary
+    		System.out.println("Strange: I'm transferring all my wealth to myself");
+    		System.exit(0);
+    	}
+    	// Create an iterator over the house-paymentAgreement pairs at the deceased household's housePayments object
+    	Iterator<Entry<House, PaymentAgreement>> paymentIt = housePayments.entrySet().iterator();
+    	Entry<House, PaymentAgreement> entry;
+    	House h;
+    	PaymentAgreement payment;
+    	// Iterate over these house-paymentAgreement pairs
+    	while (paymentIt.hasNext()) {
+    		entry = paymentIt.next();
+    		h = entry.getKey();
+    		payment = entry.getValue();
+    		// If the deceased household owns the house, then...
+    		if (h.owner == this) {
+    			// ...first, withdraw the house from any market where it is currently being offered
+    			if (h.isOnRentalMarket()) Model.houseRentalMarket.removeOffer(h.getRentalRecord());
+    			if (h.isOnMarket()) Model.houseSaleMarket.removeOffer(h.getSaleRecord());
+    			// ...then, if there is a resident in the house...
+    			if (h.resident != null) {
+    				// ...and this resident is different from the deceased household, then this resident must be a
+    				// tenant, who must get evicted
+    				if (h.resident != this) {
+    					h.resident.getEvicted(); // TODO: Explain in paper that renters always get evicted, not just if heir needs the house
+    					// ...otherwise, if the resident is the deceased household, remove it from the house
+    				} else {
+    					h.resident = null;
+    				}
+    			}
+    			// ...finally, transfer the property to the beneficiary household
+    			beneficiary.inheritHouse(h, ((MortgageAgreement) payment).purchasePrice);
+    			// Otherwise, if the deceased household does not own the house but it is living in it, then it must have
+    			// been renting it: end the letting agreement
+    		} else if (h == home) {
+    			h.resident = null;
+    			home = null;
+    			h.owner.endOfLettingAgreement(h, housePayments.get(h));
+    		}
+    		// If payment agreement is a mortgage, then try to pay off as much as possible from the deceased household's bank balance
+    		if (payment instanceof MortgageAgreement) {
+    			double payoff = ((MortgageAgreement) payment).payoff(beneficiary);
+    			double bankBalanceBeforePayoff = bankBalance;
+    			bankBalance -= payoff;
+    			// record the payoff of principal at the beneficiaries, as it will otherwise not be recorded. 
+    			// ... if the was higher than the bank balance, then record the amount that was paid off and the rest, which was not...
+    			if(bankBalance < 0.0 && bankBalanceBeforePayoff >= 0.0) {
+    				Model.householdStats.recordPrincipalRepaymentDeceasedHousehold(bankBalanceBeforePayoff);
+    				Model.householdStats.recordDebtReliefDeceasedHousehold(-bankBalance);
+    				if(Model.getTime()>=config.TIME_TO_START_RECORDING) {
+    					beneficiary.setPrincipalPaidBackForInheritance(bankBalanceBeforePayoff);
+    					beneficiary.setDebtReliefForBequeather(-bankBalance);
+    				}
+    				// ... if the bank balance was already negative, due to former payoff (like 2nd mortgage), record debt relief as the amount of the principal..
+    			} else if(bankBalance < 0.0 && bankBalanceBeforePayoff < 0.0) {
+    				Model.householdStats.recordDebtReliefDeceasedHousehold(payoff);
+    				//... if the bankBalance is positive, this means no debt was relieved and the bankBalance can be transfered
+    				//... record the principal paid back
+    			} else {
+    				Model.householdStats.recordPrincipalRepaymentDeceasedHousehold(payoff);
+    				if(Model.getTime()>=config.TIME_TO_START_RECORDING) {
+    					beneficiary.setPrincipalPaidBackForInheritance(payoff);
+    				}
+    			}
+    		}
+    		// Remove the house-paymentAgreement entry from the deceased household's housePayments object
+    		paymentIt.remove(); // TODO: Not sure this is necessary. Note, though, that this implies erasing all outstanding debt
+    	}
+    	// In some cases the household that just died, inherited from another household which died before, therefore, add debt relief principal paid back
+    	beneficiary.setPrincipalPaidBackForInheritance(getPrincipalPaidBackForInheritance());
+    	beneficiary.setDebtReliefForBequeather(getDebtReliefForBequeather());
+    	
+    	// Finally, transfer all remaining liquid wealth to the beneficiary household
+    	beneficiary.bankBalance += Math.max(0.0, bankBalance);
     }
     
     /**
@@ -956,7 +974,11 @@ public class Household implements IHouseOwner {
 	}
 
 	public void setPrincipalPaidBackForInheritance(double principalPaidBackForInheritance) {
-		this.principalPaidBackForInheritance = principalPaidBackForInheritance;
+		this.principalPaidBackForInheritance += principalPaidBackForInheritance;
+	}
+	
+	public void resetPrincipalPaidBackForInheritance() {
+		this.principalPaidBackForInheritance = 0.0;
 	}
 
 	public double getMonthlyTaxesPaid() {
@@ -970,4 +992,7 @@ public class Household implements IHouseOwner {
 	public double getNetHouseTransactionRevenue() {
 		return netHouseTransactionRevenue;
 	}
+
+	public double getDebtReliefForBequeather() {
+		return debtReliefForBequeather;
 }

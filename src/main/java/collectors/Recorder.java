@@ -53,6 +53,9 @@ public class Recorder {
     private PrintWriter rentalYield;
     private PrintWriter housePriceGrowth;
     private PrintWriter interestRateSpread;
+    private PrintWriter newCredit;
+    private PrintWriter prinRepRegular;
+    private PrintWriter prinRepSale;
     
     //------------------------//
     //----- Constructors -----//

@@ -58,6 +58,12 @@ public class Config {
 	public boolean recordAge;				// True to write age of agent 
 	public boolean recordTransactionRevenue; // True to write expenses and revenues stemming from housing transactions
 	public boolean recordId;					// True to write the agents ID for every period (int)
+	public boolean recordNewCredit;				// True to write agents newly taken out credit (double)
+	public boolean recordPrincipalRepRegular;	// True to write agents regular monthly mortgage repayments (double)
+	public boolean recordPrincipalRepIrregular;	// True to write agents irregular mortgage repayments (inheritance and debt relief) (double)
+	public boolean recordPrincipalRepSale;		// True to write agents paying off outstanding mortgage when selling their property
+	public boolean recordBankcuptcyCashInjection; // True to write agents cash injection when going bankrupt
+	public boolean recordPrincipalPaidBackInheritance; // True to write principal paid back due to inheritance
 
 
     

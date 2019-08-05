@@ -149,6 +149,9 @@ public class Model {
             		|| config.recordFinancialWealthConsumption || config.recordHousingWealthConsumption
             		|| config.recordDebtConsumption|| config.recordSavingForDeleveraging || config.recordBTL || config.recordFTB 
             		||config.recordInFirstHome || config.recordAge || config.recordTransactionRevenue || config.recordId
+            		|| config.recordNewCredit || config.recordPrincipalRepRegular
+            		|| config.recordPrincipalRepIrregular || config.recordPrincipalRepSale
+            		|| config.recordBankcuptcyCashInjection || config.recordPrincipalPaidBackInheritance
             		) {
                 microDataRecorder.openSingleRunSingleVariableFiles(nSimulation, config.recordBankBalance,
                         config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate,
@@ -157,7 +160,10 @@ public class Model {
                         config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, config.recordFinancialWealthConsumption,
                         config.recordHousingWealthConsumption, config.recordDebtConsumption, config.recordSavingForDeleveraging,
                 		config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge, config.recordTransactionRevenue,
-                		config.recordId);
+                		config.recordId, config.recordNewCredit, config.recordPrincipalRepRegular,
+                		config.recordPrincipalRepIrregular, config.recordPrincipalRepSale, config.recordBankcuptcyCashInjection, 
+                		config.recordPrincipalPaidBackInheritance
+                		);
             }
             
             // For each simulation, open the AgentData files
@@ -205,7 +211,9 @@ public class Model {
                         config.recordFinancialWealthConsumption, config.recordHousingWealthConsumption, 
                         config.recordDebtConsumption, config.recordSavingForDeleveraging, config.recordBTL,
                         config.recordFTB, config.recordInFirstHome, config.recordAge, config.recordTransactionRevenue,
-                        config.recordId);
+                        config.recordId, config.recordNewCredit, config.recordPrincipalRepRegular,
+                        config.recordPrincipalRepIrregular, config.recordPrincipalRepSale,
+                        config.recordBankcuptcyCashInjection, config.recordPrincipalPaidBackInheritance);
             }
 		}
 

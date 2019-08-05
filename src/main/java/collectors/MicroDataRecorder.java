@@ -39,6 +39,13 @@ public class MicroDataRecorder {
     private PrintWriter outfileAge;
     private PrintWriter outfileTransactionRevenue;
     private PrintWriter outfileId;
+    private PrintWriter outfileNewCredit;
+    private PrintWriter outfilePrincipalRepRegular;
+    private PrintWriter outfilePrincipalRepIrregular;
+    private PrintWriter outfilePrincipalRepSale;
+    private PrintWriter outfileBankcuptcyCashInjection;
+    private PrintWriter outfilePrincipalPaidBackInheritance;
+    
 
     //------------------------//
     //----- Constructors -----//
@@ -59,7 +66,9 @@ public class MicroDataRecorder {
                                                  boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                                                  boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL, 
                                                  boolean recordFTB, boolean recordInFirstHome, boolean recordAge, boolean recordTransactionRevenue,
-                                                 boolean recordId) {
+                                                 boolean recordId, boolean recordNewCredit, boolean recordPrincipalRepRegular,
+                                                 boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
+                                                 boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance) {
         if (recordBankBalance) {
             try {
                 outfileBankBalance = new PrintWriter(outputFolder + "BankBalance-run" + nRun
@@ -236,6 +245,55 @@ public class MicroDataRecorder {
         		e.printStackTrace();
         	}
         }
+        if(recordNewCredit) {
+        	try {
+        		outfileNewCredit = new PrintWriter(outputFolder + 
+        				"NewCredit-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordPrincipalRepRegular) {
+        	try {
+        		outfilePrincipalRepRegular = new PrintWriter(outputFolder + 
+        				"PrincipalRepRegular-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordPrincipalRepIrregular) {
+        	try {
+        		outfilePrincipalRepIrregular = new PrintWriter(outputFolder + 
+        				"PrincipalRepIrregular-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordprincipalRepSale) {
+        	try {
+        		outfilePrincipalRepSale = new PrintWriter(outputFolder + 
+        				"PrincipalRepSale-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordBankcuptcyCashInjection) {
+        	try {
+        		outfileBankcuptcyCashInjection = new PrintWriter(outputFolder + 
+        				"BankcuptcyCashInjection-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordPrincipalPaidBackInheritance) {
+        	try {
+        		outfilePrincipalPaidBackInheritance = new PrintWriter(outputFolder + 
+        				"PrincipalPaidBackInheritance-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        
     }
 
     void timeStampSingleRunSingleVariableFiles(int time, boolean recordBankBalance, boolean recordHousingWealth,
@@ -247,7 +305,9 @@ public class MicroDataRecorder {
                                                boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                                                boolean recordDebtConsumption, boolean recordSavingForDeleveraging,
                                                boolean recordBTL, boolean recordFTB, boolean recordInFirstHome, boolean recordAge, 
-                                               boolean recordTransactionRevenue, boolean recordId
+                                               boolean recordTransactionRevenue, boolean recordId, boolean recordNewCredit, 
+                                               boolean recordPrincipalRepRegular, boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
+                                               boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance
                                                ) {
         if (time % Model.config.microDataRecordIntervall == 0 && time >= Model.config.TIME_TO_START_RECORDING) {
             if (recordBankBalance) {
@@ -382,6 +442,42 @@ public class MicroDataRecorder {
             	}
             	outfileId.print(time);
             }
+            if (recordNewCredit) {
+            	if (time != 0) {
+            		outfileNewCredit.println("");
+            	}
+            	outfileNewCredit.print(time);
+            }
+            if (recordPrincipalRepRegular) {
+            	if (time != 0) {
+            		outfilePrincipalRepRegular.println("");
+            	}
+            	outfilePrincipalRepRegular.print(time);
+            }
+            if (recordPrincipalRepIrregular) {
+            	if (time != 0) {
+            		outfilePrincipalRepIrregular.println("");
+            	}
+            	outfilePrincipalRepIrregular.print(time);
+            }
+            if (recordprincipalRepSale) {
+            	if (time != 0) {
+            		outfilePrincipalRepSale.println("");
+            	}
+            	outfilePrincipalRepSale.print(time);
+            }
+            if (recordBankcuptcyCashInjection) {
+            	if (time != 0) {
+            		outfileBankcuptcyCashInjection.println("");
+            	}
+            	outfileBankcuptcyCashInjection.print(time);
+            }
+            if (recordPrincipalPaidBackInheritance) {
+            	if (time != 0) {
+            		outfilePrincipalPaidBackInheritance.println("");
+            	}
+            	outfilePrincipalPaidBackInheritance.print(time);
+            }
         }
     }
 	
@@ -462,13 +558,31 @@ public class MicroDataRecorder {
 		else outfileInFirstHome.print(", " + 0);
     }
     void recordAge(int time, double Age) {
-    	outfileAge.print(", " + Age);
+    	outfileAge.print(", " + round(Age,3));
     }
     void recordTransactionRevenue(int time, double transactionRevenue) {
     	outfileTransactionRevenue.print(", " + round(transactionRevenue,3));
     }
     void recordId(int time, int id) {
     	outfileId.print(", " + id);
+    }
+    void recordNewCredit(int time, double newCredit) {
+    	outfileNewCredit.print(", " + round(newCredit,3));
+    }
+    void recordPrincipalRepRegular(int time, double principalRepRegular) {
+    	outfilePrincipalRepRegular.print(", " + round(principalRepRegular,3));
+    }
+    void recordPrincipalRepIrregular(int time, double principalRepIrregular) {
+    	outfilePrincipalRepIrregular.print(", " + round(principalRepIrregular,3));
+    }
+    void recordPrincipalRepSale(int time, double principalRepSale) {
+    	outfilePrincipalRepSale.print(", " + round(principalRepSale,3));
+    }
+    void recordBankcuptcyCashInjection(int time, double cashInjection) {
+    	outfileBankcuptcyCashInjection.print(", " + round(cashInjection,3));
+    }
+    void recordPrincipalPaidBackInheritance(int time, double principalPaidBackInheritance) {
+    	outfilePrincipalPaidBackInheritance.print(", " + round(principalPaidBackInheritance,3));
     }
 
 
@@ -479,7 +593,9 @@ public class MicroDataRecorder {
                           boolean recordIncomeConsumption, boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                           boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL,
                           boolean recordFTB, boolean recordInFirstHome, boolean recordAge, boolean recordTransactionRevenue,
-                          boolean recordId) {
+                          boolean recordId, boolean recordNewCredit, boolean recordPrincipalRepRegular,
+                          boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
+                          boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance) {
         if (recordBankBalance) {
             outfileBankBalance.close();
         }
@@ -545,6 +661,24 @@ public class MicroDataRecorder {
         }
         if (recordId) {
         	outfileId.close();
+        }
+        if (recordNewCredit) {
+        	outfileNewCredit.close();
+        }
+        if (recordPrincipalRepRegular) {
+        	outfilePrincipalRepIrregular.close();
+        }
+        if (recordPrincipalRepIrregular) {
+        	outfilePrincipalRepIrregular.close();
+        }
+        if (recordprincipalRepSale) {
+        	outfilePrincipalRepSale.close();
+        }
+        if (recordBankcuptcyCashInjection) {
+        	outfileBankcuptcyCashInjection.close();
+        }
+        if (recordPrincipalPaidBackInheritance) {
+        	outfilePrincipalPaidBackInheritance.close();
         }
 	}
 	
