@@ -88,10 +88,14 @@ public class Config {
     public double consumptionFractionQ2;					// propensity to consume out of disposable income for second income quartile
     public double consumptionFractionQ3; 					// propensity to consume out of disposable income for third income quartile
     public double consumptionFractionQ4;					// propensity to consume out of disposable income for highest income quartile
+    public double consumptionFractionTop10;					// propensity to consume out of disposable income for the top 10% income quartile (without the top 1%)
+    public double consumptionFractionTop1;					// propensity to consume out of disposable income for the top 1 % income quartile
     public double wealthEffectQ1;							// lowest income quartile wealth effect
     public double wealthEffectQ2;							// second income quartile wealth effect
     public double wealthEffectQ3;							// third income quartile wealth effect
     public double wealthEffectQ4;							// highest income quartile wealth effect
+    public double wealthEffectTop10;						// top 10 % wealth effect (without top 1 %)
+    public double wealthEffectTop1;							// top 1 % wealth effect
     public double consumptionNetHousingWealth;				// coefficient for consumption out net housing wealth (i.e. housing wealth less debt)
     public double paymentsToIncome;							// share of MonthlyNetTotalIncome used for mortgage payments
     public double liquidityPreference;						// times the monthly disposable income households want to hold liquid
@@ -121,6 +125,8 @@ public class Config {
     double FUNDAMENTALIST_CAP_GAIN_COEFF;   // Weight that fundamentalists put on cap gain
     double TREND_CAP_GAIN_COEFF;			// Weight that trend-followers put on cap gain
     double P_FUNDAMENTALIST; 			    // Probability that a BTL investor is a fundamentalist versus a trend-follower
+    public double p_airbnb; 			// PAUL probability that BTL investor is AirBnB investor
+    public double rentMaxAmortisationPeriodsAirBnB; // PAUL what is the maximum rent armortisation for AirBnBs
    
     // Household behaviour parameters: rent
     double DESIRED_RENT_INCOME_FRACTION;    // Desired proportion of income to be spent on rent

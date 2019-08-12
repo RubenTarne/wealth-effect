@@ -18,6 +18,8 @@ public class HouseholdBehaviour {
     private Config                  config = Model.config; // Passes the Model's configuration parameters object to a private field
     private MersenneTwister	        prng;
     private boolean                 BTLInvestor;
+    // PAUL
+    private boolean 				airBnBInvestor; // is the BTL investor an airBnB investor
     private double                  BTLCapGainCoefficient; // Sensitivity of BTL investors to capital gain, 0.0 cares only about rental yield, 1.0 cares only about cap gain
     private double                  propensityToSave;
     private LogNormalDistribution   downpaymentDistFTB; // Size distribution for downpayments of first-time-buyers
@@ -52,6 +54,15 @@ public class HouseholdBehaviour {
             } else {
                 BTLCapGainCoefficient = config.TREND_CAP_GAIN_COEFF;
             }
+//            
+//            // PAUL if household is investor, decide if he is an AirBnB investor
+//            if(prng.nextDouble() < config.p_airbnb) {
+//            	airBnBInvestor = true;
+//            } else {
+//            	// PAUL otherwise household is not an airbnbinvestor
+//                airBnBInvestor = false;
+//            }
+//            
         } else {
             BTLInvestor = false;
         }
@@ -99,9 +110,17 @@ public class HouseholdBehaviour {
 				wealthEffect = config.wealthEffectQ3;
 				consumptionFraction = config.consumptionFractionQ3;
 			}
-			else {
+			else if(0.75 <= incomePercentile && incomePercentile <0.90) {
 				wealthEffect = config.wealthEffectQ4;
 				consumptionFraction = config.consumptionFractionQ4;
+			}
+			else if(0.9 <= incomePercentile && incomePercentile <0.99) {
+				wealthEffect = config.wealthEffectTop10;
+				consumptionFraction = config.consumptionFractionTop10;
+			}
+			else {
+				wealthEffect = config.wealthEffectTop1;
+				consumptionFraction = config.consumptionFractionTop1;
 			}
 			// calculate the desired consumption
 			consumption = consumptionFraction*disposableIncome 
@@ -337,7 +356,13 @@ public class HouseholdBehaviour {
         			purchasePrice, decideDownPayment(me, purchasePrice), newHouseQuality, probabilityPlaceBidOnHousingMarket, 
         			placeBidOnHousingMarket);
         }
+        
+//        if(Model.householdStats.getnEmptyHouses()>100) { return false;}
+//         boolean fiftyFifty = prng.nextDouble() < 0.5;
+//         return fiftyFifty;
+//        return false;
         return placeBidOnHousingMarket;
+        
     }
 
 	/********************************************************
@@ -513,6 +538,10 @@ public class HouseholdBehaviour {
         // TODO: The following contains a fudge (config.RENT_MAX_AMORTIZATION_PERIOD) to keep rental yield up
 		double minAcceptable = Model.housingMarketStats.getExpAvSalePriceForQuality(quality)
                 /(config.RENT_MAX_AMORTIZATION_PERIOD*config.constants.MONTHS_IN_YEAR);
+		if(airBnBInvestor) {
+			minAcceptable = Model.housingMarketStats.getExpAvSalePriceForQuality(quality)
+	                /(config.rentMaxAmortisationPeriodsAirBnB*config.constants.MONTHS_IN_YEAR);
+		}
 		if (result < minAcceptable) result = minAcceptable;
 		return result;
 	}
@@ -546,4 +575,11 @@ public class HouseholdBehaviour {
     public boolean isPropertyInvestor() { return BTLInvestor; }
 
     public double getPropensityToSave() { return propensityToSave; }
+
+	// PAUL insert a getter for airBnBinvestor
+    public boolean isAirBnBInvestor() {
+		return airBnBInvestor;
+	}
+    
+    
 }

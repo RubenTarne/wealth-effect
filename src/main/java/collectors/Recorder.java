@@ -164,7 +164,11 @@ public class Recorder {
     					+ "totalPrincipalRepayment, totalPrincipalRepaymentsDueToHouseSale, totalPrincipalPaidBackForInheritance, totalInterestRepayment, totalRentalPayments, "
     					+ "totalBankruptcyCashInjection, totalDebtReliefDueToDeceasedHousehold, "
     					+ "creditSupplyTarget, newlyPaidDownPayments, newlyIssuedCredit, nNegativeEquity, "
-    					+ "LTV FTB, LTV OO, LTV BTL, interestRateSpread, moneyOutflowToConstructionSector");
+    					+ "LTV FTB, LTV OO, LTV BTL, interestRateSpread, moneyOutflowToConstructionSector"
+    					
+    					// PAUL additional airbnb variables
+    					+ ", nAirBnBInvestors, airBnBRentalIncome, nAirbnbRentedOut, rentersMonthlyDisposableIncome"
+    					);
     		} catch (FileNotFoundException | UnsupportedEncodingException e) {
     			e.printStackTrace();
     		}
@@ -346,7 +350,17 @@ public class Recorder {
 					Model.bank.getLoanToValueLimit(false, false) + ", " +
 					// divide by 100 as the interest rate in core indicators is calculated as percentage
 					Model.coreIndicators.getInterestRateSpread()/100 + ", " +
-					Model.housingMarketStats.getMoneyToConstructionSector());
+					Model.housingMarketStats.getMoneyToConstructionSector()
+					 + ", " +
+        	
+        			// PAUL additional values for AIRBNB
+					Model.householdStats.getnAirBnBBTL() + ", " +
+					Model.householdStats.getAirBnBRentalIncome() + ", " +
+					Model.householdStats.getnAirBnBs()+ ", " +
+					Model.householdStats.getRentingMonthlyDisposableIncome()
+        	);
+        	
+
         }
 
         // Write quality band prices to file

@@ -26,6 +26,12 @@ public class HouseholdStats {
 	private int     nBTLOwnerOccupier; // Number of BTL households owning their home but without any BTL property
 	private int     nBTLHomeless; // Number of homeless BTL households
     private int     nBTLBankruptcies; // Number of BTL households going bankrupt in a given time step
+    
+    // PAUL AIRBNB values 
+    private int 	nAirBnBBTL;
+	private double	airBnBRentalIncome;
+	private int 	nAirBnBs;
+	private double  rentingMonthlyDisposableIncome;
 
 	public int      nNonBTLOwnerOccupier; // Number of non-BTL households owning their home
 	private int     nRenting; // Number of (by definition, non-BTL) households renting their home
@@ -118,6 +124,13 @@ public class HouseholdStats {
         nBTLOwnerOccupier = 0;
         nBTLHomeless = 0;
         nBTLBankruptcies = 0;
+        
+        // PAUL AIRBNB values
+        nAirBnBBTL = 0;
+    	airBnBRentalIncome = 0.0;
+    	nAirBnBs = 0;
+    	rentingMonthlyDisposableIncome = 0.0;
+    	
         nNonBTLOwnerOccupier = 0;
         nRenting = 0;
         nNonBTLHomeless = 0;
@@ -171,6 +184,13 @@ public class HouseholdStats {
         nBTLOwnerOccupier = 0;
         nBTLHomeless = 0;
         nBTLBankruptcies = 0;
+        
+     // PAUL AIRBNB values
+        nAirBnBBTL = 0;
+    	airBnBRentalIncome = 0.0;
+    	nAirBnBs = 0;
+    	rentingMonthlyDisposableIncome = 0.0;
+        
         nNonBTLOwnerOccupier = 0;
         nRenting = 0;
         nNonBTLHomeless = 0;
@@ -256,6 +276,13 @@ public class HouseholdStats {
                     homelessMonthlyNetIncome += h.getMonthlyNetTotalIncome();
                     homelessMonthlyGrossEmploymentIncome += h.getMonthlyGrossEmploymentIncome();
                 }
+                
+                // PAUL additional recordings for AirBnB investors
+                if(h.behaviour.isAirBnBInvestor()) {
+                	++nAirBnBBTL;
+                	airBnBRentalIncome += h.getAirBnBRentalIncome();
+                	nAirBnBs += h.getnAirBnBRentedOut();
+                }
             } else {
                 if (h.isBankrupt()) nNonBTLBankruptcies += 1;
                 // Non-BTL investors who own their house
@@ -270,6 +297,9 @@ public class HouseholdStats {
                     rentingAnnualisedTotalIncome += h.getMonthlyGrossTotalIncome();
                     rentingMonthlyNetIncome += h.getMonthlyNetTotalIncome();
                     rentingMonthlyGrossEmploymentIncome += h.getMonthlyGrossEmploymentIncome();
+                    // PAUL
+                    rentingMonthlyDisposableIncome += h.returnMonthlyDisposableIncome();
+                    
                     if (Model.housingMarketStats.getExpAvSalePriceForQuality(h.getHome().getQuality()) > 0) {
                         sumStockYield += h.getHousePayments().get(h.getHome()).monthlyPayment
                                 *config.constants.MONTHS_IN_YEAR
@@ -563,7 +593,7 @@ public class HouseholdStats {
 
     // Getters for other variables...
     // ... number of empty houses (total number of houses minus number of non-homeless households)
-    int getnEmptyHouses() {
+    public int getnEmptyHouses() {
         return Model.construction.getHousingStock() + nBTLHomeless + nNonBTLHomeless - Model.households.size();
     }
     // ... proportion of housing stock owned by buy-to-let investors (all rental properties, plus all empty houses not
@@ -610,5 +640,21 @@ public class HouseholdStats {
     double getDebtConsumption() { return totalDebtConsumption; }
     double getTotalSavingForDeleveraging() { return totalSavingForDeleveraging; }
     int getNNegativeEquity() { return nNegativeEquity; }
+
+    // PAUL create three getters, one for nAirbNBbtl and one for their extra rental income, and number of airbnbs
+	public int getnAirBnBBTL() {
+		return nAirBnBBTL;
+	}
+	public double getAirBnBRentalIncome() {
+		return airBnBRentalIncome;
+	}
+	public int getnAirBnBs() {
+		return nAirBnBs;
+	}
+
+	public double getRentingMonthlyDisposableIncome() {
+		return rentingMonthlyDisposableIncome;
+	}
+    
 
 }

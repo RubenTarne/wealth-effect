@@ -62,6 +62,9 @@ public class Household implements IHouseOwner {
     private double 							cashInjection; // records the amount of cash injection when household goes bankrupt
     private double							netHouseTransactionRevenue; // records the households income due to the sale of a house or household expenditure for buying a house (negative value)
     private double							newCredit; // new credit (principal) taken out is recorded hereter
+    private double							airBnBRentalIncome; //PAUL rental income by AirBnB investors
+    private int								nAirBnBRentedOut; // PAUL keep track of the number of airbnbs rented out
+    
     
     //------------------------//
     //----- Constructors -----//
@@ -117,11 +120,18 @@ public class Household implements IHouseOwner {
     	monthlyPayments = 0.0;
     	netHouseTransactionRevenue = 0.0;
     	newCredit = 0.0;
+    	// PAUL reset the airBnB income (and number of flats rented each month) in every step, so that it does not add up over the periods
+    	airBnBRentalIncome = 0.0;
+    	nAirBnBRentedOut = 0;
+    	
     	// record bankBalance very beginning of period
     	Model.householdStats.recordBankBalanceVeryBeginningOfPeriod(bankBalance);
         // Update annual and monthly gross employment income
         annualGrossEmploymentIncome = data.EmploymentIncome.getAnnualGrossEmploymentIncome(age, incomePercentile);
         monthlyGrossEmploymentIncome = annualGrossEmploymentIncome/config.constants.MONTHS_IN_YEAR;
+//        // PAUL calculate the Airbnb income
+//        if(behaviour.isAirBnBInvestor()) airBnBRentalIncome = calculateAirBnBIncome();
+//        
     	// Add monthly disposable income (net total income minus essential consumption and housing expenses) to bank balance
     	monthlyDisposableIncome = getMonthlyDisposableIncome();
     	bankBalance += monthlyDisposableIncome;
@@ -294,18 +304,57 @@ public class Household implements IHouseOwner {
     /**
      * Adds up all sources of (gross) income on a monthly basis, i.e., both employment and rental income
      */
-    public double getMonthlyGrossTotalIncome() { return monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome(); }
+    public double getMonthlyGrossTotalIncome() { return monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome()
+//    // PAUL add the airbnb income
+//    + airBnBRentalIncome
+    ; }
 
     /**
      * Adds up this month's rental income from all currently owned and rented properties
      */
     public double getMonthlyGrossRentalIncome() {
-        double monthlyGrossRentalIncome = 0.0;
-        for(RentalAgreement rentalAgreement: rentalContracts.values()) {
-            monthlyGrossRentalIncome += rentalAgreement.nextPayment();
-        }
+    	double monthlyGrossRentalIncome = 0.0;
+    	for(RentalAgreement rentalAgreement: rentalContracts.values()) {
+    		monthlyGrossRentalIncome += rentalAgreement.nextPayment();
+    	}
         return monthlyGrossRentalIncome;
     }
+    
+//    // PAUL this method calculats airbnb rental income and counts the number of airbnbs rented out
+//    private double calculateAirBnBIncome() {
+//    	//PAUL here: if households are AirBnB investors and have a house on the rental market (i.e. it is still empty),
+//    	// then they receive their minimal amortisation rental income 
+//    	double airBnBIncome = 0.0;
+//
+//    	Iterator<Entry<House, PaymentAgreement>> paymentIt = housePayments.entrySet().iterator();
+//    	Entry<House, PaymentAgreement> entry;
+//    	House h;
+//    	PaymentAgreement payment;
+//    	// Iterate over these house-paymentAgreement pairs...
+//    	while (paymentIt.hasNext()) {
+//    		entry = paymentIt.next();
+//    		h = entry.getKey();
+//    		payment = entry.getValue();
+//    		// ...if the household is the owner of the house..
+//    		if (h.owner == this) {
+//    			// check if it is on the rental market (i.e. empty, and in code term "unequal to null")  ..
+//    			// as the house could be rented out this period, check if it has been on the market for longer than
+//    			// one period. The airbnb-income is, so to say, recieved only after the fact. 
+//    			// otherwise the inclusion into the income calculation would become too difficult as it would need
+//    			// to be transferred into the next period (market mechanism happens only at the end of the period)
+//    			HouseOfferRecord forRent = h.getRentalRecord();
+//    			if (forRent != null && Model.getTime() > (forRent.gettInitialListing()+1)) {
+//    				// .. if so, then "rent" it out to AirBnB tourists, which means, add the minimum accepted rental price
+//    				// to the gross rental income, and record it 
+//    				airBnBIncome += Model.housingMarketStats.getExpAvSalePriceForQuality(h.getQuality())
+//    						/(config.rentMaxAmortisationPeriodsAirBnB*config.constants.MONTHS_IN_YEAR);
+//    				// then record this airbnb rental
+//    				nAirBnBRentedOut += 1;
+//    			}
+//    		}
+//    	}
+//    	return airBnBIncome;
+//    }
 
     //----- Methods for house owners -----//
 
@@ -1020,6 +1069,14 @@ public class Household implements IHouseOwner {
 
 	public void setNewCredit(double newCredit) {
 		this.newCredit = newCredit;
+	}
+
+	public int getnAirBnBRentedOut() {
+		return nAirBnBRentedOut;
+	}
+
+	public double getAirBnBRentalIncome() {
+		return airBnBRentalIncome;
 	}
 	
 }
