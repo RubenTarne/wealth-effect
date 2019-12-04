@@ -191,6 +191,11 @@ public class Config {
     double CENTRAL_BANK_AFFORDABILITY_COEFF;    // Maximum fraction of the household's income to be spent on mortgage repayments under stressed conditions
     double CENTRAL_BANK_BTL_STRESSED_INTEREST;  // Interest rate under stressed condition for BTL investors when calculating interest coverage ratios (ICR)
     double CENTRAL_BANK_MAX_ICR;                // Interest coverage ratio (ICR) limit imposed by the central bank
+    double centralBankFirstTimeBuyerLTVLimit; 	// Loan-To-Value upper limit for first-time buying mortgages
+    double centralBankOwnerOccupierLTVLimit; 	// Loan-To-Value upper limit for owner-occupying mortgages
+    double centralBankBTLLTVLimit; 				// Loan-To-Value upper limit for BTL mortgages
+    double centralBankMaxFractionMortgagesOverLTVLimit; // Fraction of all mortgages allowed to exceed the Loan-To-Value limit
+
 
     // Construction sector parameters
     double CONSTRUCTION_HOUSES_PER_HOUSEHOLD;   // Target ratio of houses per household

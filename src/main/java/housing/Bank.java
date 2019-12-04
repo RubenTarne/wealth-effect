@@ -31,6 +31,10 @@ public class Bank {
     private double		                dDemand_dInterest; // rate of change of demand with interest rate (pounds)
     private int                         nOOMortgagesOverLTI; // Number of mortgages for owner-occupying that go over the LTI cap this time step
     private int                         nOOMortgages; // Total number of mortgages for owner-occupying
+    private int							nMortgages; // Total number of all mortgages
+    private int							nFTBMortgagesOverLTV; // Total number of FTB mortgages over the LTV limit
+    private int							nMoverMortgagesOverLTV; // Total number of mortgages of movers (owner-occupiers, that are not first-time buyers)
+    private int							nBTLMortgagesOverLTV; // Total number of mortgages of BTL-investors over the LTV limit
 
     // LTV internal policy thresholds
     private double                      firstTimeBuyerLTVLimit; // Loan-To-Value upper limit for first-time buyer mortgages
@@ -99,6 +103,10 @@ public class Bank {
 		supplyVal = 0.0;
         nOOMortgagesOverLTI = 0;
         nOOMortgages = 0;
+        nMortgages = 0;
+        nFTBMortgagesOverLTV = 0;
+        nMoverMortgagesOverLTV = 0;
+        nBTLMortgagesOverLTV = 0;
 	}
 	
 	/**
@@ -140,8 +148,8 @@ public class Bank {
 	 * Get the monthly payment factor, i.e., the monthly payment on a mortgage as a fraction of the mortgage principal.
 	 */
 	private double getMonthlyPaymentFactor(boolean isHome) {
-		// TEST BTL receive normal credit where they pay off the principal as well.
-		//if(config.ALTERNATE_CONSUMPTION_FUNCTION) { return monthlyPaymentFactor;}
+//		 TEST BTL receive normal credit where they pay off the principal as well.
+//		if(config.ALTERNATE_CONSUMPTION_FUNCTION) { return monthlyPaymentFactor;}
 		if (isHome) {
 			return monthlyPaymentFactor; // Monthly payment factor to pay off the principal in N_PAYMENTS
 		} else {
@@ -158,7 +166,7 @@ public class Bank {
 	 * @return The MortgageApproval object, or NULL if the mortgage is declined
 	 */
 	MortgageAgreement requestLoan(Household h, double housePrice, double desiredDownPayment, boolean isHome,
-                                  House house) {
+			House house) {
 		MortgageAgreement approval = requestApproval(h, housePrice, desiredDownPayment, isHome, true);
 		if(approval == null) return(null);
 		// --- if all's well, go ahead and arrange mortgage
@@ -166,13 +174,35 @@ public class Bank {
 		if(approval.principal > 0.0) {
 			mortgages.add(approval);
 			Model.creditSupply.recordLoan(h, approval, house);
-            if(isHome) {
-                ++nOOMortgages;
-                if(approval.principal/h.getAnnualGrossEmploymentIncome() >
-                        Model.centralBank.getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome)) {
-                    ++nOOMortgagesOverLTI;
+
+			// check if loans would be over LTI and/or LTV limit and count them
+			if(isHome) {
+				// .. first, record OO mortgage for movers and first-time buyers and check if over LTI limit
+				++nOOMortgages;
+				if(approval.principal/h.getAnnualGrossEmploymentIncome() >
+				Model.centralBank.getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome)) {
+					++nOOMortgagesOverLTI;
+					// .. second, check if it was a first-time buyer loan over the LTV limit
+					if(h.isFirstTimeBuyer()) {
+						if(approval.principal/housePrice > Model.centralBank.getLoanToValueLimit(true, true)){
+							++nFTBMortgagesOverLTV;
+						}
+						// .. if not, it has to be a loan for a mover
+					} else {
+						if(approval.principal/housePrice > Model.centralBank.getLoanToValueLimit(false, true)) {
+							++nMoverMortgagesOverLTV;
+						}
+					}
+				}
+			} else {
+				//.. if the loan is not for the households home, it has to be a BTL loan
+				if(approval.principal/housePrice >
+				Model.centralBank.getLoanToValueLimit(false, false)) {
+					++nBTLMortgagesOverLTV;
 				}
 			}
+			
+			++nMortgages;
 		}
 		return approval;
 	}
@@ -334,27 +364,53 @@ public class Bank {
      * @return The Loan-To-Value ratio limit applicable to the given household
      */
     public double getLoanToValueLimit(boolean isFirstTimeBuyer, boolean isHome) {
+    	double limit;
+
+    	// pro-cyclical credit -  loan-to-value limit
     	if(config.FLEXIBLE_CREDIT_CONSTRAINTS) {
-        	if(isHome) {
-        		if(isFirstTimeBuyer) {
-        			// return at least the set limit, but possibly higher, and at most 1.0
-        			//return Math.max(Math.min(Model.housingMarketStats.getLongTermHPA()*0.2+firstTimeBuyerLTVLimit, 1.0), firstTimeBuyerLTVLimit);
-        			return Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+firstTimeBuyerLTVLimit, 0.999);
-        		} else {
-        			return Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+ownerOccupierLTVLimit, 0.999);
-        		}
-        	}
-        	return Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+buyToLetLTVLimit, 0.999);
-        }
-        
+    		// first compute the private bank self-imposed (hard) limit, which applies always
+    		if(isHome) {
+    			if(isFirstTimeBuyer) {
+    				// return at least the set limit, but possibly higher, and at most 1.0
+    				//return Math.max(Math.min(Model.housingMarketStats.getLongTermHPA()*0.2+firstTimeBuyerLTVLimit, 1.0), firstTimeBuyerLTVLimit);
+    				limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+firstTimeBuyerLTVLimit, 0.999);
+    			} else {
+    				limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+ownerOccupierLTVLimit, 0.999);
+    			}
+    		} else {
+    			limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+buyToLetLTVLimit, 0.999);
+    		}
+    		// If the fraction of mortgages already underwritten over the Central Bank LTV limit exceeds a certain
+    		// maximum (regulated also by the Central Bank)...
+    		if ((nFTBMortgagesOverLTV + nMoverMortgagesOverLTV + nBTLMortgagesOverLTV + 1.0)/(nMortgages + 1.0) >
+    		Model.centralBank.getMaxFractionOOMortgagesOverLTVLimit()) {
+    			// ... then compare the Central Bank LTI (soft) limit and that of the private bank (hard) and choose the smallest
+    			limit = Math.min(limit, Model.centralBank.getLoanToValueLimit(isFirstTimeBuyer, isHome));
+    		}
+    		return limit;
+    	}
+
+    	// fixed credit constraints - loan-to-value limit
+    	// first compute the private bank self-imposed (hard) limit, which applies always
     	if(isHome) {
-            if(isFirstTimeBuyer) {
-                return firstTimeBuyerLTVLimit;
-            } else {
-                return ownerOccupierLTVLimit;
-            }
-        }
-    	return buyToLetLTVLimit;
+    		if(isFirstTimeBuyer) {
+    			// return at least the set limit, but possibly higher, and at most 1.0
+    			//return Math.max(Math.min(Model.housingMarketStats.getLongTermHPA()*0.2+firstTimeBuyerLTVLimit, 1.0), firstTimeBuyerLTVLimit);
+    			limit = firstTimeBuyerLTVLimit;
+    		} else {
+    			limit = ownerOccupierLTVLimit;
+    		}
+    	} else {
+    		limit = buyToLetLTVLimit;
+    	}
+    	// If the fraction of mortgages already underwritten over the Central Bank LTV limit exceeds a certain
+    	// maximum (regulated also by the Central Bank)...
+    	if ((nFTBMortgagesOverLTV + nMoverMortgagesOverLTV + nBTLMortgagesOverLTV + 1.0)/(nMortgages + 1.0) >
+    	Model.centralBank.getMaxFractionOOMortgagesOverLTVLimit()) {
+    		// ... then compare the Central Bank LTV (soft) limit and that of the private bank (hard) and choose the smallest
+    		limit = Math.min(limit, Model.centralBank.getLoanToValueLimit(isFirstTimeBuyer, isHome));
+    	}
+    	return limit;
     }
 
 	/**

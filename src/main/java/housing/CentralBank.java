@@ -26,6 +26,12 @@ public class CentralBank {
     // ICR policy thresholds
     private double interestCoverRatioLimit; // Ratio of expected rental yield over interest monthly payment under stressed interest conditions
     private double interestCoverRatioStressedRate; // Stressed interest rate used for Interest-Cover-Ratio assessments
+    
+    // LTV policy thresholds
+    private double firstTimeBuyerLTVLimit; // Loan-To-Value upper limit for first-time buying mortgages
+    private double ownerOccupierLTVLimit; // Loan-To-Value upper limit for owner-occupying mortgages
+    private double BTLLTVLimit; // Loan-To-Value upper limit for BTL mortgages
+    private double maxFractionMortgagesOverLTVLimit;// Fraction of all mortgages allowed to exceed the Loan-To-Value limit
 
     //-------------------//
     //----- Methods -----//
@@ -39,6 +45,11 @@ public class CentralBank {
         // Setup initial ICR policy thresholds
         interestCoverRatioLimit = config.CENTRAL_BANK_MAX_ICR;
         interestCoverRatioStressedRate = config.CENTRAL_BANK_BTL_STRESSED_INTEREST;
+        // Setup initial LTV policy thresholds
+        firstTimeBuyerLTVLimit = config.centralBankFirstTimeBuyerLTVLimit;
+        ownerOccupierLTVLimit = config.centralBankOwnerOccupierLTVLimit;
+        BTLLTVLimit = config.centralBankBTLLTVLimit;
+        maxFractionMortgagesOverLTVLimit = config.centralBankMaxFractionMortgagesOverLTVLimit;
     }
 
 	/**
@@ -114,4 +125,32 @@ public class CentralBank {
             return 0.0; // Dummy return statement
         }
     }
+    
+    /**
+     * Get the Loan-To-Value ratio limit applicable to a given household. 
+     * The private bank always imposes its own limit. Apart from this, it also imposes the
+     * Central Bank regulated limit, which allows for a certain fraction of loans
+     * to go over it
+     *
+     * @param isFirstTimeBuyer True if the household is first-time buyer
+     * @param isHome True if the mortgage is to buy a home for the household (non-BTL mortgage)
+     * @return Loan-To-Value ratio limit applicable to the household
+     */
+	double getLoanToValueLimit(boolean isFirstTimeBuyer, boolean isHome) {
+        if (isHome) {
+            if (isFirstTimeBuyer) {
+                return firstTimeBuyerLTVLimit;
+            } else {
+                return ownerOccupierLTVLimit;
+            }
+        } else {
+            return BTLLTVLimit;
+        }
+	}
+	
+    /**
+     * Get the maximum fraction of mortgages to households that can go over the Loan-To-Value limit
+     */
+    double getMaxFractionOOMortgagesOverLTVLimit() { return maxFractionMortgagesOverLTVLimit; }
+
 }
