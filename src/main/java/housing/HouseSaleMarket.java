@@ -83,7 +83,7 @@ public class HouseSaleMarket extends HousingMarket {
 			HouseOfferRecord bestOffer = (HouseOfferRecord)offersPY.peek(bid);
 			if (bestOffer != null) {
 				if(config.allCreditConstraintsActive==false 
-						&& config.FLEXIBLE_CREDIT_CONSTRAINTS) {
+						&& config.procyclicalCreditConstraints) {
 					minDownpayment = bestOffer.getPrice() * (1.0 - Model.bank.getLoanToValueLimit(false, false));
 				} else {
 					minDownpayment = 

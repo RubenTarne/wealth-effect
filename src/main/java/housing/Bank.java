@@ -76,16 +76,17 @@ public class Bank {
      * @param totalPopulation Current population in the model, needed to scale the target amount of credit
 	 */
 	public void step(int totalPopulation) {
-		supplyTarget = creditSupplyTarget(totalPopulation);
-		setMortgageInterestRate(recalculateInterestRate());
+		if (config.fixedInterestRates) {
+			setMortgageInterestRate(config.bankMortgageInterestSpread + centralBank.getBaseRate());
+		} else {
+			supplyTarget = creditSupplyTarget(totalPopulation);
+			setMortgageInterestRate(recalculateInterestRate());
+		}
 		resetMonthlyCounters();
 	}
 	
-	// credit supply increases with HPA expectation
 	public double creditSupplyTarget(int totalPopulation) {
-		if(config.FLEXIBLE_CREDIT_SUPPLY) {
-			return (1+Model.housingMarketStats.getLongTermHPA()*config.CREDIT_SUPPLY_ADJUSTMENT)*(config.BANK_CREDIT_SUPPLY_TARGET*totalPopulation);
-		}else if(config.trend && config.periodTrendStarting >= Model.getTime()){
+		if(config.trend && config.periodTrendStarting >= Model.getTime()){
 			// adjust the credit supply by banks according to the income growth rate
 			return config.BANK_CREDIT_SUPPLY_TARGET*totalPopulation * (Model.getTime()-config.periodTrendStarting) * config.yearlyIncreaseEmploymentIncome; 
 		}else {
@@ -365,7 +366,7 @@ public class Bank {
     	double limit;
 
     	// pro-cyclical credit -  loan-to-value limit
-    	if(config.FLEXIBLE_CREDIT_CONSTRAINTS) {
+    	if(config.procyclicalCreditConstraints) {
     		// first compute the private bank self-imposed (hard) limit, which applies always
     		if(isHome) {
     			if(isFirstTimeBuyer) {

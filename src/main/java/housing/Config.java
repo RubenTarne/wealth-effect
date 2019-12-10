@@ -68,8 +68,8 @@ public class Config {
 
     
     // Decision equations
-    boolean FLEXIBLE_CREDIT_SUPPLY;					// make credit supply dependent on the housing cycle
-    boolean FLEXIBLE_CREDIT_CONSTRAINTS;			// toggle flexible LTV, LTI and affordability ratios by the bank
+    boolean fixedInterestRates;					// bank uses a fixed interest rate as opposed to basing it on the difference between actual and target credit supply
+    boolean procyclicalCreditConstraints;			// toggle flexible LTV, LTI and affordability ratios by the bank
     boolean allCreditConstraintsActive;				// if false, then only LTV is active, if true all other constraints are binding as well
     boolean ALTERNATE_CONSUMPTION_FUNCTION;			// make consumption solely dependent on income and wealth
     
@@ -172,10 +172,10 @@ public class Config {
     public double BTL_CHOICE_MIN_BANK_BALANCE;     // Minimun bank balance, as a percentage of the desired bank balance, to buy new properties
 
     // Bank parameters
-    double CREDIT_SUPPLY_ADJUSTMENT;		// Flexible credit supply adjustment parameter
     double LTVAdjustmentFactor;				// Sensitivity of the LTV parameter to the HPA
     private int MORTGAGE_DURATION_YEARS;    // Mortgage duration in years
     double BANK_INITIAL_RATE;               // Private bank initial interest rate
+    double bankMortgageInterestSpread;		// If fixedInterestRates = true, private bank sets the following interest rate (double)
     double BANK_CREDIT_SUPPLY_TARGET;       // Bank's target supply of credit per household per month
     double BANK_D_DEMAND_D_INTEREST;        // Rate of change of the demand for credit in response to a change in the interest rate (in pounds per point)
     double BANK_MAX_FTB_LTV;                // Maximum LTV ratio that the private bank would allow for first-time-buyers
