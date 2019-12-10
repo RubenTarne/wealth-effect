@@ -68,7 +68,7 @@ public class AgentDecisionRecorder{
             		+ "LTIPrincipal, " 
             		// data from the rentOrBuy method
             		+ "BankBalance, " + "MonthlyDisposableIncome, " 
-            		+ "MonthlyGrossEmploymentIncome, " + "EquityPosition, " 
+            		+ "MonthlyGrossTotalIncome, " + "EquityPosition, " 
             		+ "costOfBuying, " + "costOfRenting, " + "monthlyPayments, " + "approvedMaxPurchasePrice, "
             		+ "desiredDownPayment, " + "approvedDownPayment, " 
             		+ "monthlyInterestRate, " + "longTermHPAExpectation, " + "HPI, "
@@ -138,7 +138,7 @@ public class AgentDecisionRecorder{
     		double purchasePrice, double newHouseQuality, double desiredDownPayment) {
     	Model.agentDecisionRecorder.rentOrBuy.println(String.format("%.2f", me.getBankBalance())
     			+ ", " + String.format("%.2f", me.returnMonthlyDisposableIncome())
-    			+ ", " + String.format("%.2f", me.getMonthlyGrossEmploymentIncome())
+    			+ ", " + String.format("%.2f", me.getMonthlyGrossTotalIncome())
     			+ ", " + String.format("%.2f", me.getEquityPosition())
     			+ ", " + ", " 
     			+ ", " + String.format("%.2f", mortgageApproval.monthlyPayment)
@@ -160,7 +160,7 @@ public class AgentDecisionRecorder{
     		boolean placeBidOnHousingMarket) {
     	Model.agentDecisionRecorder.rentOrBuy.println(String.format("%.2f", me.getBankBalance())
     			+ ", " + String.format("%.2f", me.returnMonthlyDisposableIncome())
-    			+ ", " + String.format("%.2f", me.getMonthlyGrossEmploymentIncome())
+    			+ ", " + String.format("%.2f", me.getMonthlyGrossTotalIncome())
     			+ ", " + String.format("%.2f", me.getEquityPosition())
     			+ ", " + String.format("%.2f", costOfHouse)
     			+ ", " + String.format("%.2f", costOfRent*(1.0 + config.PSYCHOLOGICAL_COST_OF_RENTING))
