@@ -16,12 +16,15 @@ public class CentralBank {
     //------------------//
 
     // General fields
-	private Config	config = Model.config;	// Passes the Model's configuration parameters object to a private field
+	private Config      config = Model.config;	// Passes the Model's configuration parameters object to a private field
+
+    // Monetary policy
+    private double		baseRate;
 
     // LTI policy thresholds
-    private double firstTimeBuyerLTILimit; // Loan-To-Income upper limit for first-time buying mortgages
-    private double ownerOccupierLTILimit; // Loan-To-Income upper limit for owner-occupying mortgages
-    private double maxFractionOOMortgagesOverLTILimit; // Fraction of owner-occupying mortgages allowed to exceed the Loan-To-Income limit
+    private double      firstTimeBuyerLTILimit; // Loan-To-Income upper limit for first-time buying mortgages
+    private double      ownerOccupierLTILimit; // Loan-To-Income upper limit for owner-occupying mortgages
+    private double      maxFractionOOMortgagesOverLTILimit; // Fraction of owner-occupying mortgages allowed to exceed the Loan-To-Income limit
 
     // ICR policy thresholds
     private double interestCoverRatioLimit; // Ratio of expected rental yield over interest monthly payment under stressed interest conditions
@@ -38,11 +41,13 @@ public class CentralBank {
     //-------------------//
 
     void init() {
-        // Setup initial LTI policy thresholds
+        // Set initial monetary policy
+        baseRate = config.CENTRAL_BANK_INITIAL_BASE_RATE;
+        // Set initial LTI policy thresholds
         firstTimeBuyerLTILimit = config.CENTRAL_BANK_MAX_FTB_LTI;
         ownerOccupierLTILimit = config.CENTRAL_BANK_MAX_OO_LTI;
         maxFractionOOMortgagesOverLTILimit = config.CENTRAL_BANK_FRACTION_OVER_MAX_LTI;
-        // Setup initial ICR policy thresholds
+        // Set initial ICR policy thresholds
         interestCoverRatioLimit = config.CENTRAL_BANK_MAX_ICR;
         interestCoverRatioStressedRate = config.CENTRAL_BANK_BTL_STRESSED_INTEREST;
         // Setup initial LTV policy thresholds
@@ -152,5 +157,10 @@ public class CentralBank {
      * Get the maximum fraction of mortgages to households that can go over the Loan-To-Value limit
      */
     double getMaxFractionOOMortgagesOverLTVLimit() { return maxFractionMortgagesOverLTVLimit; }
+
+
+    //----- Getter/setter methods -----//
+
+    double getBaseRate() { return baseRate; }
 
 }
