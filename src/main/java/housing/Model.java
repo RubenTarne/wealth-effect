@@ -231,8 +231,8 @@ public class Model {
 		construction.init();
 		houseSaleMarket.init();
 		houseRentalMarket.init();
-		bank.init();
-		centralBank.init();
+        centralBank.init();
+        bank.init();
         housingMarketStats.init();
         rentalMarketStats.init();
         householdStats.init();
