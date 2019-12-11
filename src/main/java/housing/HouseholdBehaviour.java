@@ -323,55 +323,68 @@ public class HouseholdBehaviour {
 	 *  is assumed to be the difference in rental price between the two qualities.
 	 *  @return true if we should buy a house, false if we should rent
 	 */
-    boolean decideRentOrPurchase(Household me, double purchasePrice) {
-        if(isPropertyInvestor()) {
-        	if (config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) { 
-            	Model.agentDecisionRecorder.rentOrBuy.println("true");
-        	}
-        	return(true);
-        }
-        MortgageAgreement mortgageApproval = Model.bank.requestApproval(me, purchasePrice,
-                decideDownPayment(me, purchasePrice), true, false);
-        int newHouseQuality = Model.housingMarketStats.getMaxQualityForPrice(purchasePrice);
-        if (newHouseQuality < 0) {
-            // if house household can't afford a house, record some basic facts DECISION DATA SH
-            if (config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
-            	Model.agentDecisionRecorder.recordCantAffordHouseRentOrPurchase(me, mortgageApproval, 
-            			purchasePrice, newHouseQuality, decideDownPayment(me, purchasePrice));
-            }
-        	return false; // can't afford a house anyway   
-        }
-        double costOfHouse = mortgageApproval.monthlyPayment*config.constants.MONTHS_IN_YEAR
+	boolean decideRentOrPurchase(Household me, double purchasePrice) {
+		if(isPropertyInvestor()) {
+			if (config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) { 
+				Model.agentDecisionRecorder.rentOrBuy.println("true");
+			}
+			return(true);
+		}
+		MortgageAgreement mortgageApproval = Model.bank.requestApproval(me, purchasePrice,
+				decideDownPayment(me, purchasePrice), true, false);
+		int newHouseQuality = Model.housingMarketStats.getMaxQualityForPrice(purchasePrice);
+		if (newHouseQuality < 0) {
+			// if house household can't afford a house, record some basic facts DECISION DATA SH
+			if (config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
+				Model.agentDecisionRecorder.recordCantAffordHouseRentOrPurchase(me, mortgageApproval, 
+						purchasePrice, newHouseQuality, decideDownPayment(me, purchasePrice));
+			}
+			return false; // can't afford a house anyway   
+		}
+		double costOfHouse = mortgageApproval.monthlyPayment*config.constants.MONTHS_IN_YEAR
 				- purchasePrice*getLongTermHPAExpectation();
-        double costOfRent = Model.rentalMarketStats.getExpAvSalePriceForQuality(newHouseQuality)
-                *config.constants.MONTHS_IN_YEAR;
-        double probabilityPlaceBidOnHousingMarket = sigma(config.SENSITIVITY_RENT_OR_PURCHASE*(costOfRent
-//        		*(1.0 + config.PSYCHOLOGICAL_COST_OF_RENTING) 
-        		- costOfHouse));
-        boolean placeBidOnHousingMarket = prng.nextDouble() < probabilityPlaceBidOnHousingMarket;
-        //continue to record AgentDecision data here. DECISION DATA SH The first part (bank data) is written in the
-        // bank.requestApproval method
-        if(config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
-        	Model.agentDecisionRecorder.recordDecisionRentOrPurchase(me, mortgageApproval, costOfHouse, costOfRent, 
-        			purchasePrice, decideDownPayment(me, purchasePrice), newHouseQuality, probabilityPlaceBidOnHousingMarket, 
-        			placeBidOnHousingMarket);
-        }
-        
-//        if(Model.householdStats.getnEmptyHouses()>100) { return false;}
-//         boolean fiftyFifty = prng.nextDouble() < 0.5;
-//         return fiftyFifty;
-//        return false;
-        return placeBidOnHousingMarket;
-        
-    }
+		double costOfRent = Model.rentalMarketStats.getExpAvSalePriceForQuality(newHouseQuality)
+				*config.constants.MONTHS_IN_YEAR;
+		double probabilityPlaceBidOnHousingMarket = sigma(config.SENSITIVITY_RENT_OR_PURCHASE*(costOfRent
+				//        		*(1.0 + config.PSYCHOLOGICAL_COST_OF_RENTING) 
+				- costOfHouse));
+		boolean placeBidOnHousingMarket = prng.nextDouble() < probabilityPlaceBidOnHousingMarket;
+		//continue to record AgentDecision data here. DECISION DATA SH The first part (bank data) is written in the
+		// bank.requestApproval method
+		if(config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
+			Model.agentDecisionRecorder.recordDecisionRentOrPurchase(me, mortgageApproval, costOfHouse, costOfRent, 
+					purchasePrice, decideDownPayment(me, purchasePrice), newHouseQuality, probabilityPlaceBidOnHousingMarket, 
+					placeBidOnHousingMarket);
+		}
+		// allow for some burning-in period, as in the first few periods all houses are empty
+		if(config.procyclicalRentalMarket && Model.getTime() > 500) {
+			if(Model.householdStats.getnEmptyHouses()>config.nEmptyHousesAboveWhichBidForRent) { return false;}
+		}
+		return placeBidOnHousingMarket;
+
+	}
 
 	/********************************************************
 	 * Decide how much to bid on the rental market
 	 * Source: Zoopla rental prices 2008-2009 (at Bank of England)
 	 ********************************************************/
-	double desiredRent(double monthlyGrossEmploymentIncome) {
-	    return monthlyGrossEmploymentIncome*config.DESIRED_RENT_INCOME_FRACTION;
-	}
+    double desiredRent(double monthlyGrossEmploymentIncome) {
+    	// allow for some burning-in period, as in the first few periods all houses are empty
+    	if (config.procyclicalRentalMarket && Model.getTime() > 500) {
+    		double fraction;
+    		// in an example y = 0.001 * x + (0.33-0.001*100)
+    		fraction = config.elasticityDesiredRent * Model.householdStats.getnEmptyHouses() + (config.DESIRED_RENT_INCOME_FRACTION
+    				-config.elasticityDesiredRent*config.nEmptyHousesDesiredRent);
+    		if(fraction<config.DESIRED_RENT_INCOME_FRACTION)fraction=config.DESIRED_RENT_INCOME_FRACTION;
+    		if(fraction>config.maxShareIncomeDesiredRent)fraction=config.maxShareIncomeDesiredRent;
+//    		System.out.println("Fraction is: " + fraction + "; HPI: " + Model.housingMarketStats.getHPI() + "; nEmptyHouses: " + Model.householdStats.getnEmptyHouses() + 
+//    				"; Model Time is: " + Model.getTime());
+    		
+    		return monthlyGrossEmploymentIncome*fraction;
+    	} else {
+    		return monthlyGrossEmploymentIncome*config.DESIRED_RENT_INCOME_FRACTION;
+    	}
+    }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Property investor behaviour

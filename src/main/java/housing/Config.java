@@ -67,11 +67,12 @@ public class Config {
 
 
     
-    // Decision equations
+    // Model version parameters
     boolean fixedInterestRates;					// bank uses a fixed interest rate as opposed to basing it on the difference between actual and target credit supply
     boolean procyclicalCreditConstraints;			// toggle flexible LTV, LTI and affordability ratios by the bank
     boolean allCreditConstraintsActive;				// if false, then only LTV is active, if true all other constraints are binding as well
     boolean ALTERNATE_CONSUMPTION_FUNCTION;			// make consumption solely dependent on income and wealth
+    boolean procyclicalRentalMarket;				// 
     
     // income inequality parameters
     boolean risingIncomeInequality; 				// implement rising employment income inequality
@@ -132,6 +133,11 @@ public class Config {
     double DESIRED_RENT_INCOME_FRACTION;    // Desired proportion of income to be spent on rent
     public double PSYCHOLOGICAL_COST_OF_RENTING;   // Annual psychological cost of renting
     double SENSITIVITY_RENT_OR_PURCHASE;    // Sensitivity parameter of the decision between buying and renting
+    int nEmptyHousesAboveWhichBidForRent;
+    int nEmptyHousesDesiredRent;
+    double elasticityDesiredRent;
+    double maxShareIncomeDesiredRent;
+    
     // Household behaviour parameters: general
 	double BANK_BALANCE_FOR_CASH_DOWNPAYMENT;   // If bankBalance/housePrice is above this, payment will be made fully in cash
     double HPA_EXPECTATION_FACTOR;              // Weight assigned to current trend when computing expectations
