@@ -141,6 +141,7 @@ public class Config {
     // Household behaviour parameters: general
 	double BANK_BALANCE_FOR_CASH_DOWNPAYMENT;   // If bankBalance/housePrice is above this, payment will be made fully in cash
     double HPA_EXPECTATION_FACTOR;              // Weight assigned to current trend when computing expectations
+    double HPA_EXPECTATION_CONST;           // Constant to be added or subtracted from previous trend when computing future HPI growth expectations
     public int HPA_YEARS_TO_CHECK;              // Number of years of the HPI record to check when computing the annual HPA
     // Household behaviour parameters: sale price reduction
     double P_SALE_PRICE_REDUCE;             // Monthly probability of reducing the price of a house on the market
