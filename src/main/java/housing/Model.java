@@ -41,6 +41,7 @@ public class Model {
     //------------------//
 
     public static Config                config;
+    public static MersenneTwister       prng;
     public static Construction		    construction;
     public static CentralBank		    centralBank;
     public static Bank 				    bank;
@@ -62,7 +63,6 @@ public class Model {
 
     static Government		            government;
 
-    private static MersenneTwister      prng;
     private static Demographics		    demographics;
     private static Recorder             recorder;
     private static String               configFileName;
