@@ -150,9 +150,7 @@ public class Config {
     double CONSUMPTION_FRACTION;            // Fraction of monthly budget for consumption (monthly budget = bank balance - minimum desired bank balance)
     public double ESSENTIAL_CONSUMPTION_FRACTION;  // Fraction of Government support necessarily spent monthly by all households as essential consumption
     // Household behaviour parameters: initial sale price
-    double SALE_MARKUP;                     // Initial markup over average price of same quality houses
-    double SALE_WEIGHT_MONTHS_ON_MARKET;    // Weight of the months-on-market effect
-    double SALE_EPSILON;                    // Standard deviation of the noise
+    String DATA_INITIAL_SALE_MARKUP_DIST;   // Address for probability distribution of logarithmic sale price mark-ups
     // Household behaviour parameters: buyer's desired expenditure
     double BUY_SCALE;                       // Scale, number of annual salaries the buyer is willing to spend for buying a house
     double BUY_WEIGHT_HPA;                  // Weight given to house price appreciation when deciding how much to spend for buying a house
