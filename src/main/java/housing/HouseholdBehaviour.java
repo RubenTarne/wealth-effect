@@ -265,8 +265,7 @@ public class HouseholdBehaviour {
 	 * @param housePrice the price of the house
      */
 	double decideDownPayment(Household me, double housePrice) {
-//		return 0.0;
-		if (me.getBankBalance() > housePrice*config.BANK_BALANCE_FOR_CASH_DOWNPAYMENT) {
+		if (me.getBankBalance() > housePrice*config.DOWNPAYMENT_BANK_BALANCE_FOR_CASH_SALE) {
 			return housePrice;
 		}
 		double downpayment;

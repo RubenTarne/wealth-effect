@@ -76,7 +76,6 @@ public class CreditSupply {
 	 */
 	public void recordLoan(Household h, MortgageAgreement approval, House house) {
 		double housePrice;
-		if(config.isMortgageDiagnosticsActive()) {
 			housePrice = approval.principal + approval.downPayment;
 			// TODO: Check with Arzu, Marc if monthly gross income used here should include total income or just employment income (as of now)
 			affordability = config.derivedParams.getAffordabilityDecay()*affordability +
@@ -102,6 +101,10 @@ public class CreditSupply {
 			if(approval.isFirstTimeBuyer) ftbCounter += 1;
 			if(approval.isBuyToLet) btlCounter += 1;
 		}
+		downpayments.addValue(approval.downPayment);
+		mortgageCounter += 1;
+		if(approval.isFirstTimeBuyer) ftbCounter += 1;
+		if(approval.isBuyToLet) btlCounter += 1;
 	}
 	
     //TODO: Check which of these functions should be kept and which removed!
