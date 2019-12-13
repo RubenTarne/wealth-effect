@@ -110,6 +110,8 @@ public class Model {
 
 	public static void main(String[] args) {
 
+        long start = System.nanoTime();
+
 	    // Handle input arguments from command line
         handleInputArguments(args);
 
@@ -223,6 +225,9 @@ public class Model {
         if(config.recordAgentData) {agentRecorder.finish();}
         if(config.recordAgentDecisions) {agentDecisionRecorder.finish();}
 
+        long elapsedTime = System.nanoTime() - start;
+        System.out.println("Computing time: " + (double)elapsedTime/1_000_000_000);
+
         //Stop the program when finished
 		System.exit(0);
 	}
@@ -260,7 +265,7 @@ public class Model {
         rentalMarketStats.postClearingRecord();
         // Stores household statistics after both regional markets have been cleared
         householdStats.record();
-        // Update credit supply statistics // TODO: Check what this actually does and if it should go elsewhere!
+        // Update credit supply statistics
         creditSupply.step();
 		// Update bank and interest rate for new mortgages
 		bank.step(Model.households.size());
