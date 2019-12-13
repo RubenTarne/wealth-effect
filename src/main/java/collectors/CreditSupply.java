@@ -76,31 +76,31 @@ public class CreditSupply {
 	 */
 	public void recordLoan(Household h, MortgageAgreement approval, House house) {
 		double housePrice;
-			housePrice = approval.principal + approval.downPayment;
-			// TODO: Check with Arzu, Marc if monthly gross income used here should include total income or just employment income (as of now)
-			affordability = config.derivedParams.getAffordabilityDecay()*affordability +
-                    (1.0-config.derivedParams.getAffordabilityDecay())*approval.monthlyPayment/
-                            (h.getMonthlyGrossEmploymentIncome());
-			// TODO: This condition is redundant, as the method is only called when approval.principal > 0
-			if(approval.principal > 0.0) {
-				if(approval.isBuyToLet) {
-					btl_ltv.addValue(100.0*approval.principal/housePrice);
-					double icr = Model.rentalMarketStats.getExpAvFlowYield()*approval.purchasePrice/
-                            (approval.principal*Model.centralBank.getInterestCoverRatioStressedRate(false));
-					btl_icr.addValue(icr);
-				} else {
-					oo_ltv.addValue(100.0*approval.principal/housePrice);
-					oo_lti.addValue(approval.principal/h.getAnnualGrossEmploymentIncome());
-				}
-				downpayments.addValue(approval.downPayment);
+		housePrice = approval.principal + approval.downPayment;
+		// TODO: Check with Arzu, Marc if monthly gross income used here should include total income or just employment income (as of now)
+		affordability = config.derivedParams.getAffordabilityDecay()*affordability +
+				(1.0-config.derivedParams.getAffordabilityDecay())*approval.monthlyPayment/
+				(h.getMonthlyGrossEmploymentIncome());
+		// TODO: This condition is redundant, as the method is only called when approval.principal > 0
+		if(approval.principal > 0.0) {
+			if(approval.isBuyToLet) {
+				btl_ltv.addValue(100.0*approval.principal/housePrice);
+				double icr = Model.rentalMarketStats.getExpAvFlowYield()*approval.purchasePrice/
+						(approval.principal*Model.centralBank.getInterestCoverRatioStressedRate(false));
+				btl_icr.addValue(icr);
+			} else {
+				oo_ltv.addValue(100.0*approval.principal/housePrice);
+				oo_lti.addValue(approval.principal/h.getAnnualGrossEmploymentIncome());
 			}
-			mortgageCounter += 1;
-			newDownPayment += approval.downPayment;
-			newPrincipalIssuedCounter += approval.principal;
-			
-			if(approval.isFirstTimeBuyer) ftbCounter += 1;
-			if(approval.isBuyToLet) btlCounter += 1;
+			downpayments.addValue(approval.downPayment);
 		}
+		mortgageCounter += 1;
+		newDownPayment += approval.downPayment;
+		newPrincipalIssuedCounter += approval.principal;
+
+		if(approval.isFirstTimeBuyer) ftbCounter += 1;
+		if(approval.isBuyToLet) btlCounter += 1;
+
 		downpayments.addValue(approval.downPayment);
 		mortgageCounter += 1;
 		if(approval.isFirstTimeBuyer) ftbCounter += 1;
