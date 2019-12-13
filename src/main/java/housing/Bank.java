@@ -122,7 +122,7 @@ public class Bank {
 	/**
 	 * Get the interest rate on mortgages.
 	 */
-	public double getMortgageInterestRate() { return centralBank.getBaseRate() + interestSpread; }
+	private double getMortgageInterestRate() { return baseRate + interestSpread; }
 	
 
 	/**
@@ -164,9 +164,8 @@ public class Bank {
 	 * @param isHome True if household h plans to live in the house (non-BTL mortgage)
 	 * @return The MortgageApproval object, or NULL if the mortgage is declined
 	 */
-	MortgageAgreement requestLoan(Household h, double housePrice, double desiredDownPayment, boolean isHome,
-			House house) {
-		MortgageAgreement approval = requestApproval(h, housePrice, desiredDownPayment, isHome, true);
+	MortgageAgreement requestLoan(Household h, double housePrice, double desiredDownPayment, boolean isHome) {
+		MortgageAgreement approval = requestApproval(h, housePrice, desiredDownPayment, isHome);
 		if(approval == null) return(null);
 		// --- if all's well, go ahead and arrange mortgage
 		supplyVal += approval.principal;

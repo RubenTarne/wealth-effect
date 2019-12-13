@@ -116,8 +116,8 @@ public class CoreIndicators {
 	
 	// Owner-occupier mortgage LTI ratio (mean above the median)
 	double getOwnerOccupierLTIMeanAboveMedian() {
-        if (Model.creditSupply.oo_lti.getN() > 0) {
-            return Model.creditSupply.oo_lti.apply(new MeanAboveMedian());
+        if (Model.creditSupply.getOO_lti().getN() > 0) {
+            return Model.creditSupply.getOO_lti().apply(new MeanAboveMedian());
         } else {
             return 0.0;
         }
@@ -125,8 +125,8 @@ public class CoreIndicators {
 
     // Owner-occupier mortage LTV ratio (mean above the median)
 	double getOwnerOccupierLTVMeanAboveMedian() {
-        if (Model.creditSupply.oo_ltv.getN() > 0) {
-            return Model.creditSupply.oo_ltv.apply(new MeanAboveMedian());
+        if (Model.creditSupply.getOO_ltv().getN() > 0) {
+            return Model.creditSupply.getOO_ltv().apply(new MeanAboveMedian());
         } else {
             return 0.0;
         }
@@ -134,8 +134,8 @@ public class CoreIndicators {
 
     // Buy-to-let loan-to-value ratio (mean)
 	double getBuyToLetLTVMean() {
-        if (Model.creditSupply.btl_ltv.getN() > 0) {
-            return Model.creditSupply.btl_ltv.getMean();
+        if (Model.creditSupply.getBTL_ltv().getN() > 0) {
+            return Model.creditSupply.getBTL_ltv().getMean();
         } else {
             return 0.0;
         }
@@ -143,11 +143,11 @@ public class CoreIndicators {
 
 	// Annualised household credit growth (credit growth: rate of change of credit, current month new credit divided by
     //  new credit in previous step)
-	double getHouseholdCreditGrowth() { return Model.creditSupply.netCreditGrowth*12.0*100.0; }
+	double getHouseholdCreditGrowth() { return Model.creditSupply.getNetCreditGrowth()*12.0*100.0; }
 
 	// Household mortgage debt to income ratio (%)
 	double getDebtToIncome() {
-		return 100.0*(Model.creditSupply.totalBTLCredit + Model.creditSupply.totalOOCredit)
+		return 100.0*(Model.creditSupply.getTotalBTLCredit() + Model.creditSupply.getTotalOOCredit())
                 /(Model.householdStats.getOwnerOccupierAnnualisedTotalIncome()
                 + Model.householdStats.getActiveBTLAnnualisedTotalIncome()
                 + Model.householdStats.getNonOwnerAnnualisedTotalIncome());
@@ -155,12 +155,12 @@ public class CoreIndicators {
 
 	// Household debt to income ratio (owner-occupier mortgages only) (%)
 	double getOODebtToIncome() {
-        return 100.0*Model.creditSupply.totalOOCredit/Model.householdStats.getOwnerOccupierAnnualisedTotalIncome();
+        return 100.0*Model.creditSupply.getTotalOOCredit()/Model.householdStats.getOwnerOccupierAnnualisedTotalIncome();
     }
 
 	// Number of mortgage approvals per month (scaled for 26.5 million households)
 	int getMortgageApprovals() {
-		return (int)(Model.creditSupply.nApprovedMortgages*config.getUKHouseholds()
+		return (int)(Model.creditSupply.getnApprovedMortgages()*config.getUKHouseholds()
                 /Model.households.size());
 	}
 
@@ -172,13 +172,13 @@ public class CoreIndicators {
 
 	// Number of advances to first-time-buyers (scaled for 26.5 million households)
 	int getAdvancesToFTBs() {
-		return (int)(Model.creditSupply.nFTBMortgages*config.getUKHouseholds()
+		return (int)(Model.creditSupply.getnFTBMortgages()*config.getUKHouseholds()
                 /Model.households.size());
 	}
 
     // Number of advances to buy-to-let purchasers (scaled for 26.5 million households)
 	int getAdvancesToBTL() {
-		return (int)(Model.creditSupply.nBTLMortgages*config.getUKHouseholds()
+		return (int)(Model.creditSupply.getnBTLMortgages()*config.getUKHouseholds()
                 /Model.households.size());
 	}
 
@@ -190,7 +190,7 @@ public class CoreIndicators {
 	// household sector have available for spending or saving after income distribution measures 
 	// (for example, taxes, social contributions and benefits) have taken effect." 
 	// TODO: therefore, I use Net Income of ALL households
-	public double getPriceToIncome() {
+	double getPriceToIncome() {
 	    // TODO: Also, why to use HPI*HPIReference? Why not average house price?
 		return(Model.housingMarketStats.getHPI()*config.derivedParams.getHPIReference()
 				*(Model.households.size())

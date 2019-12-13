@@ -93,7 +93,7 @@ public class Model {
         transactionRecorder = new TransactionRecorder(outputFolder);
         offerAndBidRecorder = new OfferAndBidRecorder(outputFolder);
         microDataRecorder = new MicroDataRecorder(outputFolder);
-        creditSupply = new collectors.CreditSupply(outputFolder);
+        creditSupply = new collectors.CreditSupply();
         coreIndicators = new collectors.CoreIndicators();
         householdStats = new collectors.HouseholdStats();
 //        housingMarketStats = new collectors.HousingMarketStats(houseSaleMarket);
