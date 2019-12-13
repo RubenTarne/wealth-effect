@@ -24,8 +24,8 @@ public class CreditSupply {
     private DescriptiveStatistics btl_ltv;
     private DescriptiveStatistics btl_icr;
     private DescriptiveStatistics downpayments; // TODO: This quantity only includes downpayments when the principal of the loan is > 0
-    private double totalBTLCredit = 0.0;        // Buy to let mortgage credit
-    private double totalOOCredit = 0.0;         // Owner-occupier mortgage credit
+    public double totalBTLCredit = 0.0;        // Buy to let mortgage credit
+    public double totalOOCredit = 0.0;         // Owner-occupier mortgage credit
     private double netCreditGrowth;             // Rate of change of credit per month as percentage
     private double affordability = 0.0;         // Affordability coefficient
     private int mortgageCounter;                // Counter for total number of new mortgages
@@ -34,6 +34,17 @@ public class CreditSupply {
     private int nFTBMortgages;                  // Total number of new first time buyer mortgages
     private int btlCounter;                     // Counter for total number of new buy to let mortgages
     private int nBTLMortgages;                  // Total number of new buy to let mortgages
+
+    public double oldTotalCredit;
+	
+	public double totalBTLDownPayment = 0.0;
+	public double totalOODownPayment = 0.0;
+	public double netDownPaymentGrowth;
+	public double oldTotalDownPayment;
+	public double newDownPayment;
+	public double newDownPaymentsApproved;
+	private double newPrincipalIssuedCounter;
+	private double newPrincipalIssued;	
 
     //------------------------//
     //----- Constructors -----//

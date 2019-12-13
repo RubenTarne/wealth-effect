@@ -122,7 +122,7 @@ public class Bank {
 	/**
 	 * Get the interest rate on mortgages.
 	 */
-	private double getMortgageInterestRate() { return baseRate + interestSpread; }
+	private double getMortgageInterestRate() { return centralBank.getBaseRate() + interestSpread; }
 	
 
 	/**
@@ -165,13 +165,13 @@ public class Bank {
 	 * @return The MortgageApproval object, or NULL if the mortgage is declined
 	 */
 	MortgageAgreement requestLoan(Household h, double housePrice, double desiredDownPayment, boolean isHome) {
-		MortgageAgreement approval = requestApproval(h, housePrice, desiredDownPayment, isHome);
+		MortgageAgreement approval = requestApproval(h, housePrice, desiredDownPayment, isHome, true);
 		if(approval == null) return(null);
 		// --- if all's well, go ahead and arrange mortgage
 		supplyVal += approval.principal;
 		if(approval.principal > 0.0) {
 			mortgages.add(approval);
-			Model.creditSupply.recordLoan(h, approval, house);
+			Model.creditSupply.recordLoan(h, approval);
 
 			// check if loans would be over LTI and/or LTV limit and count them
 			if(isHome) {
