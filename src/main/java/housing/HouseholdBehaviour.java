@@ -435,9 +435,10 @@ public class HouseholdBehaviour {
 		double leverage = currentMarketPrice / equity;
         // ...find the expected rental yield of this property as its current rental price (under current average
         // occupancy) divided by its current (fair market value) sale price
-        double currentRentalYield = h.getRentalRecord().getPrice() * config.constants.MONTHS_IN_YEAR
-                * rentalMarketStats.getAvOccupancyForQuality(h.getQuality()) / currentMarketPrice;
-		double currentRentalYield = Model.rentalMarketStats.getAvFlowYieldForQuality(h.getQuality());
+//        double currentRentalYield = h.getRentalRecord().getPrice() * config.constants.MONTHS_IN_YEAR
+//                * rentalMarketStats.getAvOccupancyForQuality(h.getQuality()) / currentMarketPrice;
+		double currentRentalYield = Model.rentalMarketStats.getAvFlowYieldForQuality(h.getQuality()) * 
+				rentalMarketStats.getAvOccupancyForQuality(h.getQuality()) / currentMarketPrice;;
         // ...find the mortgage rate (pounds paid a year per pound of equity)
 		double mortgageRate = mortgage.nextPayment()*config.constants.MONTHS_IN_YEAR/equity;
         // ...finally, find expected equity yield, or yield on equity

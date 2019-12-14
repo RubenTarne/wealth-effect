@@ -612,7 +612,7 @@ public class Household implements IHouseOwner {
      ********************************************************/
     private void bidForAHome() {
         // Find household's desired housing expenditure
-        double desiredPurchasePrice = behaviour.getDesiredPurchasePrice(monthlyGrossEmploymentIncome);
+        double desiredPurchasePrice = behaviour.getDesiredPurchasePrice(annualGrossEmploymentIncome);
 
         // Cap this expenditure to the maximum mortgage available to the household
         double price = Math.min(desiredPurchasePrice, Model.bank.getMaxMortgage(this, true, false));
