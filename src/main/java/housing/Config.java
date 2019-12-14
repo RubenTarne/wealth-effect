@@ -164,7 +164,6 @@ public class Config {
     double BUY_WEIGHT_HPA;                  // Weight given to house price appreciation when deciding how much to spend
     double BUY_MU;                          // Mean of the normal noise used to create a log-normal variate, which is then used as a multiplicative noise
     double BUY_SIGMA;                       // Standard deviation of the normal noise used to create a log-normal variate, which is then used as a multiplicative noise
-    // Household behaviour parameters: rent reduction
     double RENT_REDUCTION;                      // Percentage reduction of demanded rent for every month the property is in the market, not rented
     // Household behaviour parameters: downpayment
     double DOWNPAYMENT_BANK_BALANCE_FOR_CASH_SALE;  // If bankBalance/housePrice is above this, payment will be made fully in cash
