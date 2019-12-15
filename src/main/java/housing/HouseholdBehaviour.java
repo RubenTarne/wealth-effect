@@ -256,6 +256,7 @@ public class HouseholdBehaviour {
      */
     double getInitialRentPrice(int quality) {
         return rentMarkUpPdf.nextDouble(prng) * rentalMarketStats.getExpAvSalePriceForQuality(quality);
+//        return rentalMarketStats.getExpAvSalePriceForQuality(quality);
     }
 
 	/**
@@ -569,7 +570,7 @@ public class HouseholdBehaviour {
      *
      * @return Expectation of HPI in one year's time divided by today's HPI
      */
-	private double getLongTermHPAExpectation() {
+	public double getLongTermHPAExpectation() {
 		return housingMarketStats.getLongTermHPA() * config.HPA_EXPECTATION_FACTOR + config.HPA_EXPECTATION_CONST;
     }
 
