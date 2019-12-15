@@ -256,6 +256,7 @@ public class HouseholdBehaviour {
      */
     double getInitialRentPrice(int quality) {
         return rentMarkUpPdf.nextDouble(prng) * rentalMarketStats.getExpAvSalePriceForQuality(quality);
+//        return rentalMarketStats.getExpAvSalePriceForQuality(quality);
     }
 
 	/**
