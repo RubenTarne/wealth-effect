@@ -26,7 +26,7 @@ public class TransactionRecorder {
     //----- Methods -----//
     //-------------------//
 
-    public void openSingleRunFiles(int nRun) {
+    public void openSingleRunFiles(int nRun, boolean recordTransations, boolean recordNBidUpFrequency) {
         // Try opening output files and write first row header with column names
         try {
             outfile = new PrintWriter(outputFolder + "Transactions-run" + nRun + ".csv", "UTF-8");
@@ -88,5 +88,4 @@ public class TransactionRecorder {
 		}
 	}
 
-	public void finishRun() { outfile.close(); }
 }
