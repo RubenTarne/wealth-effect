@@ -74,6 +74,9 @@ public class Config {
     boolean ALTERNATE_CONSUMPTION_FUNCTION;			// make consumption solely dependent on income and wealth
     boolean procyclicalRentalMarket;				// 
     
+    // GER version 
+    boolean GERVersion;			
+    
     // income inequality parameters
     boolean risingIncomeInequality; 				// implement rising employment income inequality
     double yearlyInequalityIncrease; 				// percentage by which the employment income inequality rises per year
