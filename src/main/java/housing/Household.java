@@ -65,7 +65,6 @@ public class Household implements IHouseOwner {
     private double							airBnBRentalIncome; //PAUL rental income by AirBnB investors
     private int								nAirBnBRentedOut; // PAUL keep track of the number of airbnbs rented out
     
-    
     //------------------------//
     //----- Constructors -----//
     //------------------------//
@@ -586,22 +585,30 @@ public class Household implements IHouseOwner {
      * @return The rental agreement, for passing it to the landlord
      */
     RentalAgreement completeHouseRental(HouseOfferRecord sale) {
-        // Check if renter same as owner, if renter already has a home and if the house is already occupied
-        if (sale.getHouse().owner == this) System.out.println("Strange: I'm trying to rent a house I own!");
-        if(home != null) System.out.println("Strange: I'm renting a house but not homeless");
-        if(sale.getHouse().resident != null) System.out.println("Strange: tenant moving into an occupied house");
-        // Create a new rental agreement with the agreed price and with a random length between a minimum and a maximum
-        RentalAgreement rent = new RentalAgreement();
-        rent.monthlyPayment = sale.getPrice();
-        rent.nPayments = config.TENANCY_LENGTH_AVERAGE + prng.nextInt(2*config.TENANCY_LENGTH_EPSILON + 1)
-                - config.TENANCY_LENGTH_EPSILON;
-        // Add the rental agreement to the house payments object of the tenant household
-        housePayments.put(sale.getHouse(), rent);
-        // Set the house as the tenant's home and the tenant as the house's resident
-        home = sale.getHouse();
-        sale.getHouse().resident = this;
-        // Return the rental agreement for passing it to the landlord
-        return rent;
+    	// Check if renter same as owner, if renter already has a home and if the house is already occupied
+    	if (sale.getHouse().owner == this) System.out.println("Strange: I'm trying to rent a house I own!");
+    	if(home != null) System.out.println("Strange: I'm renting a house but not homeless");
+    	if(sale.getHouse().resident != null) System.out.println("Strange: tenant moving into an occupied house");
+    	// Create a new rental agreement with the agreed price and with a random length between a minimum and a maximum
+    	RentalAgreement rent = new RentalAgreement();
+    	rent.monthlyPayment = sale.getPrice();
+    	rent.nPayments = config.TENANCY_LENGTH_AVERAGE + prng.nextInt(2*config.TENANCY_LENGTH_EPSILON + 1)
+    	- config.TENANCY_LENGTH_EPSILON;
+
+    	// the German rental market has high standard deviations, leading to possibly negative nPayments.
+    	// additionally, contracts are not shorter than 1 year.   
+    	if(config.GERVersion && rent.nPayments < 12) {
+    		//        	double  length = config.TENANCY_LENGTH_AVERAGE + prng.nextGaussian() * config.TENANCY_LENGTH_EPSILON;
+    		//        			rent.nPayments = (int) Math.round(length);
+    		rent.nPayments = 12;
+    	}
+    	// Add the rental agreement to the house payments object of the tenant household
+    	housePayments.put(sale.getHouse(), rent);
+    	// Set the house as the tenant's home and the tenant as the house's resident
+    	home = sale.getHouse();
+    	sale.getHouse().resident = this;
+    	// Return the rental agreement for passing it to the landlord
+    	return rent;
     }
 
     /********************************************************
