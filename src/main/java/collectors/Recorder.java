@@ -56,6 +56,8 @@ public class Recorder {
     private PrintWriter newCredit;
     private PrintWriter prinRepRegular;
     private PrintWriter prinRepSale;
+    private PrintWriter ooLTVAboveMedian;
+    private PrintWriter ooLTV;
     
     //------------------------//
     //----- Constructors -----//
@@ -125,6 +127,10 @@ public class Recorder {
                 housePriceGrowth = new PrintWriter(outputFolder + "coreIndicator-housePriceGrowth.csv",
                         "UTF-8");
                 interestRateSpread = new PrintWriter(outputFolder + "coreIndicator-interestRateSpread.csv",
+                        "UTF-8");
+                ooLTVAboveMedian = new PrintWriter(outputFolder + "coreIndicator-ooLTVAboveMedian.csv",
+                        "UTF-8");
+                ooLTV = new PrintWriter(outputFolder + "coreIndicator-ooLTV.csv",
                         "UTF-8");
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 e.printStackTrace();
@@ -226,6 +232,8 @@ public class Recorder {
                 rentalYield.print(", ");
                 housePriceGrowth.print(", ");
                 interestRateSpread.print(", ");
+                ooLTVAboveMedian.print(", ");
+                ooLTV.print(", ");
             }
             // Write core indicators results
             HPI.print(Model.coreIndicators.getHPI());
@@ -255,6 +263,9 @@ public class Recorder {
             rentalYield.print(Model.coreIndicators.getAvStockYield());
             housePriceGrowth.print(Model.coreIndicators.getQoQHousePriceGrowth());
             interestRateSpread.print(Model.coreIndicators.getInterestRateSpread());
+            ooLTVAboveMedian.print(Model.coreIndicators.getOwnerOccupierLTVMeanAboveMedian());
+            ooLTV.print(Model.coreIndicators.getOwnerOccupierLTVMean());
+            
         }
 
         // Write general output results to output file
@@ -405,6 +416,8 @@ public class Recorder {
             rentalYield.println("");
             housePriceGrowth.println("");
             interestRateSpread.println("");
+            ooLTVAboveMedian.println("");
+            ooLTV.println("");
         }
         if (recordOutfile) outfile.close();
         if (recordQualityBandPrice) {
@@ -442,6 +455,8 @@ public class Recorder {
             rentalYield.close();
             housePriceGrowth.close();
             interestRateSpread.close();
+            ooLTVAboveMedian.close();
+            ooLTV.close();
         }
     }
 }

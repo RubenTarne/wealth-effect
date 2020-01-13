@@ -131,6 +131,15 @@ public class CoreIndicators {
             return 0.0;
         }
 	}
+	
+	// Owner-occupier mortgage LTV ratio (mean)
+	double getOwnerOccupierLTVMean() {
+        if (Model.creditSupply.getOO_ltv().getN() > 0) {
+            return Model.creditSupply.getOO_ltv().getMean();
+        } else {
+            return 0.0;
+        }
+    }
 
     // Buy-to-let loan-to-value ratio (mean)
 	double getBuyToLetLTVMean() {
