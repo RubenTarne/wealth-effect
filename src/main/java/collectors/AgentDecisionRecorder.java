@@ -163,7 +163,7 @@ public class AgentDecisionRecorder{
     			+ ", " + String.format("%.2f", me.getMonthlyGrossTotalIncome())
     			+ ", " + String.format("%.2f", me.getEquityPosition())
     			+ ", " + String.format("%.2f", costOfHouse)
-    			+ ", " + String.format("%.2f", costOfRent*(1.0 + config.PSYCHOLOGICAL_COST_OF_RENTING))
+    			+ ", " + String.format("%.2f", costOfRent)
     			+ ", " + String.format("%.2f", mortgageApproval.monthlyPayment)
     			+ ", " + String.format("%.2f", purchasePrice)
     			+ ", " + String.format("%.2f", desiredDownPayment)
