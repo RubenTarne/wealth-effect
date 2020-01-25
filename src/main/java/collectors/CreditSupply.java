@@ -144,9 +144,6 @@ public class CreditSupply {
 		if(approval.isBuyToLet) btlCounter += 1;
 
 		downpayments.addValue(approval.downPayment);
-		mortgageCounter += 1;
-		if(approval.isFirstTimeBuyer) ftbCounter += 1;
-		if(approval.isBuyToLet) btlCounter += 1;
 	}
 
 	private void setArchiveLength(int archiveLength) {
