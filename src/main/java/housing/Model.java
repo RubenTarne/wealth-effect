@@ -141,6 +141,7 @@ public class Model {
 
             // For each simulation, open files for writing single-run results
             recorder.openSingleRunFiles(nSimulation, config.recordOutfile, config.recordQualityBandPrice, config.N_QUALITY);
+            if (config.recordTransactions) { transactionRecorder.openSingleRunFiles(nSimulation); }
             if (config.recordOffersAndBids) { offerAndBidRecorder.openSingleRunFiles(nSimulation); }
             if (config.recordBankBalance || config.recordNHousesOwned 
             		|| config.recordHousingWealth || config.recordSavingRate
@@ -201,6 +202,7 @@ public class Model {
 
 			// Finish each simulation within the recorders (closing single-run files, changing line in multi-run files)
             recorder.finishRun(config.recordOutfile, config.recordCoreIndicators, config.recordQualityBandPrice);
+            if (config.recordTransactions) transactionRecorder.finishRun();
             if (config.recordOffersAndBids) offerAndBidRecorder.finishRun();
             if (config.recordBankBalance || config.recordNHousesOwned) {
                 microDataRecorder.finishRun(config.recordBankBalance, config.recordHousingWealth,
