@@ -24,8 +24,9 @@ public class CentralBank {
     // LTI policy thresholds
     private double      firstTimeBuyerLTILimit; // Loan-To-Income upper limit for first-time buying mortgages
     private double      ownerOccupierLTILimit; // Loan-To-Income upper limit for owner-occupying mortgages
+    private double 		BTLLTILimit; // Loan-To-Income internal upper limit for BTL mortgages (if config.activeBTLLTI = true)
     private double      maxFractionOOMortgagesOverLTILimit; // Fraction of owner-occupying mortgages allowed to exceed the Loan-To-Income limit
-
+    
     // ICR policy thresholds
     private double interestCoverRatioLimit; // Ratio of expected rental yield over interest monthly payment under stressed interest conditions
     private double interestCoverRatioStressedRate; // Stressed interest rate used for Interest-Cover-Ratio assessments
@@ -46,6 +47,7 @@ public class CentralBank {
         // Set initial LTI policy thresholds
         firstTimeBuyerLTILimit = config.CENTRAL_BANK_MAX_FTB_LTI;
         ownerOccupierLTILimit = config.CENTRAL_BANK_MAX_OO_LTI;
+        BTLLTILimit = config.CENTRAL_BANK_MAX_BTL_LTI;
         maxFractionOOMortgagesOverLTILimit = config.CENTRAL_BANK_FRACTION_OVER_MAX_LTI;
         // Set initial ICR policy thresholds
         interestCoverRatioLimit = config.CENTRAL_BANK_MAX_ICR;
@@ -88,17 +90,29 @@ public class CentralBank {
      * @return Loan-To-Income ratio limit applicable to the household
      */
 	double getLoanToIncomeLimit(boolean isFirstTimeBuyer, boolean isHome) {
-        if (isHome) {
-            if (isFirstTimeBuyer) {
-                return firstTimeBuyerLTILimit;
-            } else {
-                return ownerOccupierLTILimit;
-            }
-        } else {
-            System.out.println("Strange: The Central Bank is trying to impose a Loan-To-Income limit on a Buy-To-Let" +
-                        "investor!");
-            return 0.0; // Dummy return statement
-        }
+		if(config.activeBTLLTI) {
+			if (isHome) {
+				if (isFirstTimeBuyer) {
+					return firstTimeBuyerLTILimit;
+				} else {
+					return ownerOccupierLTILimit;
+				}
+			} else {
+				return BTLLTILimit; 
+			}
+		} else {
+			if (isHome) {
+				if (isFirstTimeBuyer) {
+					return firstTimeBuyerLTILimit;
+				} else {
+					return ownerOccupierLTILimit;
+				}
+			} else {
+				System.out.println("Strange: The Central Bank is trying to impose a Loan-To-Income limit on a Buy-To-Let" +
+						"investor!");
+				return 0.0; // Dummy return statement
+			}
+		}
 	}
 
     /**

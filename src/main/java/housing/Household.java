@@ -27,6 +27,7 @@ public class Household implements IHouseOwner {
     private double              annualGrossEmploymentIncome;
     private double              monthlyGrossEmploymentIncome;
     private double 				monthlyDisposableIncome;
+    private double				annualGrossTotalIncome; // this is needed config.activeBTLLTI = true. BTL income can change in a period, but income for LTI needs to be stable.
     private double				equityPosition;
     private double				consumption;
     private double				incomeConsumption;
@@ -128,6 +129,7 @@ public class Household implements IHouseOwner {
         // Update annual and monthly gross employment income
         annualGrossEmploymentIncome = data.EmploymentIncome.getAnnualGrossEmploymentIncome(age, incomePercentile);
         monthlyGrossEmploymentIncome = annualGrossEmploymentIncome/config.constants.MONTHS_IN_YEAR;
+        if(config.activeBTLLTI) annualGrossTotalIncome = getAnnualGrossTotalIncome();
 //        // PAUL calculate the Airbnb income
 //        if(behaviour.isAirBnBInvestor()) airBnBRentalIncome = calculateAirBnBIncome();
 //        
@@ -1086,6 +1088,10 @@ public class Household implements IHouseOwner {
 
 	public double getAirBnBRentalIncome() {
 		return airBnBRentalIncome;
+	}
+	
+	public double getBTLLTIAnnualGrossTotalIncome() {
+		return annualGrossTotalIncome;
 	}
 	
 }

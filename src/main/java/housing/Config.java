@@ -193,12 +193,14 @@ public class Config {
     double BANK_MAX_BTL_LTV;                // Maximum LTV ratio that the private bank would allow for BTL investors
     double BANK_MAX_FTB_LTI;                // Maximum LTI ratio that the private bank would allow for first-time-buyers (private bank's hard limit)
     double BANK_MAX_OO_LTI;                 // Maximum LTI ratio that the private bank would allow for owner-occupiers (private bank's hard limit)
-
+    boolean activeBTLLTI;
+    double BANK_MAX_BTL_LTI;
 
     // Central bank parameters
     double CENTRAL_BANK_INITIAL_BASE_RATE;      // Central Bank initial base rate
     double CENTRAL_BANK_MAX_FTB_LTI;		    // Maximum LTI ratio that the bank would allow for first-time-buyers when not regulated
     double CENTRAL_BANK_MAX_OO_LTI;		        // Maximum LTI ratio that the bank would allow for owner-occupiers when not regulated
+    double CENTRAL_BANK_MAX_BTL_LTI;
     double CENTRAL_BANK_FRACTION_OVER_MAX_LTI;  // Maximum fraction of mortgages that the bank can give over the LTI ratio limit
     double CENTRAL_BANK_AFFORDABILITY_COEFF;    // Maximum fraction of the household's income to be spent on mortgage repayments under stressed conditions
     double CENTRAL_BANK_BTL_STRESSED_INTEREST;  // Interest rate under stressed condition for BTL investors when calculating interest coverage ratios (ICR)
