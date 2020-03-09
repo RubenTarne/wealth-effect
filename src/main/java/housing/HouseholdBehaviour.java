@@ -571,7 +571,7 @@ public class HouseholdBehaviour {
      * @return Expectation of HPI in one year's time divided by today's HPI
      */
 	public double getLongTermHPAExpectation() {
-		return Model.housingMarketStats.getLongTermHPA() * config.HPA_EXPECTATION_FACTOR + config.HPA_EXPECTATION_CONST;
+		return housingMarketStats.getLongTermHPA() * config.HPA_EXPECTATION_FACTOR + config.HPA_EXPECTATION_CONST;
     }
 
     public double getBTLCapGainCoefficient() { return BTLCapGainCoefficient; }
