@@ -232,6 +232,9 @@ public class Config {
     // Data addresses: Demographics
     public String DATA_AGE_DISTRIBUTION;            // Address for data on the age distribution of household representative persons
 
+    // TEST - WP1 - deactivated transactions - implement portfolio-channel analysis
+    public int startTimeDeactivateTransactions; 						// the model deactivates all transaction-related behaviour from this model time on
+    
     /** Construction of objects to contain derived parameters and constants **/
 
     // Create object containing all constants
