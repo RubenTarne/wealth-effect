@@ -161,41 +161,44 @@ public class Household implements IHouseOwner {
     	Entry<House, PaymentAgreement> entry;
     	House h;
     	PaymentAgreement payment;
-    	// Iterate over these house-paymentAgreement pairs...
-    	while (paymentIt.hasNext()) {
-    		entry = paymentIt.next();
-    		h = entry.getKey();
-    		payment = entry.getValue();
-    		// ...if the household is the owner of the house, then manage it
-    		if (h.owner == this) {
-    			manageHouse(h);
-    			// ...otherwise, if the household is not the owner nor the resident, then it is an old debt due to
-    			// the household's inability to pay the remaining principal off after selling a property...
-    		} else if (h.resident != this) {
-    			MortgageAgreement mortgage = (MortgageAgreement) payment;
-    			// ...remove this type of houses from payments as soon as the household pays the debt off
-    			if ((payment.nPayments == 0) & (mortgage.principal == 0.0)) {
-    				paymentIt.remove();
-    			}
-    		}
-    	}
-    	// Make housing decisions depending on current housing state
-    	if (isInSocialHousing()) {
-    		bidForAHome(); // When BTL households are born, they enter here the first time and until they manage to buy a home!
-    	} else if (isRenting()) {
-    		if (housePayments.get(home).nPayments == 0) { // End of rental period for this tenant
-    			endTenancy();
-    			bidForAHome();
-    		}            
-    	} else if (behaviour.isPropertyInvestor()) { // Only BTL investors who already own a home enter here
-    		// BTL investors always bid the price corresponding to the maximum mortgage they could get
-    		double price = Model.bank.getMaxMortgage(this, false, false);
-    		Model.householdStats.countBTLBidsAboveExpAvSalePrice(price);
-    		if (behaviour.decideToBuyInvestmentProperty(this)) {
-    			Model.houseSaleMarket.bid(this, price, true);
-    		}
-    	} else if (!isHomeowner()){
-    		System.out.println("Strange: this household is not a type I recognize");
+    	//TODO TEST -> deactivate the housing market, basically....
+    	if (Model.getTime() < config.startTimeDeactivateTransactions) {
+        	// Iterate over these house-paymentAgreement pairs...
+        	while (paymentIt.hasNext()) {
+        		entry = paymentIt.next();
+        		h = entry.getKey();
+        		payment = entry.getValue();
+        		// ...if the household is the owner of the house, then manage it
+        		if (h.owner == this) {
+        			manageHouse(h);
+        			// ...otherwise, if the household is not the owner nor the resident, then it is an old debt due to
+        			// the household's inability to pay the remaining principal off after selling a property...
+        		} else if (h.resident != this) {
+        			MortgageAgreement mortgage = (MortgageAgreement) payment;
+        			// ...remove this type of houses from payments as soon as the household pays the debt off
+        			if ((payment.nPayments == 0) & (mortgage.principal == 0.0)) {
+        				paymentIt.remove();
+        			}
+        		}
+        	}
+        	// Make housing decisions depending on current housing state
+        	if (isInSocialHousing()) {
+        		bidForAHome(); // When BTL households are born, they enter here the first time and until they manage to buy a home!
+        	} else if (isRenting()) {
+        		if (housePayments.get(home).nPayments == 0) { // End of rental period for this tenant
+        			endTenancy();
+        			bidForAHome();
+        		}            
+        	} else if (behaviour.isPropertyInvestor()) { // Only BTL investors who already own a home enter here
+        		// BTL investors always bid the price corresponding to the maximum mortgage they could get
+        		double price = Model.bank.getMaxMortgage(this, false, false);
+        		Model.householdStats.countBTLBidsAboveExpAvSalePrice(price);
+        		if (behaviour.decideToBuyInvestmentProperty(this)) {
+        			Model.houseSaleMarket.bid(this, price, true);
+        		}
+        	} else if (!isHomeowner()){
+        		System.out.println("Strange: this household is not a type I recognize");
+        	}
     	}
     }
 
