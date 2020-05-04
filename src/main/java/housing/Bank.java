@@ -153,8 +153,8 @@ public class Bank {
 	 * Get the monthly payment factor, i.e., the monthly payment on a mortgage as a fraction of the mortgage principal.
 	 */
 	private double getMonthlyPaymentFactor(boolean isHome) {
-//		 TEST BTL receive normal credit where they pay off the principal as well.
-//		if(config.ALTERNATE_CONSUMPTION_FUNCTION) { return monthlyPaymentFactor;}
+//		Deactivate interest-only mortgages for BTL in German model version.
+		if(config.GERVersion) { return monthlyPaymentFactor;}
 		if (isHome) {
 			return monthlyPaymentFactor; // Monthly payment factor to pay off the principal in N_PAYMENTS
 		} else {
