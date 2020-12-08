@@ -477,7 +477,7 @@ public class HouseholdBehaviour {
 		// they cannot pay the "bills" and go bankrupt every month.
 		// if payments make up more than X% of monthly Net Total Income, don't invest
 		if(config.ALTERNATE_CONSUMPTION_FUNCTION) {
-			if((me.getMonthlyPayments()) > config.paymentsToIncome*me.getMonthlyNetTotalIncome()) {
+			if((me.getMonthlyPayments()) > config.paymentsToIncome*me.returnMonthlyNetTotalIncome()) {
 				// record DECISION DATA BTL
 				if(config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
 					Model.agentDecisionRecorder.recordTooHighMonthlyPaymentsBTL(me);

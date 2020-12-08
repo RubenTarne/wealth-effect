@@ -33,7 +33,8 @@ public class TransactionRecorder {
             outfile.println("Model time, "
                     + "transactionType, houseId, houseQuality, initialListedPrice, timeFirstOffered, "
                     + "transactionPrice, rentalYield, buyerId, buyerAge, buyerHasBTLGene, buyerMonthlyGrossTotalIncome, "
-                    + "buyerMonthlyGrossEmploymentIncome, buyerPostPurchaseBankBalance, buyerCapGainCoeff, "
+                    + "buyerMonthlyGrossEmploymentIncome, buyerMonthlyDisposableIncome, buyerAllMonthlyHousingPayments, "
+                    + "buyerPostPurchaseBankBalance, buyerCapGainCoeff, "
                     + "mortgageDownpayment, firstTimeBuyerMortgage, buyToLetMortgage, sellerId, sellerAge, "
                     + "sellerHasBTLGene, sellerMonthlyGrossTotalIncome, sellerMonthlyGrossEmploymentIncome, "
                     + "sellerPostPurchaseBankBalance, sellerCapGainCoeff");
@@ -60,8 +61,10 @@ public class TransactionRecorder {
     			purchase.getBidder().id + ", " +
     			purchase.getBidder().getAge() + ", " +
     			purchase.getBidder().behaviour.isPropertyInvestor() + ", " +
-    			purchase.getBidder().getMonthlyGrossTotalIncome() + ", " +
+    			purchase.getBidder().returnMonthlyGrossTotalIncome() + ", " +
     			purchase.getBidder().getMonthlyGrossEmploymentIncome() + ", " +
+    			purchase.getBidder().returnMonthlyDisposableIncome() + "," +
+    			purchase.getBidder().getMonthlyPayments()  + "," +
     			purchase.getBidder().getBankBalance() + ", "+
     			purchase.getBidder().behaviour.getBTLCapGainCoefficient() + ", ");
 		if (mortgage != null) {
@@ -78,7 +81,7 @@ public class TransactionRecorder {
 					seller.id + ", " +
 					seller.getAge() + ", " +
 					seller.behaviour.isPropertyInvestor() + ", " +
-					seller.getMonthlyGrossTotalIncome() + ", " +
+					seller.returnMonthlyGrossTotalIncome() + ", " +
 					seller.getMonthlyGrossEmploymentIncome() + ", " +
 					seller.getBankBalance() + ", " +
 					seller.behaviour.getBTLCapGainCoefficient() +", ");

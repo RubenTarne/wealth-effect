@@ -26,6 +26,8 @@ public class Household implements IHouseOwner {
     public int                  id; // Only used for identifying households within the class TransactionRecorder
     private double              annualGrossEmploymentIncome;
     private double              monthlyGrossEmploymentIncome;
+    private double				monthlyGrossTotalIncome;
+    private double 				monthlyNetTotalIncome;
     private double 				monthlyDisposableIncome;
     private double				equityPosition;
     private double				consumption;
@@ -145,7 +147,7 @@ public class Household implements IHouseOwner {
     			monthlyDisposableIncome); // Old implementation: if(isFirstTimeBuyer() || !isInSocialHousing()) bankBalance -= behaviour.getDesiredConsumption(getBankBalance(), getAnnualGrossTotalIncome());
     	bankBalance -= consumption;
     	// Compute saving rate
-    	savingRate = (monthlyDisposableIncome - consumption)/getMonthlyGrossTotalIncome();
+    	savingRate = (monthlyDisposableIncome - consumption)/returnMonthlyGrossTotalIncome();
     	// Deal with bankruptcies
     	// TODO: Improve bankruptcy procedures (currently, simple cash injection), such as terminating contracts!
     	if (bankBalance < 0.0) {
@@ -264,7 +266,8 @@ public class Household implements IHouseOwner {
         // National insurance contributions
     	monthlyNICPaid = Model.government.class1NICsDue(annualGrossEmploymentIncome)/config.constants.MONTHS_IN_YEAR; 
     	
-    	return getMonthlyGrossTotalIncome() - monthlyTaxesPaid - monthlyNICPaid;
+    	monthlyNetTotalIncome = getMonthlyGrossTotalIncome() - monthlyTaxesPaid - monthlyNICPaid;
+    	return monthlyNetTotalIncome;
     }
 
     /**
@@ -303,15 +306,20 @@ public class Household implements IHouseOwner {
     /**
      * Annualised gross total income, i.e., both employment and rental income
      */
-    public double getAnnualGrossTotalIncome() { return getMonthlyGrossTotalIncome()*config.constants.MONTHS_IN_YEAR; }
+    public double getAnnualGrossTotalIncome() { return monthlyGrossTotalIncome*config.constants.MONTHS_IN_YEAR; }
 
     /**
      * Adds up all sources of (gross) income on a monthly basis, i.e., both employment and rental income
      */
-    public double getMonthlyGrossTotalIncome() { return monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome()
-//    // PAUL add the airbnb income
-//    + airBnBRentalIncome
-    ; }
+    public double getMonthlyGrossTotalIncome() { 
+//    	// if true, Monthly Interest payments of t-1 will be distributed according to their share of deposits/totalDeposits 
+//    	if(config.dividendPayments) {
+//    		monthlyGrossTotalIncome = monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome() + calculateMonthlyDividendIncome();
+//       	} else {
+    		monthlyGrossTotalIncome = monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome();
+//    	}
+    	return monthlyGrossTotalIncome; 
+    }
 
     /**
      * Adds up this month's rental income from all currently owned and rented properties
@@ -1076,6 +1084,14 @@ public class Household implements IHouseOwner {
 		this.newCredit = newCredit;
 	}
 
+	public double returnMonthlyNetTotalIncome() {
+		return monthlyNetTotalIncome;
+	}
+	
+	public double returnMonthlyGrossTotalIncome() {
+		return monthlyGrossTotalIncome;
+	}
+	
 	public int getnAirBnBRentedOut() {
 		return nAirBnBRentedOut;
 	}

@@ -27,6 +27,9 @@ public class HouseholdStats {
 	private int     nBTLHomeless; // Number of homeless BTL households
     private int     nBTLBankruptcies; // Number of BTL households going bankrupt in a given time step
     
+    private int 	nBTLRentalProperty; // Rental Property in the hands of BTL investors. Not counting rental property held by households inheriting property and renting it out
+    
+    
     // PAUL AIRBNB values 
     private int 	nAirBnBBTL;
 	private double	airBnBRentalIncome;
@@ -64,6 +67,10 @@ public class HouseholdStats {
     private int     nBTLBidsAboveExpAvSalePriceCounter; // Counter for the number of BTL bids with desired housing expenditure above the exp. mov. av. sale price
 
     //RUBEN additional variable totalConsumption and Savings
+    private double totalMonthlyDisposableIncome;
+	private double totalMonthlyDisposableIncomeCounter;
+    private double totalBankBalancesEndPeriod;
+    private double totalBankBalancesEndPeriodCounter;
     private double totalConsumption;
     private double totalConsumptionCounter;
     private double totalSaving;
@@ -153,6 +160,8 @@ public class HouseholdStats {
         nNonBTLBidsAboveExpAvSalePriceCounter = 0;
         nBTLBidsAboveExpAvSalePriceCounter = 0;
         //RUBEN initialise totalConsumption and Savings, etc
+        totalMonthlyDisposableIncome = 0.0;
+        totalBankBalancesEndPeriod = 0.0;
         totalConsumption = 0.0;
         totalSaving = 0.0;
         totalBankBalancesBeforeConsumption = 0.0;
@@ -232,6 +241,8 @@ public class HouseholdStats {
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
         	
+            totalMonthlyDisposableIncomeCounter += h.returnMonthlyDisposableIncome();
+            totalBankBalancesEndPeriodCounter += h.getBankBalance();
         	//TODO Ruben: check if removable, as I implemented totalPrincipalRepaymentDeceasedHousehold
         	// record household fields containing credit repayments, rent payments and cash injections
             totalPrincipalRepaymentsCounter += h.getPrincipalPaidBack();
@@ -260,20 +271,21 @@ public class HouseholdStats {
                 // Active BTL investors
                 if (h.getNProperties() > 1) {
                     ++nActiveBTL;
-                    activeBTLAnnualisedTotalIncome += h.getMonthlyGrossTotalIncome();
-                    activeBTLMonthlyNetIncome += h.getMonthlyNetTotalIncome();
+                    nBTLRentalProperty += h.getNProperties()-1; 
+                    activeBTLAnnualisedTotalIncome += h.returnMonthlyGrossTotalIncome();
+                    activeBTLMonthlyNetIncome += h.returnMonthlyNetTotalIncome();
                     activeBTLMonthlyGrossEmploymentIncome += h.getMonthlyGrossEmploymentIncome();
                 // Inactive BTL investors who own their house
                 } else if (h.getNProperties() == 1) {
                     ++nBTLOwnerOccupier;
-                    ownerOccupierAnnualisedTotalIncome += h.getMonthlyGrossTotalIncome();
-                    ownerOccupierMonthlyNetIncome += h.getMonthlyNetTotalIncome();
+                    ownerOccupierAnnualisedTotalIncome += h.returnMonthlyGrossTotalIncome();
+                    ownerOccupierMonthlyNetIncome += h.returnMonthlyNetTotalIncome();
                     ownerOccupierMonthlyGrossEmploymentIncome += h.getMonthlyGrossEmploymentIncome();
                     // Inactive BTL investors in social housing
                 } else {
                     ++nBTLHomeless;
-                    homelessAnnualisedTotalIncome += h.getMonthlyGrossTotalIncome();
-                    homelessMonthlyNetIncome += h.getMonthlyNetTotalIncome();
+                    homelessAnnualisedTotalIncome += h.returnMonthlyGrossTotalIncome();
+                    homelessMonthlyNetIncome += h.returnMonthlyNetTotalIncome();
                     homelessMonthlyGrossEmploymentIncome += h.getMonthlyGrossEmploymentIncome();
                 }
                 
@@ -288,14 +300,14 @@ public class HouseholdStats {
                 // Non-BTL investors who own their house
                 if (h.isHomeowner()) {
                     ++nNonBTLOwnerOccupier;
-                    ownerOccupierAnnualisedTotalIncome += h.getMonthlyGrossTotalIncome();
-                    ownerOccupierMonthlyNetIncome += h.getMonthlyNetTotalIncome();
+                    ownerOccupierAnnualisedTotalIncome += h.returnMonthlyGrossTotalIncome();
+                    ownerOccupierMonthlyNetIncome += h.returnMonthlyNetTotalIncome();
                     ownerOccupierMonthlyGrossEmploymentIncome += h.getMonthlyGrossEmploymentIncome();
                     // Non-BTL investors renting
                 } else if (h.isRenting()) {
                     ++nRenting;
-                    rentingAnnualisedTotalIncome += h.getMonthlyGrossTotalIncome();
-                    rentingMonthlyNetIncome += h.getMonthlyNetTotalIncome();
+                    rentingAnnualisedTotalIncome += h.returnMonthlyGrossTotalIncome();
+                    rentingMonthlyNetIncome += h.returnMonthlyNetTotalIncome();
                     rentingMonthlyGrossEmploymentIncome += h.getMonthlyGrossEmploymentIncome();
                     // PAUL
                     rentingMonthlyDisposableIncome += h.returnMonthlyDisposableIncome();
@@ -308,8 +320,8 @@ public class HouseholdStats {
                     // Non-BTL investors in social housing
                 } else if (h.isInSocialHousing()) {
                     ++nNonBTLHomeless;
-                    homelessAnnualisedTotalIncome += h.getMonthlyGrossTotalIncome();
-                    homelessMonthlyNetIncome += h.getMonthlyNetTotalIncome();
+                    homelessAnnualisedTotalIncome += h.returnMonthlyGrossTotalIncome();
+                    homelessMonthlyNetIncome += h.returnMonthlyNetTotalIncome();
                     homelessMonthlyGrossEmploymentIncome += h.getMonthlyGrossEmploymentIncome();
                 }
             }
@@ -346,7 +358,7 @@ public class HouseholdStats {
         			Model.microDataRecorder.recordSavingRate(Model.getTime(), h.getSavingRate());
         		}
         		if(config.recordMonthlyGrossTotalIncome) {
-        			Model.microDataRecorder.recordMonthlyGrossTotalIncome(Model.getTime(), h.getMonthlyGrossTotalIncome());
+        			Model.microDataRecorder.recordMonthlyGrossTotalIncome(Model.getTime(), h.returnMonthlyGrossTotalIncome());
         		}
         		if(config.recordMonthlyGrossEmploymentIncome) {
         			Model.microDataRecorder.recordMonthlyGrossEmploymentIncome(Model.getTime(), h.getMonthlyGrossEmploymentIncome());
@@ -445,6 +457,14 @@ public class HouseholdStats {
         nBTLBidsAboveExpAvSalePrice = nBTLBidsAboveExpAvSalePriceCounter;
         nNonBTLBidsAboveExpAvSalePriceCounter = 0;
         nBTLBidsAboveExpAvSalePriceCounter = 0;
+        
+        // Ruben additional counters - pass counter number to aggregate double then reset counter
+        
+        totalMonthlyDisposableIncome = totalMonthlyDisposableIncomeCounter;
+        totalMonthlyDisposableIncomeCounter = 0.0;
+        totalBankBalancesEndPeriod = totalBankBalancesEndPeriodCounter;
+        totalBankBalancesEndPeriodCounter = 0.0;
+        
         totalConsumption = totalConsumptionCounter;
         totalSaving = totalSavingCounter;
         totalConsumptionCounter = 0.0;
@@ -599,8 +619,9 @@ public class HouseholdStats {
     // ... proportion of housing stock owned by buy-to-let investors (all rental properties, plus all empty houses not
     // owned by the construction sector)
     double getBTLStockFraction() {
-        return ((double)(getnEmptyHouses() - Model.housingMarketStats.getnUnsoldNewBuild()
-                + nRenting))/Model.construction.getHousingStock();
+//        return ((double)(getnEmptyHouses() - Model.housingMarketStats.getnUnsoldNewBuild()
+//                + nRenting))/Model.construction.getHousingStock();
+        return ((double)(nBTLRentalProperty))/Model.construction.getHousingStock(); // this now collects only rental property owned by investors, not heirs
     }
     // ... number of normal (non-BTL) bidders with desired housing expenditure above the exponential moving average sale price
     int getnNonBTLBidsAboveExpAvSalePrice() { return nNonBTLBidsAboveExpAvSalePrice; }
@@ -632,7 +653,7 @@ public class HouseholdStats {
     double getTotalConsumption() { return totalConsumption; }
     double getTotalSaving() {return totalSaving; }
     double getTotalBankBalancesBeforeConsumption() { return totalBankBalancesBeforeConsumption; }
-    double getTotalBankBalancesVeryBeginningOfPeriod() { return totalBankBalancesVeryBeginningOfPeriod; }
+    // public because when dividends are distributed household-class needs to access this
     double getTotalBankBalanceEndowment() { return totalBankBalanceEndowment; }
     double getIncomeConsumption() { return totalIncomeConsumption; }
     double getFinancialWealthConsumption() { return totalFinancialWealthConsumption; }
@@ -656,5 +677,11 @@ public class HouseholdStats {
 		return rentingMonthlyDisposableIncome;
 	}
     
+    public double getTotalMonthlyDisposableIncome() {
+		return totalMonthlyDisposableIncome;
+	}
 
-}
+	public double getTotalBankBalancesEndPeriod() {
+		return totalBankBalancesEndPeriod;
+	}
+	
