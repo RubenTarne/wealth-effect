@@ -28,6 +28,7 @@ public class HousingMarketStats {
 	// Variables computed before market clearing
 	private int                     nBuyers;
     private int                     nBTLBuyers;
+    private int						nFTBBuyers;
 	private int                     nSellers;
     private int                     nNewSellers;
     private int                     nBTLSellers;
@@ -58,6 +59,7 @@ public class HousingMarketStats {
 	private double                  sumMonthsOnMarket; // Sum of the number of months on the market for properties sold this month
 	private double []               sumSalePricePerQuality; // Sum of the price for each quality band for properties sold this month
 	private int []                  nSalesPerQuality; // Number of sales for each quality band for properties sold this month
+	private double					averageHouseSaleQuality; // average quality band of houses sold 
 	private double 					moneyToConstructionSector; // money flowing out of the simulation via the construction sector
 	
 	// Other variables computed after market clearing
@@ -117,9 +119,10 @@ public class HousingMarketStats {
         nBTLSales = 0;
         sumSoldReferencePrice = 0;
         sumSoldPrice = 0;
-        sumMonthsOnMarket = 0;
+        sumMonthsOnMarket = 0; 
         sumSalePricePerQuality = new double[config.N_QUALITY];
         nSalesPerQuality = new int[config.N_QUALITY];
+        averageHouseSaleQuality = 0.0;
         moneyToConstructionSector = 0.0;
 
         // Set initial values for other variables computed after market clearing
@@ -158,9 +161,15 @@ public class HousingMarketStats {
         // Re-initialise to zero variables computed before market clearing
         nBuyers = market.getBids().size();
         nBTLBuyers = 0;
+        nFTBBuyers = 0;
         for (HouseBidderRecord bid: market.getBids()) {
             if (bid.getBidder().behaviour.isPropertyInvestor() && bid.getBidder().getHome() != null) {
                 nBTLBuyers++;
+            }
+            // RUBEN add the number of bids by FTB - this includes BTL that are bidding for their first home
+            // as the BTL bids above are only for investment property (investors already have a home)
+            if(bid.getBidder().isFirstTimeBuyer()) {
+            	nFTBBuyers++;
             }
         }
         nSellers = market.getOffersPQ().size();
@@ -253,59 +262,66 @@ public class HousingMarketStats {
      * thus the value for t=1 is not 1
      */
     public void postClearingRecord() {
-        // Pass count value obtained during market clearing to persistent variables
-        nSales = salesCount;
-        nFTBSales = ftbSalesCount;
-        nBTLSales = btlSalesCount;
-        sumSoldReferencePrice = sumSoldReferencePriceCount;
-        sumSoldPrice = sumSoldPriceCount;
-        sumMonthsOnMarket = sumMonthsOnMarketCount;
-        moneyToConstructionSector = moneyToConstructionSectorCount;
-        System.arraycopy(sumMonthsOnMarketPerQualityCount, 0, sumMonthsOnMarketPerQuality, 0, config.N_QUALITY);
-        System.arraycopy(nSalesPerQualityCount, 0, nSalesPerQuality, 0, config.N_QUALITY);
-        System.arraycopy(sumSalePricePerQualityCount, 0, sumSalePricePerQuality, 0, config.N_QUALITY);
-        // Compute the rest of variables after market clearing...
-        // ... exponential averages of months in the market and prices per quality band (only if there have been sales)
-        if (nSales > 0) {
-            expAvMonthsOnMarket = config.derivedParams.E*expAvMonthsOnMarket
-                    + (1.0 - config.derivedParams.E)*sumMonthsOnMarket/nSales;
-            expAvSalePrice = config.derivedParams.G*expAvSalePrice
-                    + (1.0 - config.derivedParams.G)*sumSoldPrice/nSales;
-        }
-        for (int q = 0; q < config.N_QUALITY; q++) {
-            if (nSalesPerQuality[q] > 0) {
-                expAvSalePricePerQuality[q] = config.derivedParams.G*expAvSalePricePerQuality[q]
-                        + (1.0 - config.derivedParams.G)*sumSalePricePerQuality[q]/nSalesPerQuality[q];
-                expAvMonthsOnMarketPerQuality[q] = config.derivedParams.E*expAvMonthsOnMarketPerQuality[q]
-                        + (1.0 - config.derivedParams.E)*sumMonthsOnMarketPerQuality[q]/nSalesPerQuality[q];
-            }
-        }
-        // ... current house price index (only if there have been sales)
-        if(nSales > 0) {
-            housePriceIndex = sumSoldPrice/sumSoldReferencePrice;
-        }
-        
-        //TODO TEST: deactivating transactions, but simulating the house price
-        // this basically includes the HPI array initiated by hand above and exchanges it with the calculated one
-        if(Model.getTime() >= config.startTimeDeactivateTransactions) {
-        	housePriceIndex = arrayHPI[Model.getTime()-config.TIME_TO_START_RECORDING+1];
-        }
-        // ... HPIRecord with the new house price index value
-        HPIRecord.addValue(housePriceIndex);
+    	// Pass count value obtained during market clearing to persistent variables
+    	nSales = salesCount;
+    	nFTBSales = ftbSalesCount;
+    	nBTLSales = btlSalesCount;
+    	sumSoldReferencePrice = sumSoldReferencePriceCount;
+    	sumSoldPrice = sumSoldPriceCount;
+    	sumMonthsOnMarket = sumMonthsOnMarketCount;
+    	moneyToConstructionSector = moneyToConstructionSectorCount;
+    	System.arraycopy(sumMonthsOnMarketPerQualityCount, 0, sumMonthsOnMarketPerQuality, 0, config.N_QUALITY);
+    	System.arraycopy(nSalesPerQualityCount, 0, nSalesPerQuality, 0, config.N_QUALITY);
+    	System.arraycopy(sumSalePricePerQualityCount, 0, sumSalePricePerQuality, 0, config.N_QUALITY);
+    	// Compute the rest of variables after market clearing...
+    	// ... exponential averages of months in the market and prices per quality band (only if there have been sales)
+    	if (nSales > 0) {
+    		expAvMonthsOnMarket = config.derivedParams.E*expAvMonthsOnMarket
+    				+ (1.0 - config.derivedParams.E)*sumMonthsOnMarket/nSales;
+    		expAvSalePrice = config.derivedParams.G*expAvSalePrice
+    				+ (1.0 - config.derivedParams.G)*sumSoldPrice/nSales;
+    	}
+    	for (int q = 0; q < config.N_QUALITY; q++) {
+    		if (nSalesPerQuality[q] > 0) {
+    			expAvSalePricePerQuality[q] = config.derivedParams.G*expAvSalePricePerQuality[q]
+    					+ (1.0 - config.derivedParams.G)*sumSalePricePerQuality[q]/nSalesPerQuality[q];
+    			expAvMonthsOnMarketPerQuality[q] = config.derivedParams.E*expAvMonthsOnMarketPerQuality[q]
+    					+ (1.0 - config.derivedParams.E)*sumMonthsOnMarketPerQuality[q]/nSalesPerQuality[q];
+    		}
+    	}
+    	// ... current house price index (only if there have been sales)
+    	if(nSales > 0) {
+    		housePriceIndex = sumSoldPrice/sumSoldReferencePrice;
+    	}
 
-        // ... current house price appreciation values (both annual and long term value)
-        annualHousePriceAppreciation = housePriceAppreciation(1);
-        longTermHousePriceAppreciation = housePriceAppreciation(config.HPA_YEARS_TO_CHECK);
-        // ... relaxation of the price distribution towards the reference price distribution (described in appendix A3)
-        for(int q = 0; q < config.N_QUALITY; q++) {
-            expAvSalePricePerQuality[q] = config.MARKET_AVERAGE_PRICE_DECAY*expAvSalePricePerQuality[q]
-                    + (1.0 - config.MARKET_AVERAGE_PRICE_DECAY)*(housePriceIndex*referencePricePerQuality[q]);
-        }
-        // ...record number of unsold new build houses
-        nUnsoldNewBuild = 0;
-        for(HousingMarketRecord sale : market.getOffersPQ()) {
-            if(((HouseOfferRecord) sale).getHouse().owner == Model.construction) nUnsoldNewBuild++;
-        }
+    	//TODO TEST: deactivating transactions, but simulating the house price
+    	// this basically includes the HPI array initiated by hand above and exchanges it with the calculated one
+    	if(Model.getTime() >= config.startTimeDeactivateTransactions) {
+    		housePriceIndex = arrayHPI[Model.getTime()-config.TIME_TO_START_RECORDING+1];
+    	}
+    	// ... HPIRecord with the new house price index value
+    	HPIRecord.addValue(housePriceIndex);
+
+    	// ... current house price appreciation values (both annual and long term value)
+    	annualHousePriceAppreciation = housePriceAppreciation(1);
+    	longTermHousePriceAppreciation = housePriceAppreciation(config.HPA_YEARS_TO_CHECK);
+    	// ... relaxation of the price distribution towards the reference price distribution (described in appendix A3)
+    	for(int q = 0; q < config.N_QUALITY; q++) {
+    		expAvSalePricePerQuality[q] = config.MARKET_AVERAGE_PRICE_DECAY*expAvSalePricePerQuality[q]
+    				+ (1.0 - config.MARKET_AVERAGE_PRICE_DECAY)*(housePriceIndex*referencePricePerQuality[q]);
+    	}
+    	double sum = 0;
+    	for(int q = 0; q < config.N_QUALITY; q++) {
+    		sum += nSalesPerQuality[q]*(q+1);
+    	}
+    	if(nSales==0) {averageHouseSaleQuality =0;
+    	}else {
+    		averageHouseSaleQuality = sum/nSales;}
+    	// ...record number of unsold new build houses
+    	nUnsoldNewBuild = 0;
+    	for(HousingMarketRecord sale : market.getOffersPQ()) {
+    		if(((HouseOfferRecord) sale).getHouse().owner == Model.construction) nUnsoldNewBuild++;
+    	}
     }
 
     /**
@@ -335,7 +351,7 @@ public class HousingMarketStats {
      *
      * @return Quarter on quarter house price growth
      */
-    double getQoQHousePriceGrowth() {
+    public double getQoQHousePriceGrowth() {
         double HPI = HPIRecord.getElement(config.derivedParams.getHPIRecordLength() - 1)
                 + HPIRecord.getElement(config.derivedParams.getHPIRecordLength() - 2)
                 + HPIRecord.getElement(config.derivedParams.getHPIRecordLength() - 3);
@@ -357,6 +373,7 @@ public class HousingMarketStats {
     // Getters for variables computed before market clearing
     int getnBuyers() { return nBuyers; }
     int getnBTLBuyers() { return nBTLBuyers; }
+    int getnFTBBuyers() { return nFTBBuyers; }
     int getnSellers() { return nSellers; }
     int getnNewSellers() { return nNewSellers; }
     int getnBTLSellers() { return nBTLSellers; }
@@ -390,8 +407,9 @@ public class HousingMarketStats {
     double getExpAvSalePrice() { return expAvSalePrice; }
     public double getHPI() { return housePriceIndex; }
     public DescriptiveStatistics getHPIRecord() { return HPIRecord; }
-    double getAnnualHPA() { return annualHousePriceAppreciation; }
+    public double getAnnualHPA() { return annualHousePriceAppreciation; }
     public double getLongTermHPA() {return longTermHousePriceAppreciation; }
+    public double getAverageHouseSaleQuality() {return averageHouseSaleQuality; }
 
     // Getters for derived variables
     double getAvBidPrice() {

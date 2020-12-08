@@ -73,7 +73,7 @@ public class Config {
     boolean allCreditConstraintsActive;				// if false, then only LTV is active, if true all other constraints are binding as well
     boolean ALTERNATE_CONSUMPTION_FUNCTION;			// make consumption solely dependent on income and wealth
     boolean procyclicalRentalMarket;				// 
-    
+    boolean dividendPayments;					// interest payments by mortgage holders end up as dividend income to households (boolean)
     boolean anticyclicalCBLTVs; 					
     // GER version 
     boolean GERVersion;			

@@ -201,6 +201,8 @@ public class Bank {
 			}
 			
 			++nMortgages;
+		} else if (approval.principal == 0.0){
+			Model.creditSupply.recordCashPayment(housePrice);
 		}
 		return approval;
 	}

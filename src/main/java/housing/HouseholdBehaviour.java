@@ -193,18 +193,14 @@ public class HouseholdBehaviour {
 			// record the consumption contributors for the aggregate recorders
 			Model.householdStats.countIncomeAndWealthConsumption(saving, consumption, incomeConsumption, 
 					financialWealthConsumption, housingWealthConsumption, debtConsumption, savingForDeleveraging);
-			// record the single consumption components to be recorded by the MicroDataRecorder
-			// only record if any of the individual consumption recorders is active 
-			if(Model.getTime() % Model.config.microDataRecordIntervall == 0 && Model.getTime() >= Model.config.TIME_TO_START_RECORDING &&
-					(config.recordIncomeConsumption || config.recordFinancialWealthConsumption 
-							|| config.recordHousingWealthConsumption|| config.recordDebtConsumption
-							|| config.recordSavingForDeleveraging)) {
+			
+			// record the single consumption components to be recorded b
 				me.setIncomeConsumption(incomeConsumption);
 				me.setFinancialWealthConsumption(financialWealthConsumption);
 				me.setHousingWealthConsumption(housingWealthConsumption);
 				me.setDebtConsumption(debtConsumption);
 				me.setSavingForDeleveraging(savingForDeleveraging);
-			}
+				
 			return consumption;
 		}
 

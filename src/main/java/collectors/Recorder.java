@@ -148,14 +148,15 @@ public class Recorder {
     			outfile = new PrintWriter(outputFolder + "Output-run" + nRun + ".csv", "UTF-8");
     			outfile.println("Model time, "
     					// Number of households of each type
-    					+ "nNonBTLHomeless, nBTLHomeless, nSocialHousing, nRenting, nNonOwner, "
+    					+ "nNonBTLSocialHousing, nFTBSocialHousing, nBTLSocialHousing, nSocialHousing, nRenting, nNonOwner, "
+    					+ "nInFirstHome, nSSB, "
     					+ "nNonBTLOwnerOccupier, nBTLOwnerOccupier, nOwnerOccupier, nActiveBTL, nBTL, nNonBTLBankrupt, "
     					+ "nBTLBankrupt, TotalPopulation, "
     					// Numbers of houses of each type
     					+ "HousingStock, nNewBuild, nUnsoldNewBuild, nEmptyHouses, BTLStockFraction, "
     					// House sale market data
     					+ "Sale HPI, Sale AnnualHPA, Sale AvBidPrice, Sale AvOfferPrice, Sale AvSalePrice, "
-    					+ "Sale ExAvSalePrice, Sale AvMonthsOnMarket, Sale ExpAvMonthsOnMarket, Sale nBuyers, "
+    					+ "Sale ExAvSalePrice, Sale AvMonthsOnMarket, Sale ExpAvMonthsOnMarket, Sale averageQualitySold, Sale nBuyers, Sale nFTBBuyers, "
     					+ "Sale nBTLBuyers, Sale nSellers, Sale nNewSellers, Sale nBTLSellers, Sale nSales, "
     					+ "Sale nNonBTLBidsAboveExpAvSalePrice, Sale nBTLBidsAboveExpAvSalePrice, Sale nSalesToBTL, "
     					+ "Sale nSalesToFTB, "
@@ -166,17 +167,24 @@ public class Recorder {
     					// Credit data
     					+ "nRegisteredMortgages, "
     					//RUBEN additional variables
-    					+ "BankBalancesVeryBeginningOfPeriod, monthlyTotalGrossIncome, monthlyTotalNetIncome, monthlyGrossEmploymentIncome, monthlyTaxesPaid, "
-    					+ "monthlyInsurancePaid, BankBalancesBeforeConsumption, BankBalancesEndowed, "
+    					+ "MonthlyDisposableIncome, DepositsEndPeriod, "
+    					+ "BankBalancesVeryBeginningOfPeriod, monthlyTotalGrossIncome, monthlyTotalNetIncome, monthlyGrossEmploymentIncome, monthlyDividendIncome, monthlyTaxesPaid, "
+    					+ "monthlyInsurancePaid, socialHousingRent, BankBalancesBeforeConsumption, BankBalancesEndowed, "
     					+ "totalConsumption, totalIncomeConsumption, totalFinancialWealthConsumption, "
     					+ "totalHousingWealthConsumption, totalDebtConsumption, totalSavingForDeleveraging, totalSaving, totalCredit, "
     					+ "totalPrincipalRepayment, totalPrincipalRepaymentsDueToHouseSale, totalPrincipalPaidBackForInheritance, totalInterestRepayment, totalRentalPayments, "
     					+ "totalBankruptcyCashInjection, totalDebtReliefDueToDeceasedHousehold, "
-    					+ "creditSupplyTarget, newlyPaidDownPayments, newlyIssuedCredit, nNegativeEquity, "
-    					+ "LTV FTB, LTV OO, LTV BTL, interestRateSpread, moneyOutflowToConstructionSector"
-    					
-    					// PAUL additional airbnb variables
-    					+ ", nAirBnBInvestors, airBnBRentalIncome, nAirbnbRentedOut, rentersMonthlyDisposableIncome"
+    					+ "creditSupplyTarget, newlyPaidDownPayments, cashPayments, newlyIssuedCredit, nNegativeEquity, "
+    					+ "LTV FTB, LTV OO, LTV BTL, interestRateSpread, moneyOutflowToConstructionSector, "
+    					+ "macropruLTVOnOff, "
+    					// agent-specific aggregate consumption total and per Agent-class
+    					+ "activeBTLConsumption, avActiveBTLConsumption, SSBConsumption, avSSBConsumption, "
+    					+ "inFirstHomeConsumption, avInFirstHomeConsumption, renterConsumption, avRenterConsumption, "
+//    					// agent-specific consumption parameters by inducer
+    					+ "avBTLIncomeConsumption, avBTLFinancialWealthConsumption, avBTLNetHousingWealthConsumption, "
+    					+ "avSSBIncomeConsumption, avSSBFinancialWealthConsumption, avSSBNetHousingWealthConsumption, "
+    					+ "avInFirstHomeIncomeConsumption, avInFirstHomeFinancialWealthConsumption, avInFirstHomeNetHousingWealthConsumtpion, "
+    					+ "avrenterIncomeConsumption, avrenterFinancialWealthConsumption, avRenterNetHousingWealthConsumption"
     					);
     		} catch (FileNotFoundException | UnsupportedEncodingException e) {
     			e.printStackTrace();
@@ -278,10 +286,13 @@ public class Recorder {
         	outfile.println(time + ", " +
         			// Number of households of each type
         			Model.householdStats.getnNonBTLHomeless() + ", " +
+        			Model.householdStats.getnFTBinSocialHousing() + ", " + 
         			Model.householdStats.getnBTLHomeless() + ", " +
         			Model.householdStats.getnHomeless() + ", " +
         			Model.householdStats.getnRenting() + ", " +
         			Model.householdStats.getnNonOwner() + ", " +
+        			Model.householdStats.getnInFirstHome() + ", " +
+        			Model.householdStats.getnSSB() + ", " +
         			Model.householdStats.getnNonBTLOwnerOccupier() + ", " +
         			Model.householdStats.getnBTLOwnerOccupier() + ", " +
         			Model.householdStats.getnOwnerOccupier() + ", " +
@@ -305,7 +316,9 @@ public class Recorder {
         			Model.housingMarketStats.getExpAvSalePrice() + ", " +
         			Model.housingMarketStats.getAvMonthsOnMarket() + ", " +
         			Model.housingMarketStats.getExpAvMonthsOnMarket() + ", " +
+        			Model.housingMarketStats.getAverageHouseSaleQuality() + ", " +
         			Model.housingMarketStats.getnBuyers() + ", " +
+        			Model.housingMarketStats.getnFTBBuyers() + ", " + 
         			Model.housingMarketStats.getnBTLBuyers() + ", " +
         			Model.housingMarketStats.getnSellers() + ", " +
         			Model.housingMarketStats.getnNewSellers() + ", " +
@@ -330,6 +343,8 @@ public class Recorder {
         			// Credit data
         			Model.creditSupply.getnRegisteredMortgages() + ", " +
         			//RUBEN additional variables
+					Model.householdStats.getTotalMonthlyDisposableIncome() + ", " +
+					Model.householdStats.getTotalBankBalancesEndPeriod() + ", " +
         			Model.householdStats.getTotalBankBalancesVeryBeginningOfPeriod() + ", " +
         			(Model.householdStats.getOwnerOccupierAnnualisedTotalIncome()/Model.config.constants.MONTHS_IN_YEAR
         					+ Model.householdStats.getActiveBTLAnnualisedTotalIncome()/Model.config.constants.MONTHS_IN_YEAR
@@ -338,8 +353,10 @@ public class Recorder {
         							+ Model.householdStats.getActiveMonthlyNetIncome()
         							+ Model.householdStats.getNonOwnerMonthlyNetIncome()) + ", " +
 					Model.householdStats.getMonthlyGrossEmploymentIncome() + ", " +	
+					Model.householdStats.getMonthlyTotalDividendIncome() + ", " + 
 					Model.householdStats.getTotalMonthlyTaxesPaid() + ", " + 
 					Model.householdStats.getTotalMonthlyNICPaid() + ", " +
+					Model.householdStats.getTotalSocialHousingRent() + ", " + 
 					Model.householdStats.getTotalBankBalancesBeforeConsumption() + ", " + 
 					Model.householdStats.getTotalBankBalanceEndowment() + ", " +
 					Model.householdStats.getTotalConsumption()  + ", " +
@@ -359,6 +376,7 @@ public class Recorder {
 					Model.householdStats.getTotalDebtReliefOfDeceasedHouseholds() + ", " +
 					Model.bank.creditSupplyTarget(Model.households.size()) + ", " +
 					Model.creditSupply.getNewlyPaidDownPayments() + ", " +
+					Model.creditSupply.getCashPayments() + ", " + 
 					Model.creditSupply.getNewlyIssuedCredit() + ", " + 
 					Model.householdStats.getNNegativeEquity() + ", " +
 					Model.bank.getLoanToValueLimit(true, true) + ", " +
@@ -366,14 +384,56 @@ public class Recorder {
 					Model.bank.getLoanToValueLimit(false, false) + ", " +
 					// divide by 100 as the interest rate in core indicators is calculated as percentage
 					Model.coreIndicators.getInterestRateSpread()/100 + ", " +
-					Model.housingMarketStats.getMoneyToConstructionSector()
-					 + ", " +
-        	
-        			// PAUL additional values for AIRBNB
-					Model.householdStats.getnAirBnBBTL() + ", " +
-					Model.householdStats.getAirBnBRentalIncome() + ", " +
-					Model.householdStats.getnAirBnBs()+ ", " +
-					Model.householdStats.getRentingMonthlyDisposableIncome()
+					Model.housingMarketStats.getMoneyToConstructionSector() + ", " +
+					Model.centralBank.getCentralBankLTVsOnOff() + ", " +
+					// additional consumption parameters
+					// active BTL total and per BTL investor
+					(Model.householdStats.getActiveBTLIncomeConsumption() +
+							Model.householdStats.getActiveBTLFinancialWealthConsumption() +
+							Model.householdStats.getActiveBTLNetHousingWealthConsumption()) +", " + 
+					((Model.householdStats.getActiveBTLIncomeConsumption() +
+					Model.householdStats.getActiveBTLFinancialWealthConsumption() +
+					Model.householdStats.getActiveBTLNetHousingWealthConsumption()) / 
+							Model.householdStats.getnActiveBTL()) +", " + 
+					// SSB total and per household
+					(Model.householdStats.getSSBIncomeConsumption() +
+							Model.householdStats.getSSBFinancialWealthConsumption() +
+							Model.householdStats.getSSBNetHousingWealthConsumption()) +", " + 
+					((Model.householdStats.getSSBIncomeConsumption() +
+					Model.householdStats.getSSBFinancialWealthConsumption() +
+					Model.householdStats.getSSBNetHousingWealthConsumption()) / 
+							Model.householdStats.getnSSB()) +", " + 
+					// inFirstHome total and per Houshold
+					(Model.householdStats.getInFirstHomeIncomeConsumption() +
+							Model.householdStats.getInFirstHomeFinancialWealthConsumption() +
+							Model.householdStats.getInFirstHomeNetHousingWealthConsumption()) +", " + 
+					((Model.householdStats.getInFirstHomeIncomeConsumption() +
+					Model.householdStats.getInFirstHomeFinancialWealthConsumption() +
+					Model.householdStats.getInFirstHomeNetHousingWealthConsumption()) / 
+							Model.householdStats.getnInFirstHome()) +", " + 
+	    			// renter consumption total and per household
+					(Model.householdStats.getRenterIncomeConsumption() + 
+							Model.householdStats.getRenterFinancialWealthConsumption() + 
+							Model.householdStats.getRenterNetHousingWealthConsumption()) +", " + 
+					((Model.householdStats.getRenterIncomeConsumption() + 
+							Model.householdStats.getRenterFinancialWealthConsumption() + 
+							Model.householdStats.getRenterNetHousingWealthConsumption()) /
+							Model.householdStats.getnNonOwner()) +", " + 
+	    			
+					
+					// detailed per household consumption by consumption inducer
+					(Model.householdStats.getActiveBTLIncomeConsumption() / Model.householdStats.getnActiveBTL()) +", " + 
+					(Model.householdStats.getActiveBTLFinancialWealthConsumption() / Model.householdStats.getnActiveBTL()) +", " + 
+					(Model.householdStats.getActiveBTLNetHousingWealthConsumption() / Model.householdStats.getnActiveBTL()) +", " + 
+					(Model.householdStats.getSSBIncomeConsumption() / Model.householdStats.getnSSB()) +", " + 
+					(Model.householdStats.getSSBFinancialWealthConsumption() / Model.householdStats.getnSSB()) +", " + 
+					(Model.householdStats.getSSBNetHousingWealthConsumption() / Model.householdStats.getnSSB()) +", " + 
+					(Model.householdStats.getInFirstHomeIncomeConsumption() / Model.householdStats.getnInFirstHome()) +", " + 
+					(Model.householdStats.getInFirstHomeFinancialWealthConsumption() / Model.householdStats.getnInFirstHome()) +", " + 
+					(Model.householdStats.getInFirstHomeNetHousingWealthConsumption() / Model.householdStats.getnInFirstHome()) +", " + 
+					(Model.householdStats.getRenterIncomeConsumption() / Model.householdStats.getnNonOwner()) +", " + 
+					(Model.householdStats.getRenterFinancialWealthConsumption() / Model.householdStats.getnNonOwner()) +", " + 
+					(Model.householdStats.getRenterNetHousingWealthConsumption() / Model.householdStats.getnNonOwner())
         	);
         	
 

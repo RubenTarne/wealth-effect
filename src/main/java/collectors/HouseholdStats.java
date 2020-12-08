@@ -25,7 +25,9 @@ public class HouseholdStats {
 	private int     nActiveBTL; // Number of BTL households with, at least, one BTL property
 	private int     nBTLOwnerOccupier; // Number of BTL households owning their home but without any BTL property
 	private int     nBTLHomeless; // Number of homeless BTL households
-    private int     nBTLBankruptcies; // Number of BTL households going bankrupt in a given time step
+    private int		nSSB; // number of second and subsequent buyers, defined as homeowners that are not in their first home anymore
+    private int		nInFirstHome; // numbers of owner occupiers in their first home (bought as First-time buyer)
+	private int     nBTLBankruptcies; // Number of BTL households going bankrupt in a given time step
     
     private int 	nBTLRentalProperty; // Rental Property in the hands of BTL investors. Not counting rental property held by households inheriting property and renting it out
     
@@ -39,6 +41,7 @@ public class HouseholdStats {
 	public int      nNonBTLOwnerOccupier; // Number of non-BTL households owning their home
 	private int     nRenting; // Number of (by definition, non-BTL) households renting their home
 	private int     nNonBTLHomeless; // Number of homeless non-BTL households
+	private int		nFTBinSocialHousing; // number of FTB in social housing (homeless)
     private int     nNonBTLBankruptcies; // Number of non-BTL households going bankrupt in a given time step
 
 	// Fields for summing annualised total incomes
@@ -71,6 +74,8 @@ public class HouseholdStats {
 	private double totalMonthlyDisposableIncomeCounter;
     private double totalBankBalancesEndPeriod;
     private double totalBankBalancesEndPeriodCounter;
+    private double totalSocialHousingRent;
+    private double totalSocialHousingRentCounter;
     private double totalConsumption;
     private double totalConsumptionCounter;
     private double totalSaving;
@@ -114,6 +119,36 @@ public class HouseholdStats {
     private double totalDebtConsumptionCounter;
     private double totalSavingForDeleveraging;
     private double totalSavingForDeleveragingCounter;
+    private double totalDividendIncome;
+    private double totalDividendIncomeCounter;
+    
+    // agent-specific consumption parameters
+    private double activeBTLIncomeConsumptionCounter;
+    private double activeBTLFinancialWealthConsumptionCounter;
+	private double activeBTLNetHousingWealthConsumptionCounter;
+	private double SSBIncomeConsumptionCounter;
+	private double SSBFinancialWealthConsumptionCounter;
+	private double SSBNetHousingWealthConsumptionCounter;
+	private double inFirstHomeIncomeConsumptionCounter;
+	private double inFirstHomeFinancialWealthConsumptionCounter;
+	private double inFirstHomeNetHousingWealthConsumptionCounter;
+	private double renterIncomeConsumptionCounter;
+	private double renterFinancialWealthConsumptionCounter;
+	private double renterNetHousingWealthConsumptionCounter;
+	
+    private double activeBTLIncomeConsumption;
+    private double activeBTLFinancialWealthConsumption;
+	private double activeBTLNetHousingWealthConsumption;
+	private double SSBIncomeConsumption;
+	private double SSBFinancialWealthConsumption;
+	private double SSBNetHousingWealthConsumption;
+	private double inFirstHomeIncomeConsumption;
+	private double inFirstHomeFinancialWealthConsumption;
+	private double inFirstHomeNetHousingWealthConsumption;
+	private double renterIncomeConsumption;
+	private double renterFinancialWealthConsumption;
+	private double renterNetHousingWealthConsumption;
+    
     
     // For sensitivity analysis
     public DescriptiveStatistics totalNetWealth; 
@@ -130,6 +165,9 @@ public class HouseholdStats {
         nActiveBTL = 0;
         nBTLOwnerOccupier = 0;
         nBTLHomeless = 0;
+        nSSB = 0; 
+        nInFirstHome = 0; 
+
         nBTLBankruptcies = 0;
         
         // PAUL AIRBNB values
@@ -141,6 +179,7 @@ public class HouseholdStats {
         nNonBTLOwnerOccupier = 0;
         nRenting = 0;
         nNonBTLHomeless = 0;
+        nFTBinSocialHousing = 0;
         nNonBTLBankruptcies = 0;
         activeBTLAnnualisedTotalIncome = 0.0;
         ownerOccupierAnnualisedTotalIncome = 0.0;
@@ -162,6 +201,7 @@ public class HouseholdStats {
         //RUBEN initialise totalConsumption and Savings, etc
         totalMonthlyDisposableIncome = 0.0;
         totalBankBalancesEndPeriod = 0.0;
+        totalSocialHousingRent = 0.0;
         totalConsumption = 0.0;
         totalSaving = 0.0;
         totalBankBalancesBeforeConsumption = 0.0;
@@ -184,6 +224,7 @@ public class HouseholdStats {
         totalDebtConsumption = 0.0;
         totalSavingForDeleveraging = 0.0;
         totalNetWealth = new DescriptiveStatistics();
+        totalDividendIncome = 0.0;
     }
 
     public void record() {
@@ -192,6 +233,8 @@ public class HouseholdStats {
         nActiveBTL = 0;
         nBTLOwnerOccupier = 0;
         nBTLHomeless = 0;
+        nInFirstHome = 0;
+        nSSB = 0;
         nBTLBankruptcies = 0;
         
      // PAUL AIRBNB values
@@ -199,10 +242,13 @@ public class HouseholdStats {
     	airBnBRentalIncome = 0.0;
     	nAirBnBs = 0;
     	rentingMonthlyDisposableIncome = 0.0;
+    	
+    	nBTLRentalProperty = 0;
         
         nNonBTLOwnerOccupier = 0;
         nRenting = 0;
         nNonBTLHomeless = 0;
+        nFTBinSocialHousing = 0;
         nNonBTLBankruptcies = 0;
         activeBTLAnnualisedTotalIncome = 0.0;
         ownerOccupierAnnualisedTotalIncome = 0.0;
@@ -228,6 +274,7 @@ public class HouseholdStats {
         //RUBEN initialise nNegativeEquity
         nNegativeEquity = 0;
         totalNetWealth.clear();
+        totalDividendIncome = 0.0;
         // Time stamp householdStats mesoRecorders
         Model.microDataRecorder.timeStampSingleRunSingleVariableFiles(Model.getTime(), config.recordBankBalance,
                 config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate, config.recordMonthlyGrossTotalIncome,
@@ -240,9 +287,14 @@ public class HouseholdStats {
         		config.recordPrincipalPaidBackInheritance);
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
+        	// This records the agent-specific consumption and number of SSB and inFirstHome agents
+        	// (as agent classes are divided here different than in the main method)
+        	recordAgentSpecificConsumption(h);
         	
             totalMonthlyDisposableIncomeCounter += h.returnMonthlyDisposableIncome();
             totalBankBalancesEndPeriodCounter += h.getBankBalance();
+            totalSocialHousingRentCounter += h.getSocialHousingRent();
+        	
         	//TODO Ruben: check if removable, as I implemented totalPrincipalRepaymentDeceasedHousehold
         	// record household fields containing credit repayments, rent payments and cash injections
             totalPrincipalRepaymentsCounter += h.getPrincipalPaidBack();
@@ -256,6 +308,7 @@ public class HouseholdStats {
             totalMonthlyTaxesPaidCounter += h.getMonthlyTaxesPaid();
             totalMonthlyNICPaidCounter += h.getMonthlyNICPaid();
             totalBankruptcyCashInjectionCounter += h.getCashInjection();
+            totalDividendIncomeCounter += h.recordMonthlyDividendIncome();
         	
             // count if the household had a negative equity position at the beginning of the period
             if (h.getEquityPosition() < 0) {
@@ -319,6 +372,7 @@ public class HouseholdStats {
                     }
                     // Non-BTL investors in social housing
                 } else if (h.isInSocialHousing()) {
+                	if(h.isFirstTimeBuyer()) { ++nFTBinSocialHousing;}
                     ++nNonBTLHomeless;
                     homelessAnnualisedTotalIncome += h.returnMonthlyGrossTotalIncome();
                     homelessMonthlyNetIncome += h.returnMonthlyNetTotalIncome();
@@ -465,6 +519,12 @@ public class HouseholdStats {
         totalBankBalancesEndPeriod = totalBankBalancesEndPeriodCounter;
         totalBankBalancesEndPeriodCounter = 0.0;
         
+        totalSocialHousingRent = totalSocialHousingRentCounter;
+        totalSocialHousingRentCounter = 0.0;
+        
+        totalDividendIncome = totalDividendIncomeCounter;
+        totalDividendIncomeCounter = 0.0;
+        
         totalConsumption = totalConsumptionCounter;
         totalSaving = totalSavingCounter;
         totalConsumptionCounter = 0.0;
@@ -508,6 +568,32 @@ public class HouseholdStats {
         totalHousingWealthConsumptionCounter = 0.0;
         totalDebtConsumptionCounter = 0.0;
         totalSavingForDeleveragingCounter = 0.0;
+        
+        activeBTLIncomeConsumption = activeBTLIncomeConsumptionCounter;
+        activeBTLFinancialWealthConsumption = activeBTLFinancialWealthConsumptionCounter;
+        activeBTLNetHousingWealthConsumption = activeBTLNetHousingWealthConsumptionCounter;
+        SSBIncomeConsumption = SSBIncomeConsumptionCounter;
+        SSBFinancialWealthConsumption = SSBFinancialWealthConsumptionCounter;
+        SSBNetHousingWealthConsumption = SSBNetHousingWealthConsumptionCounter;
+        inFirstHomeIncomeConsumption = inFirstHomeIncomeConsumptionCounter;
+        inFirstHomeFinancialWealthConsumption = inFirstHomeFinancialWealthConsumptionCounter;
+        inFirstHomeNetHousingWealthConsumption = inFirstHomeNetHousingWealthConsumptionCounter;
+        renterIncomeConsumption = renterIncomeConsumptionCounter;
+        renterFinancialWealthConsumption = renterFinancialWealthConsumptionCounter;
+        renterNetHousingWealthConsumption = renterNetHousingWealthConsumptionCounter;
+    	
+    	activeBTLIncomeConsumptionCounter = 0.0;
+        activeBTLFinancialWealthConsumptionCounter = 0.0;
+    	activeBTLNetHousingWealthConsumptionCounter = 0.0;
+    	SSBIncomeConsumptionCounter = 0.0;
+    	SSBFinancialWealthConsumptionCounter = 0.0;
+    	SSBNetHousingWealthConsumptionCounter = 0.0;
+    	inFirstHomeIncomeConsumptionCounter = 0.0;
+    	inFirstHomeFinancialWealthConsumptionCounter = 0.0;
+    	inFirstHomeNetHousingWealthConsumptionCounter = 0.0;
+    	renterIncomeConsumptionCounter = 0.0;
+    	renterFinancialWealthConsumptionCounter = 0.0;
+    	renterNetHousingWealthConsumptionCounter = 0.0;
         
     }
 
@@ -563,6 +649,47 @@ public class HouseholdStats {
 	public void recordPrincipalRepaymentDeceasedHousehold(double principal) {
 		totalPrincipalRepaymentDeceasedHouseholdCounter += principal;
 	}
+	
+	
+	// method to record agent-specific consumption in a more condensed way
+	private void recordAgentSpecificConsumption(Household h) {
+		// active BTL investors
+		if (h.behaviour.isPropertyInvestor() & h.getNProperties() > 1) {
+			activeBTLIncomeConsumptionCounter += h.getIncomeConsumption();
+			activeBTLFinancialWealthConsumptionCounter += h.getFinancialWealthConsumption();
+			activeBTLNetHousingWealthConsumptionCounter += h.getHousingWealthConsumption() + h.getDebtConsumption();
+			
+			// SSB -> homeowner and not in First Home
+		} else if (h.isHomeowner() & !h.isInFirstHome()){
+			++nSSB; 
+			SSBIncomeConsumptionCounter += h.getIncomeConsumption();
+			SSBFinancialWealthConsumptionCounter += h.getFinancialWealthConsumption();
+			SSBNetHousingWealthConsumptionCounter += h.getHousingWealthConsumption() + h.getDebtConsumption();
+			
+			// inFirstHome 
+		} else if (h.isHomeowner() & h.isInFirstHome()){
+			++nInFirstHome;
+			inFirstHomeIncomeConsumptionCounter += h.getIncomeConsumption();
+			inFirstHomeFinancialWealthConsumptionCounter += h.getFinancialWealthConsumption();
+			inFirstHomeNetHousingWealthConsumptionCounter += h.getHousingWealthConsumption() + h.getDebtConsumption();
+
+			// Renting (BTL, SSB and FTB)	
+		} else if (h.isRenting() | h.isInSocialHousing()) {
+			renterIncomeConsumptionCounter += h.getIncomeConsumption();
+			renterFinancialWealthConsumptionCounter += h.getFinancialWealthConsumption();
+			// there could be cases where households have inherited houses and move out of their home before
+			// selling off all their inherited houses 
+			renterNetHousingWealthConsumptionCounter += h.getHousingWealthConsumption() + h.getDebtConsumption();
+		} else {
+			System.out.println("weird, not a household that I know (consumption recorder)");
+		}
+
+	}
+	
+	
+//	public void record
+	
+	
     //----- Getter/setter methods -----//
 
     // Getters for numbers of households variables
@@ -575,6 +702,7 @@ public class HouseholdStats {
     public int getnNonBTLOwnerOccupier() { return nNonBTLOwnerOccupier; }
     int getnRenting() { return nRenting; }
     int getnNonBTLHomeless() { return nNonBTLHomeless; }
+    int getnFTBinSocialHousing() {return nFTBinSocialHousing;}
     int getnNonBTLBankruptcies() { return nNonBTLBankruptcies; }
     int getnOwnerOccupier() { return nBTLOwnerOccupier + nNonBTLOwnerOccupier; }
     int getnHomeless() { return nBTLHomeless + nNonBTLHomeless; }
@@ -654,6 +782,7 @@ public class HouseholdStats {
     double getTotalSaving() {return totalSaving; }
     double getTotalBankBalancesBeforeConsumption() { return totalBankBalancesBeforeConsumption; }
     // public because when dividends are distributed household-class needs to access this
+    public double getTotalBankBalancesVeryBeginningOfPeriod() { return totalBankBalancesVeryBeginningOfPeriod; }
     double getTotalBankBalanceEndowment() { return totalBankBalanceEndowment; }
     double getIncomeConsumption() { return totalIncomeConsumption; }
     double getFinancialWealthConsumption() { return totalFinancialWealthConsumption; }
@@ -685,3 +814,69 @@ public class HouseholdStats {
 		return totalBankBalancesEndPeriod;
 	}
 	
+	public double getTotalSocialHousingRent() {
+		return totalSocialHousingRent;
+	}
+	
+	public double getMonthlyTotalDividendIncome() {
+		return totalDividendIncome;
+	}
+
+	public int getnSSB() {
+		return nSSB;
+	}
+
+	public int getnInFirstHome() {
+		return nInFirstHome;
+	}
+
+	public double getActiveBTLIncomeConsumption() {
+		return activeBTLIncomeConsumption;
+	}
+
+	public double getActiveBTLFinancialWealthConsumption() {
+		return activeBTLFinancialWealthConsumption;
+	}
+
+	public double getActiveBTLNetHousingWealthConsumption() {
+		return activeBTLNetHousingWealthConsumption;
+	}
+
+	public double getSSBIncomeConsumption() {
+		return SSBIncomeConsumption;
+	}
+
+	public double getSSBFinancialWealthConsumption() {
+		return SSBFinancialWealthConsumption;
+	}
+
+	public double getSSBNetHousingWealthConsumption() {
+		return SSBNetHousingWealthConsumption;
+	}
+
+	public double getInFirstHomeIncomeConsumption() {
+		return inFirstHomeIncomeConsumption;
+	}
+
+	public double getInFirstHomeFinancialWealthConsumption() {
+		return inFirstHomeFinancialWealthConsumption;
+	}
+
+	public double getInFirstHomeNetHousingWealthConsumption() {
+		return inFirstHomeNetHousingWealthConsumption;
+	}
+
+	public double getRenterIncomeConsumption() {
+		return renterIncomeConsumption;
+	}
+
+	public double getRenterFinancialWealthConsumption() {
+		return renterFinancialWealthConsumption;
+	}
+	
+	public double getRenterNetHousingWealthConsumption() {
+		return renterNetHousingWealthConsumption;
+	}
+
+
+}

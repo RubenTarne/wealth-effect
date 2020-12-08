@@ -29,6 +29,8 @@ public class Household implements IHouseOwner {
     private double				monthlyGrossTotalIncome;
     private double 				monthlyNetTotalIncome;
     private double 				monthlyDisposableIncome;
+    private double 				monthlyDividendIncome;
+    private double				socialHousingRent;
     private double				equityPosition;
     private double				consumption;
     private double				incomeConsumption;
@@ -116,7 +118,9 @@ public class Household implements IHouseOwner {
     	// set payment counters and cashInjection to zero, so they can be updated 
     	principalPaidBack = 0.0;
     	principalPaidBackDueToHouseSale = 0.0;
+    	socialHousingRent = 0.0;
     	interestPaidBack = 0.0; 
+    	monthlyDividendIncome = 0.0;
     	rentalPayment = 0.0;
     	cashInjection = 0.0;
     	monthlyPayments = 0.0;
@@ -243,14 +247,26 @@ public class Household implements IHouseOwner {
     		//        	//	System.out.println("MonthlyDisposableIncome is negative: " + monthlyDisposableIncome);
     		//        	}
     	}
+    	// TODO implementing dividend payments here excludes them from taxation.
+    	// if true, Monthly Interest payments of t-1 will be distributed according to their share of deposits/totalDeposits 
+    	if(config.dividendPayments) {
+    		monthlyDividendIncome = calculateMonthlyDividendIncome();
+    		monthlyDisposableIncome += monthlyDividendIncome;
+       	}
+    	
     	// households in social housing pay rent equal to average local authority rent prices for England from 2013-14 
     	// https://data.london.gov.uk/dataset/local-authority-average-rents
     	// = 82.44 pounds of WEEKLY rent 
     	// TODO this is yearly rental cost of 3,957.12 pounds per year and can therefore be higher than private rents
     	if(home==null && !config.GERVersion) {
-    		monthlyDisposableIncome -= 4*82.44;
+    		socialHousingRent = 4*82.44;
+    		monthlyDisposableIncome -= socialHousingRent;
     		// in case disposable income becomes negative, assume the government covering the rent, so households don't dissave
-    		if(monthlyDisposableIncome<0) monthlyDisposableIncome=0;
+    		// adjust the social housing rent recorder
+    		if(monthlyDisposableIncome<0) {
+    			socialHousingRent = socialHousingRent+monthlyDisposableIncome;
+    			monthlyDisposableIncome=0;
+    		}
     	}
     	monthlyDisposableIncome -= monthlyPayments;
     	return monthlyDisposableIncome;
@@ -330,6 +346,13 @@ public class Household implements IHouseOwner {
     		monthlyGrossRentalIncome += rentalAgreement.nextPayment();
     	}
         return monthlyGrossRentalIncome;
+    }
+    
+    public double calculateMonthlyDividendIncome() {
+    	monthlyDividendIncome = Model.householdStats.getTotalInterestRepayments()
+    			*bankBalance/Math.max(Model.householdStats.getTotalBankBalancesVeryBeginningOfPeriod(),0.01);
+
+    	return monthlyDividendIncome;
     }
     
 //    // PAUL this method calculats airbnb rental income and counts the number of airbnbs rented out
@@ -1090,6 +1113,14 @@ public class Household implements IHouseOwner {
 	
 	public double returnMonthlyGrossTotalIncome() {
 		return monthlyGrossTotalIncome;
+	}
+	
+	public double getSocialHousingRent() {
+		return socialHousingRent;
+	}
+	
+	public double recordMonthlyDividendIncome() {
+		return monthlyDividendIncome;
 	}
 	
 	public int getnAirBnBRentedOut() {

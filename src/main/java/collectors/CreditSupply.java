@@ -45,6 +45,10 @@ public class CreditSupply {
 	public double newDownPaymentsApproved;
 	private double newPrincipalIssuedCounter;
 	private double newPrincipalIssued;	
+	
+	// record cash payments
+	private double cashPayments;
+	private double cashPaymentsCounter;
 
     //------------------------//
     //----- Constructors -----//
@@ -100,6 +104,10 @@ public class CreditSupply {
         newDownPayment = 0.0;
         newPrincipalIssued = newPrincipalIssuedCounter;
         newPrincipalIssuedCounter = 0.0;
+        
+        cashPayments = cashPaymentsCounter;
+        cashPaymentsCounter = 0.0;
+        
 	}
 	//TODO this is not newly issued credit, but total credit in the simulation at time 't'
 	public double getNewlyIssuedCredit() {
@@ -145,6 +153,10 @@ public class CreditSupply {
 
 		downpayments.addValue(approval.downPayment);
 	}
+	
+	public void recordCashPayment(double cashPayment) {
+		cashPaymentsCounter += cashPayment;
+	}
 
 	private void setArchiveLength(int archiveLength) {
 		oo_lti = new DescriptiveStatistics(archiveLength);
@@ -175,4 +187,6 @@ public class CreditSupply {
     double getTotalOOCredit() { return totalOOCredit; }
 
     double getNetCreditGrowth() { return netCreditGrowth; }
+    
+    double getCashPayments() {return cashPayments;}
 }
