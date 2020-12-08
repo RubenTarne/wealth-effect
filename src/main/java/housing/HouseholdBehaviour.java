@@ -152,7 +152,7 @@ public class HouseholdBehaviour {
 
 			// restrict consumption so that the wealth effect cannot decrease liquid wealth below the ratio 
 			// of twice the disposable income
-			if((bankBalance-disposableIncome-consumption)<config.liquidityPreference*disposableIncome) {
+			if((bankBalance-disposableIncome-(consumption-disposableIncome))<config.liquidityPreference*disposableIncome) {
 				consumption = incomeConsumption;
 			}
 
