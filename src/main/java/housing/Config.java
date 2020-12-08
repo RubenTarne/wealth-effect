@@ -182,6 +182,7 @@ public class Config {
     public double BTL_CHOICE_MIN_BANK_BALANCE;     // Minimun bank balance, as a percentage of the desired bank balance, to buy new properties
 
     // Bank parameters
+    boolean BTLinterestOnly;				// BTL investors get interest-only mortgages and repay the principal in one payment at the end of 25 years
     double LTVAdjustmentFactor;				// Sensitivity of the LTV parameter to the HPA
     private int MORTGAGE_DURATION_YEARS;    // Mortgage duration in years
     double BANK_INITIAL_RATE;               // Private bank initial interest rate

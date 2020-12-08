@@ -148,7 +148,7 @@ public class Bank {
 	 */
 	private double getMonthlyPaymentFactor(boolean isHome) {
 //		 TEST BTL receive normal credit where they pay off the principal as well.
-//		if(config.ALTERNATE_CONSUMPTION_FUNCTION) { return monthlyPaymentFactor;}
+		if(!config.BTLinterestOnly) { return monthlyPaymentFactor;}
 		if (isHome) {
 			return monthlyPaymentFactor; // Monthly payment factor to pay off the principal in N_PAYMENTS
 		} else {
