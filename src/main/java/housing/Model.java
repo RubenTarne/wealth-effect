@@ -81,13 +81,13 @@ public class Model {
         prng = new MersenneTwister(config.SEED);
 
         government = new Government();
-//        demographics = new Demographics(prng);
-//        construction = new Construction(prng);
+        demographics = new Demographics(prng);
+        construction = new Construction(prng);
         centralBank = new CentralBank();
         bank = new Bank(centralBank);
         households = new ArrayList<>(config.TARGET_POPULATION*2);
-//        houseSaleMarket = new HouseSaleMarket(prng);
-//        houseRentalMarket = new HouseRentalMarket(prng);
+        houseSaleMarket = new HouseSaleMarket(prng);
+        houseRentalMarket = new HouseRentalMarket(prng);
 
         recorder = new collectors.Recorder(outputFolder);
         transactionRecorder = new TransactionRecorder(outputFolder);
@@ -96,8 +96,8 @@ public class Model {
         creditSupply = new collectors.CreditSupply();
         coreIndicators = new collectors.CoreIndicators();
         householdStats = new collectors.HouseholdStats();
-//        housingMarketStats = new collectors.HousingMarketStats(houseSaleMarket);
-//        rentalMarketStats = new collectors.RentalMarketStats(housingMarketStats, houseRentalMarket);
+        housingMarketStats = new collectors.HousingMarketStats(houseSaleMarket);
+        rentalMarketStats = new collectors.RentalMarketStats(housingMarketStats, houseRentalMarket);
         agentRecorder = new collectors.AgentDataRecorder(outputFolder);
         agentDecisionRecorder = new collectors.AgentDecisionRecorder(outputFolder);
         
@@ -124,19 +124,19 @@ public class Model {
         // Perform config.N_SIMS simulations
 		for (nSimulation = 1; nSimulation <= config.N_SIMS; nSimulation += 1) {
 			
-			// TEST change the seed every monte-carlo simulation, adding int nSimulation to it 
-			// (-1, so the first iteration is the seed implemented in the config)
-			// Model.config.setSeed(config.SEED + nSimulation-1);
-			// update the Mersenne twister with the new seed as well as the instances, where MersenneTwister
-			// is used
-			prng.setSeed(config.SEED + nSimulation-1);
-	        demographics = new Demographics(prng);
-	        construction = new Construction(prng);
-	        houseSaleMarket = new HouseSaleMarket(prng);
-	        houseRentalMarket = new HouseRentalMarket(prng);
-	        // construct the housing Market Stats with the new houseSaleMarket
-	        housingMarketStats = new collectors.HousingMarketStats(houseSaleMarket);
-	        rentalMarketStats = new collectors.RentalMarketStats(housingMarketStats, houseRentalMarket);
+//			// TEST change the seed every monte-carlo simulation, adding int nSimulation to it 
+//			// (-1, so the first iteration is the seed implemented in the config)
+//			// Model.config.setSeed(config.SEED + nSimulation-1);
+//			// update the Mersenne twister with the new seed as well as the instances, where MersenneTwister
+//			// is used
+//			prng.setSeed(config.SEED + nSimulation-1);
+//	        demographics = new Demographics(prng);
+//	        construction = new Construction(prng);
+//	        houseSaleMarket = new HouseSaleMarket(prng);
+//	        houseRentalMarket = new HouseRentalMarket(prng);
+//	        // construct the housing Market Stats with the new houseSaleMarket
+//	        housingMarketStats = new collectors.HousingMarketStats(houseSaleMarket);
+//	        rentalMarketStats = new collectors.RentalMarketStats(housingMarketStats, houseRentalMarket);
 
 
             // For each simulation, open files for writing single-run results
