@@ -166,7 +166,7 @@ public class Household implements IHouseOwner {
     	Entry<House, PaymentAgreement> entry;
     	House h;
     	PaymentAgreement payment;
-    	//TODO TEST -> deactivate the housing market, basically....
+    	//TODO TEST -> deactivate the housing market from time t on, i.e. deactivate the following code 
     	if (Model.getTime() < config.startTimeDeactivateTransactions) {
         	// Iterate over these house-paymentAgreement pairs...
         	while (paymentIt.hasNext()) {
