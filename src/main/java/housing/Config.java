@@ -74,6 +74,7 @@ public class Config {
     boolean ALTERNATE_CONSUMPTION_FUNCTION;			// make consumption solely dependent on income and wealth
     boolean procyclicalRentalMarket;				// 
     
+    boolean anticyclicalCBLTVs; 					
     // GER version 
     boolean GERVersion;			
     

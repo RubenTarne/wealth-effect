@@ -35,6 +35,9 @@ public class CentralBank {
     private double ownerOccupierLTVLimit; // Loan-To-Value upper limit for owner-occupying mortgages
     private double BTLLTVLimit; // Loan-To-Value upper limit for BTL mortgages
     private double maxFractionMortgagesOverLTVLimit;// Fraction of all mortgages allowed to exceed the Loan-To-Value limit
+    
+    
+    private boolean macroprudentialActive; // true, if the caps of the CB are active, false, if only the commercial banks LTVs are active
 
     //-------------------//
     //----- Methods -----//
@@ -55,6 +58,8 @@ public class CentralBank {
         ownerOccupierLTVLimit = config.centralBankOwnerOccupierLTVLimit;
         BTLLTVLimit = config.centralBankBTLLTVLimit;
         maxFractionMortgagesOverLTVLimit = config.centralBankMaxFractionMortgagesOverLTVLimit;
+        
+        macroprudentialActive = false;
     }
 
 	/**
@@ -62,20 +67,42 @@ public class CentralBank {
      *
 	 * @param coreIndicators The current value of the core indicators
 	 */
-	public void step(collectors.CoreIndicators coreIndicators) {
-		/* Use this method to express the policy strategy of the central bank by setting the value of the various limits
-		 in response to the current value of the core indicators.
+    public void step(collectors.CoreIndicators coreIndicators) {
+    	//		 Use this method to express the policy strategy of the central bank by setting the value of the various limits
+    	//		 in response to the current value of the core indicators.
+    	//
+    	//		 Example policy: if house price growth is greater than 0.001 then FTB LTV limit is 0.75 otherwise (if house
+    	//		 price growth is less than or equal to  0.001) FTB LTV limit is 0.95
+    	//		 Example code:
+    	//		 	if(Model.housingMarketStats.getLongTermHPA() > 0.001 && Model.getTime() >1000) {
+    	//		 		firstTimeBuyerLTVLimit = 0.75;
+    	//		 		ownerOccupierLTVLimit = 0.75;
+    	//		 		BTLLTVLimit = 0.75;
+    	//		 	} else {
+    	//		 		firstTimeBuyerLTVLimit = 0.999;
+    	//		 		ownerOccupierLTVLimit = 0.999;
+    	//		 		BTLLTVLimit = 0.999;
+    	//		 	}
+    	
+    	if(config.anticyclicalCBLTVs) {
+    		if(macroprudentialActive == true & Model.housingMarketStats.getAnnualHPA() < -0.2) {
+    			macroprudentialActive = false;
+    		} else if(macroprudentialActive == false & Model.housingMarketStats.getQoQHousePriceGrowth() > 0.0){
+    			macroprudentialActive = true;
+    		}
 
-		 Example policy: if house price growth is greater than 0.001 then FTB LTV limit is 0.75 otherwise (if house
-		 price growth is less than or equal to  0.001) FTB LTV limit is 0.95
-		 Example code:
-		 	if(coreIndicators.getHousePriceGrowth() > 0.001) {
-		 		firstTimeBuyerLTVLimit = 0.75;
-		 	} else {
-		 		firstTimeBuyerLTVLimit = 0.95;
-		 	}
-		 */
-	}
+    		if(macroprudentialActive == true) {
+    			firstTimeBuyerLTVLimit = config.centralBankFirstTimeBuyerLTVLimit;
+    			ownerOccupierLTVLimit = config.centralBankOwnerOccupierLTVLimit;
+    			BTLLTVLimit = config.centralBankBTLLTVLimit;
+    		} else {
+    			firstTimeBuyerLTVLimit = 0.999;
+    			ownerOccupierLTVLimit = 0.999;
+    			BTLLTVLimit = 0.999;
+    		}
+    	}
+
+    }
 
     /**
      * Get the Loan-To-Income ratio limit applicable to a given household. Note that Loan-To-Income constraints apply
@@ -162,5 +189,10 @@ public class CentralBank {
     //----- Getter/setter methods -----//
 
     double getBaseRate() { return baseRate; }
+    
+    public int getCentralBankLTVsOnOff() {
+    	if(macroprudentialActive) return 1;
+    	else return 0;
+    }
 
 }
