@@ -33,6 +33,7 @@ public class Recorder {
     private PrintWriter shareEmptyHouses;
     private PrintWriter BTLMarketShare;
     private PrintWriter financialWealth;
+    private PrintWriter totalConsumption;
     private PrintWriter incomeConsumption;
     private PrintWriter financialConsumption;
     private PrintWriter grossHousingWealthConsumption;
@@ -88,6 +89,8 @@ public class Recorder {
                 		"UTF-8");
             	financialWealth = new PrintWriter(outputFolder + "coreIndicator-financialWealth.csv",
                 		"UTF-8");
+            	totalConsumption = new PrintWriter(outputFolder + "coreIndicator-totalConsumption.csv", 
+            			"UTF-8");
             	incomeConsumption = new PrintWriter(outputFolder + "coreIndicator-incomeConsumption.csv",
                 		"UTF-8");
             	financialConsumption = new PrintWriter(outputFolder + "coreIndicator-financialConsumption.csv",
@@ -212,6 +215,7 @@ public class Recorder {
             	shareEmptyHouses.print(", ");
             	BTLMarketShare.print(", ");
                 financialWealth.print(", ");
+                totalConsumption.print(", ");
                 incomeConsumption.print(", ");
                 financialConsumption.print(", ");
                 grossHousingWealthConsumption.print(", ");
@@ -243,6 +247,7 @@ public class Recorder {
         	shareEmptyHouses.print(Model.coreIndicators.getShareEmptyHouses());
         	BTLMarketShare.print(Model.coreIndicators.getBTLMarketShare());
             financialWealth.print(Model.coreIndicators.getTotalFinancialWealth());
+            totalConsumption.print(Model.coreIndicators.getTotalConsumption());
             incomeConsumption.print(Model.coreIndicators.getTotalIncomeConsumption());
             financialConsumption.print(Model.coreIndicators.getTotalFinancialConsumption());
             grossHousingWealthConsumption.print(Model.coreIndicators.getTotalGrossHousingWealthConsumption());
@@ -396,6 +401,7 @@ public class Recorder {
             shareEmptyHouses.println("");
             BTLMarketShare.println("");
             financialWealth.println("");
+            totalConsumption.println("");
             incomeConsumption.println("");
             financialConsumption.println("");
             grossHousingWealthConsumption.println("");
@@ -435,6 +441,7 @@ public class Recorder {
         	shareEmptyHouses.close();
         	BTLMarketShare.close();
             financialWealth.close();
+            totalConsumption.close();
             incomeConsumption.close();
             financialConsumption.close();
             grossHousingWealthConsumption.close();

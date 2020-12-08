@@ -86,6 +86,10 @@ public class CoreIndicators {
 		return Model.householdStats.getTotalBankBalancesVeryBeginningOfPeriod();
 	}
 	
+	double getTotalConsumption() {
+		return Model.householdStats.getTotalConsumption();		
+	}
+	
 	double getTotalIncomeConsumption() {
 		return Model.householdStats.getIncomeConsumption();
 	}
