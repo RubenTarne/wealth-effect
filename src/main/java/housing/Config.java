@@ -77,7 +77,12 @@ public class Config {
     boolean dividendPayments;					// interest payments by mortgage holders end up as dividend income to households (boolean)
     boolean anticyclicalCBLTVs; 					
     // GER version 
-    boolean GERVersion;			
+    boolean GERVersion;		
+    
+    // First time buyer Saving Motive
+    boolean FTBSavingMotive;					// if true, First-time buyers have a a higher saving motive than other households and no wealth effect
+    double	minIncomePercentile; 				// very low-income FTB cannot save for downpayment, therefore the households need to be above this threshold in the income distribution
+    double	MPCForFirstTimeBuyers; 				// what is the marginal propensity to consume out of disposable (!) income i.e. after accounting for essential consumption
     
     // income inequality parameters
     boolean risingIncomeInequality; 				// implement rising employment income inequality
@@ -210,7 +215,7 @@ public class Config {
     double centralBankOwnerOccupierLTVLimit; 	// Loan-To-Value upper limit for owner-occupying mortgages
     double centralBankBTLLTVLimit; 				// Loan-To-Value upper limit for BTL mortgages
     double centralBankMaxFractionMortgagesOverLTVLimit; // Fraction of all mortgages allowed to exceed the Loan-To-Value limit
-
+   
 
     // Construction sector parameters
     double CONSTRUCTION_HOUSES_PER_HOUSEHOLD;   // Target ratio of houses per household
