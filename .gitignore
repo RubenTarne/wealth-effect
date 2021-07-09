@@ -42,3 +42,43 @@ muStar\.csv
 mu\.csv
 
 morris-input\.csv
+
+*.rds
+
+*.RData
+
+wealth-effect-git.Rproj
+
+statistical output R/
+
+Working-Paper-vulnerability-Notebook.md
+
+outputsCalibrationTest_may2021.csv
+
+R code files/
+
+Working paper drafts/Working-Paper-vulnerability-Notebook_files/
+
+Working paper drafts/Working-Paper-vulnerability-Notebook_cache/
+
+Working paper drafts/Working-Paper-vulnerability-2nd-Draft_cache/
+
+Working paper drafts/smaller paper file for testing output/
+
+Working paper drafts/Micro data preparation for paper - vulnerability/
+
+Working paper drafts/libs/
+
+Working paper drafts/index/
+
+Working paper drafts/Working-Paper-vulnerability-Notebook.tex
+
+Working paper drafts/Working-Paper-vulnerability-Notebook.nb.html
+
+Working paper drafts/Working-Paper-vulnerability-Notebook.html
+
+Working paper drafts/Working-Paper-vulnerability-2nd-Draft.tex
+
+Working paper drafts/library.bib
+
+Working paper drafts/financial-vulnerability-over-the-housing-cycle.html
