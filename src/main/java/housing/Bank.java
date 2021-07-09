@@ -142,20 +142,70 @@ public class Bank {
 		monthlyPaymentFactor = r/(1.0 - Math.pow(1.0 + r, -config.derivedParams.N_PAYMENTS));
         monthlyPaymentFactorBTL = r;
 	}
+//
+//	/**
+//	 * Get the monthly payment factor, i.e., the monthly payment on a mortgage as a fraction of the mortgage principal.
+//	 */
+//	private double getMonthlyPaymentFactor(boolean isHome, double Age) {  // Age is only included here as I test if to use Adrians age limitation proposition
+////		 TEST BTL receive normal credit where they pay off the principal as well.
+//		if(!config.BTLinterestOnly) { return monthlyPaymentFactor;}
+//		if (isHome) {
+//			return monthlyPaymentFactor; // Monthly payment factor to pay off the principal in N_PAYMENTS
+//		} else {
+//			return monthlyPaymentFactorBTL; // Monthly payment factor for interest-only mortgages
+//		}
+//	}
 
-	/**
-	 * Get the monthly payment factor, i.e., the monthly payment on a mortgage as a fraction of the mortgage principal.
-	 */
-	private double getMonthlyPaymentFactor(boolean isHome) {
-//		 TEST BTL receive normal credit where they pay off the principal as well.
-		if(!config.BTLinterestOnly) { return monthlyPaymentFactor;}
+    /**
+     * Get the monthly payment factor, i.e., the monthly payment on a mortgage as a fraction of the mortgage principal.
+     * This takes into account age-based restrictions for non-BTL mortgages via the number of payments.
+     */
+	private double getMonthlyPaymentFactor(boolean isHome, double age) {
+		double r = getMortgageInterestRate() / config.constants.MONTHS_IN_YEAR;
+		// For non-BTL purchases, compute payment factor to pay off the principal in the agreed number of payments,
+		// coherent with any mortgage length age-based restrictions
 		if (isHome) {
-			return monthlyPaymentFactor; // Monthly payment factor to pay off the principal in N_PAYMENTS
-		} else {
-			return monthlyPaymentFactorBTL; // Monthly payment factor for interest-only mortgages
+			if (getNPayments(true, age) > 0) {
+				return r / (1.0 - Math.pow(1.0 + r, -getNPayments(true, age)));
+			} else {
+				throw new RuntimeException("Trying to find monthly payment factor for a zero payments mortgage");
+			}
+			// For BTL purchases, compute interest-only payment factor (age-based restrictions applied elsewhere)
+		} else if(!config.BTLinterestOnly){ return monthlyPaymentFactor;
+		}else {	return monthlyPaymentFactorBTL;
 		}
 	}
-
+	
+    /**
+     * Compute the number of payments, taking into account differentiated age-based restrictions for BTL and non-BTL
+     * bids. In particular, BTL mortgages always have full maturity, but they can only be approved before the household
+     * reaches the age limit. On the contrary, non-BTL mortgages start seeing their maturities reduced before the age
+     * limit, in such a way that the full amount is repaid by the time the household reaches this limit.
+     */
+    private int getNPayments(boolean isHome, double age) {
+        // For non-BTL purchases, any mortgage principal must be repaid when the household turns 65
+        if (isHome) {
+            if (age <= config.BANK_AGE_LIMIT - config.MORTGAGE_DURATION_YEARS) {
+//            	if (age <= 75 - config.MORTGAGE_DURATION_YEARS) {
+                return config.MORTGAGE_DURATION_YEARS * config.constants.MONTHS_IN_YEAR;
+            } else if (age <= config.BANK_AGE_LIMIT) {
+//            } else if (age <= 75) {
+            	// as the rentOrPurchase method is based on yearly costs for house 
+            	return Math.min(1, (int) ((config.BANK_AGE_LIMIT - age) * config.constants.MONTHS_IN_YEAR));
+            } else {
+                return 0;
+            }
+        // For BTL purchases, a mortgage can only be approved before the household turns 65
+        } else {
+            if (age <= 65) {
+                return config.MORTGAGE_DURATION_YEARS * config.constants.MONTHS_IN_YEAR;
+            } else {
+                return 0;
+            }
+        }
+    }
+	
+	
 	/**
 	 * Method to arrange a Mortgage and get a MortgageAgreement object.
 	 * 
@@ -172,7 +222,12 @@ public class Bank {
 		if(approval.principal > 0.0) {
 			mortgages.add(approval);
 			Model.creditSupply.recordLoan(h, approval);
-
+//			// TEST RUBEN - age limit - only for BTL investors, the others are accounted for by the 
+//			// getMonthlyPaymentFactor() function
+//			if(!isHome & h.getAge() >65) {
+//				approval.principal = 0;
+//				return approval;
+//			}
 			// check if loans would be over LTI and/or LTV limit and count them
 			if(isHome) {
 				// .. first, record OO mortgage for movers and first-time buyers and check if over LTI limit
@@ -235,7 +290,7 @@ public class Bank {
 			if(isHome) {
 				// --- affordability constraint TODO: affordability for BTL?
 				affordable_principal = Math.max(0.0,config.CENTRAL_BANK_AFFORDABILITY_COEFF*h.getMonthlyNetEmploymentIncome())
-	                    / getMonthlyPaymentFactor(isHome);
+	                    / getMonthlyPaymentFactor(isHome, h.getAge());
 				approval.principal = Math.min(approval.principal, affordable_principal);
 
 				// --- lti constraint
@@ -264,11 +319,30 @@ public class Bank {
 			approval.downPayment = desiredDownPayment;
 			approval.principal = housePrice - desiredDownPayment;
 		}
+//
+//		approval.monthlyPayment = approval.principal* getMonthlyPaymentFactor(isHome, h.getAge());
+//		approval.nPayments = config.derivedParams.N_PAYMENTS;
+//		approval.monthlyInterestRate = r;
+//		approval.purchasePrice = approval.principal + approval.downPayment;
+//		
+        /*
+         * Set the rest of the variables of the MortgageAgreement object
+         */
 
-		approval.monthlyPayment = approval.principal* getMonthlyPaymentFactor(isHome);
-		approval.nPayments = config.derivedParams.N_PAYMENTS;
-		approval.monthlyInterestRate = r;
-		approval.purchasePrice = approval.principal + approval.downPayment;
+        if (getNPayments(isHome, h.getAge()) > 0) {
+            approval.monthlyPayment = approval.principal * getMonthlyPaymentFactor(isHome, h.getAge());
+        } else {
+            approval.monthlyPayment = 0.0;
+        }
+        approval.nPayments = getNPayments(isHome, h.getAge());
+        approval.monthlyInterestRate = getMortgageInterestRate() / config.constants.MONTHS_IN_YEAR;
+        approval.purchasePrice = approval.principal + approval.downPayment;
+        // Throw error and stop program if requested mortgage has down-payment larger than household's liquid wealth
+        if (approval.downPayment > liquidWealth) {
+            System.out.println("Error at Bank.requestApproval(), down-payment larger than household's bank balance: "
+                    + "downpayment = " + approval.downPayment + ", bank balance = " + liquidWealth);
+            System.exit(0);
+        }
 
 		/*
 		 * RECORDER ******************************************************
@@ -318,7 +392,7 @@ public class Bank {
 		if(isHome) { // No LTI nor affordability constraints for BTL investors
 			// Affordability constraint
             affordability_max_price = max_downpayment + Math.max(0.0, config.CENTRAL_BANK_AFFORDABILITY_COEFF
-                    * h.getMonthlyNetEmploymentIncome())/getMonthlyPaymentFactor(isHome);
+                    * h.getMonthlyNetEmploymentIncome())/getMonthlyPaymentFactor(isHome, h.getAge());
 			max_price = Math.min(max_price, affordability_max_price);
             // Loan-To-Income constraint
 			lti_max_price = h.getAnnualGrossEmploymentIncome()*getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome)

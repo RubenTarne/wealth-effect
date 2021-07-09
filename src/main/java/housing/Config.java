@@ -191,7 +191,8 @@ public class Config {
     // Bank parameters
     boolean BTLinterestOnly;				// BTL investors get interest-only mortgages and repay the principal in one payment at the end of 25 years
     double LTVAdjustmentFactor;				// Sensitivity of the LTV parameter to the HPA
-    private int MORTGAGE_DURATION_YEARS;    // Mortgage duration in years
+    int MORTGAGE_DURATION_YEARS;    // Mortgage duration in years
+    int BANK_AGE_LIMIT;							// age limit for the mortgages for owner-occupiers to be repaid by
     double BANK_INITIAL_RATE;               // Private bank initial interest rate
     double bankMortgageInterestSpread;		// If fixedInterestRates = true, private bank sets the following interest rate (double)
     double BANK_CREDIT_SUPPLY_TARGET;       // Bank's target supply of credit per household per month
