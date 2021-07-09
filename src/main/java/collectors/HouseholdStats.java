@@ -153,11 +153,171 @@ public class HouseholdStats {
     // For sensitivity analysis
     public DescriptiveStatistics totalNetWealth; 
     
+    // for calculation of median income
+    private DescriptiveStatistics grossTotalIncome;
+    private double medianIncome; 
+    // for a quasi-collateral channel 
+    private DescriptiveStatistics debtServiceRatios;
+    private double medianDSR;
+    private DescriptiveStatistics vulnerableHouseholdsDSR;
+    private double medianDSRVulnerableHouseholds;
+    private DescriptiveStatistics vulnerableHouseholdsAge;
+    private double medianAgeVulnerableHouseholds;
+    private DescriptiveStatistics nonVulnerableHouseholdsAge;
+    private double medianAgeNonVulnerableHouseholds;
+    private int indebtedHouseholds;
+    private int indebtedHouseholdsCounter;
+    // fields for caluclating exposures at default
+    private double ExposureAtDefaultDSR30; 
+    private double ExposureAtDefaultDSR30Counter;
+	private double ExposureAtDefaultDSR35;
+	private double ExposureAtDefaultDSR35Counter; 
+	private double ExposureAtDefaultDSR70; 
+	private double ExposureAtDefaultDSR70Counter;
+	private double ExposureAtDefaultFinancialMarginBLC20;
+	private double ExposureAtDefaultFinancialMarginBLC20Counter;
+	private double ExposureAtDefaultFinancialMarginBLC40;
+	private double ExposureAtDefaultFinancialMarginBLC40Counter;
+	private double ExposureAtDefaultFinancialMarginBLC70;
+	private double ExposureAtDefaultFinancialMarginBLC70Counter;
+	
+	private double ExposureAtDefaultAmpudiaMeasure1;
+	private double ExposureAtDefaultAmpudiaMeasure1Counter;
+	private double ExposureAtDefaultAmpudiaMeasure2;
+	private double ExposureAtDefaultAmpudiaMeasure2Counter;
+	
+	private int HouseholdsWithLessThan400p;
+	private int HouseholdsWithLessThan400pCounter;
+	private double lowDepositHouseholdConsumption ;
+	private double lowDepositHouseholdConsumptionCounter ;
+	private double lowDepositHouseholdSaving; 
+	private double lowDepositHouseholdSavingCounter; 
+	private int householdsVulnerableAmpudiaMeasure2;
+	private int householdsVulnerableAmpudiaMeasure2Counter;
+	private int activeBTLVulnerable; 
+	private int activeBTLVulnerableCounter;
+	private int SSBVulnerable;
+	private int SSBVulnerableCounter;
+	private int inFirstHomeVulnerable;
+	private int inFirstHomeVulnerableCounter;
+	private double activeBTLEAD ; 
+	private double activeBTLEADCounter;
+	private double SSBEAD; 
+	private double SSBEADCounter; 
+	private double inFirstHomeEAD;
+	private double inFirstHomeEADCounter;
+    
+	private double unemploymentExposureAtDefaultAmpudiaMeasure2 ;
+	private double unemploymentExposureAtDefaultAmpudiaMeasure2Counter ;
+	private int unemploymentHouseholdsVulnerableAmpudiaMeasure2 ;
+	private int unemploymentHouseholdsVulnerableAmpudiaMeasure2Counter ;
+
+	private int unemploymentActiveBTLVulnerable;
+	private int unemploymentActiveBTLVulnerableCounter ;
+	private double unemploymentActiveBTLEAD ;
+	private double unemploymentActiveBTLEADCounter; 
+
+	private int unemploymentSSBVulnerable ;
+	private int unemploymentSSBVulnerableCounter;
+	private double unemploymentSSBEAD ;
+	private double unemploymentSSBEADCounter ;
+
+	private int unemploymentinFirstHomeVulnerable;
+	private int unemploymentinFirstHomeVulnerableCounter;
+	private double unemploymentinFirstHomeEAD ;
+	private double unemploymentinFirstHomeEADCounter ;
+	
+	private int vulnerableByPurchase ;
+	private int vulnerableByPurchaseCounter ;
+	private int vulnerableByConsumption ;
+	private int vulnerableByConsumptionCounter ;
+	private int vulnerableByOther ;
+	private int vulnerableByOtherCounter ;
+	
+	private int notVulnerableBecauseSale ;
+	private int notVulnerableBecauseSaleCounter ;
+	private int notVulnerableBecauseSaving ;
+	private int notVulnerableBecauseSavingCounter ;
+	private int notVulnerableBecauseOther ;
+	private int notVulnerableBecauseOtherCounter;
+	
+	private int vulnerableByPurchaseBTL ;
+	private int vulnerableByPurchaseBTLCounter ;
+	private int vulnerableByPurchaseSSB ;
+	private int vulnerableByPurchaseSSBCounter ;
+	private int vulnerableByPurchaseInFirstHome ;
+	private int vulnerableByPurchaseInFirstHomeCounter ;
+	private int vulnerableByConsumptionBTL ;
+	private int vulnerableByConsumptionBTLCounter ;
+	private int vulnerableByConsumptionSSB ;
+	private int vulnerableByConsumptionSSBCounter ;
+	private int vulnerableByConsumptionInFirstHome ;
+	private int vulnerableByConsumptionInFirstHomeCounter ;
+	private int vulnerableByOtherBTL ;
+	private int vulnerableByOtherBTLCounter ;
+	private int vulnerableByOtherSSB ;
+	private int vulnerableByOtherSSBCounter ;
+	private int vulnerableByOtherInFirstHome ;
+	private int vulnerableByOtherInFirstHomeCounter ;
+
+	private int notVulnerableBecauseSaleBTL ;
+	private int notVulnerableBecauseSaleBTLCounter ;
+	private int notVulnerableBecauseSaleSSB ;
+	private int notVulnerableBecauseSaleSSBCounter ;
+	private int notVulnerableBecauseSaleInFirstHome ;
+	private int notVulnerableBecauseSaleInFirstHomeCounter ;
+	private int notVulnerableBecauseSaleOthers ;
+	private int notVulnerableBecauseSaleOthersCounter ;
+	private int notVulnerableBecauseSavingBTL ;
+	private int notVulnerableBecauseSavingBTLCounter ;
+	private int notVulnerableBecauseSavingSSB ;
+	private int notVulnerableBecauseSavingSSBCounter ;
+	private int notVulnerableBecauseSavingInFirstHome ;
+	private int notVulnerableBecauseSavingInFirstHomeCounter ;
+	private int notVulnerableBecauseSavingOthers ;
+	private int notVulnerableBecauseSavingOthersCounter ;
+	private int notVulnerableBecauseOtherBTL ;
+	private int notVulnerableBecauseOtherBTLCounter ;
+	private int notVulnerableBecauseOtherSSB ;
+	private int notVulnerableBecauseOtherSSBCounter ;
+	private int notVulnerableBecauseOtherInFirstHome ;
+	private int notVulnerableBecauseOtherInFirstHomeCounter ;
+	private int notVulnerableBecauseOtherOthers ;
+	private int notVulnerableBecauseOtherOthersCounter ;
+	
+	private int nowVulnerableByPurchase;
+	private int	nowVulnerableByPurchaseCounter;
+	private int nowVulnerableByPurchaseBTL;
+	private int nowVulnerableByPurchaseBTLCounter;
+	private int nowVulnerableByPurchaseSSB;
+	private int nowVulnerableByPurchaseSSBCounter;
+	private int nowVulnerableByPurchaseFTB;
+	private int nowVulnerableByPurchaseFTBCounter;
+	
+	private int nowVulnerableByDissaving;
+	private int	nowVulnerableByDissavingCounter;
+	private int nowVulnerableByDissavingBTL;
+	private int nowVulnerableByDissavingBTLCounter;
+	private int nowVulnerableByDissavingSSB;
+	private int nowVulnerableByDissavingSSBCounter;
+	private int nowVulnerableByDissavingFTB;
+	private int nowVulnerableByDissavingFTBCounter;
+	
+	private int nowVulnerableByOther;
+	private int	nowVulnerableByOtherCounter;
+	private int nowVulnerableByOtherBTL;
+	private int nowVulnerableByOtherBTLCounter;
+	private int nowVulnerableByOtherSSB;
+	private int nowVulnerableByOtherSSBCounter;
+	private int nowVulnerableByOtherFTB;
+	private int nowVulnerableByOtherFTBCounter;
+	
     //-------------------//
     //----- Methods -----//
     //-------------------//
 
-    /**
+
+	/**
      * Sets initial values for all relevant variables to enforce a controlled first measure for statistics
      */
     public void init() {
@@ -224,6 +384,12 @@ public class HouseholdStats {
         totalDebtConsumption = 0.0;
         totalSavingForDeleveraging = 0.0;
         totalNetWealth = new DescriptiveStatistics();
+        grossTotalIncome = new DescriptiveStatistics();
+        debtServiceRatios = new DescriptiveStatistics();
+        vulnerableHouseholdsDSR = new DescriptiveStatistics();
+        vulnerableHouseholdsAge = new DescriptiveStatistics();
+        nonVulnerableHouseholdsAge = new DescriptiveStatistics();
+        
         totalDividendIncome = 0.0;
     }
 
@@ -275,6 +441,16 @@ public class HouseholdStats {
         nNegativeEquity = 0;
         totalNetWealth.clear();
         totalDividendIncome = 0.0;
+        medianIncome = grossTotalIncome.getPercentile(50);
+        grossTotalIncome.clear();
+        medianDSR = debtServiceRatios.getPercentile(50);
+        debtServiceRatios.clear();
+        medianDSRVulnerableHouseholds = vulnerableHouseholdsDSR.getPercentile(50);
+        vulnerableHouseholdsDSR.clear();
+        medianAgeVulnerableHouseholds = vulnerableHouseholdsAge.getPercentile(50);
+        vulnerableHouseholdsAge.clear();
+        medianAgeNonVulnerableHouseholds = nonVulnerableHouseholdsAge.getPercentile(50);
+        nonVulnerableHouseholdsAge.clear();
         // Time stamp householdStats mesoRecorders
         Model.microDataRecorder.timeStampSingleRunSingleVariableFiles(Model.getTime(), config.recordBankBalance,
                 config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate, config.recordMonthlyGrossTotalIncome,
@@ -284,13 +460,30 @@ public class HouseholdStats {
                 config.recordSavingForDeleveraging, config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge,
                 config.recordTransactionRevenue, config.recordId, config.recordNewCredit, config.recordPrincipalRepRegular
                 , config.recordPrincipalRepIrregular, config.recordPrincipalRepSale, config.recordBankcuptcyCashInjection, 
-        		config.recordPrincipalPaidBackInheritance);
+        		config.recordPrincipalPaidBackInheritance, config.recordFinancialVulnerability);
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
-        	// This records the agent-specific consumption and number of SSB and inFirstHome agents
-        	// (as agent classes are divided here different than in the main method)
-        	recordAgentSpecificConsumption(h);
         	
+        	// only start the following code when the recorder starts
+        	if(Model.getTime()>=(config.TIME_TO_START_RECORDING)) {
+        		// This records the agent-specific consumption and number of SSB and inFirstHome agents
+            	// (as agent classes are divided here different than in the main method)
+            	recordAgentSpecificConsumption(h);
+        	}
+        	
+        	// record the exposure at default for each household with different measures
+        	countExposureAtDefault(h);
+        	
+        	// record the age of non-vulnerable but indebted households (debt is a negative value!)
+        	if (!h.isVulnerable() && h.getTotalDebt() < 0){
+        		nonVulnerableHouseholdsAge.addValue(h.getAge());
+        	}
+        	 if(h.isVulnerable()) {
+        		 vulnerableHouseholdsAge.addValue(h.getAge());
+        		 countCurrentlyVulnerableHouseholds(h); 
+        	 } 
+
+        	        	
             totalMonthlyDisposableIncomeCounter += h.returnMonthlyDisposableIncome();
             totalBankBalancesEndPeriodCounter += h.getBankBalance();
             totalSocialHousingRentCounter += h.getSocialHousingRent();
@@ -384,6 +577,19 @@ public class HouseholdStats {
         	if(Model.getTime()>=config.TIME_TO_START_RECORDING) {
         		totalNetWealth.addValue(h.getEquityPosition());
         	}
+        	// start recording of median income earlier, as in t the value for t-3 is used
+        	// this way the vulnerability measures can be calculated before the recording starts
+
+        	grossTotalIncome.addValue(h.returnMonthlyGrossTotalIncome());
+
+        	
+        	// implement to capture median DSR for a quasi-collateral channel
+        	double debtPayments = h.getPrincipalPaidBack() + h.getInterestPaidBack();
+        	if(debtPayments > 0) {
+        		debtServiceRatios.addValue(debtPayments/h.returnMonthlyGrossTotalIncome());
+        		indebtedHouseholdsCounter += 1;
+        	}
+        	
         	
             // Record household micro-data 
         	if(Model.getTime()>=config.TIME_TO_START_RECORDING) {
@@ -497,9 +703,19 @@ public class HouseholdStats {
         		if(config.recordPrincipalPaidBackInheritance) {
         			Model.microDataRecorder.recordPrincipalPaidBackInheritance(Model.getTime(), h.getPrincipalPaidBackForInheritance());
         			h.resetPrincipalPaidBackForInheritance();
-        		}    
+        		}
+        		if(config.recordFinancialVulnerability) {
+        			Model.microDataRecorder.recordFinancialVulnerability(Model.getTime(), h.getVulnerableBecause(), h.getVulnerableSince());
+        		}
         	}
         }
+        
+        
+    	//
+		if(Model.getTime()>= (config.TIME_TO_START_RECORDING-1)) recordExposureAtDefault();
+		
+             
+        
         // Annualise monthly income data
         activeBTLAnnualisedTotalIncome *= config.constants.MONTHS_IN_YEAR;
         ownerOccupierAnnualisedTotalIncome *= config.constants.MONTHS_IN_YEAR;
@@ -595,6 +811,10 @@ public class HouseholdStats {
     	renterFinancialWealthConsumptionCounter = 0.0;
     	renterNetHousingWealthConsumptionCounter = 0.0;
         
+    	indebtedHouseholds = indebtedHouseholdsCounter;
+    	indebtedHouseholdsCounter = 0;
+
+
     }
 
     /**
@@ -686,13 +906,409 @@ public class HouseholdStats {
 
 	}
 	
+	// Method to record the Exposure at default (i.e. summing all debt of households fitting the 
+	// conditions) (following Ampudia et al. 2016) when looking at 
+	// several indicators, like Debt-Service ratios, negative financial margins, and Ampudias
+	// measure of financial vulnerability (with certain calibrations)
+	// using household net income, as it is closest to Ampudias disposable income
+	// (while not being directly defined in their paper)
+	private void countExposureAtDefault(Household h) {
+		//		System.out.println("countExposureAtDefault at time: " + Model.getTime() + " with id: " + h.getId());
+		// debt is recorded in negative values, but for the purpose of this method use positive value
+		double householdDebt = - h.getTotalDebt();
+		double debtPayments = h.getPrincipalPaidBack() + h.getInterestPaidBack();
+		double deposits = h.getBankBalance();
+
+		// count the households with less than X dollars in their bank account
+		if (deposits < 400) { 
+			HouseholdsWithLessThan400pCounter += 1; 
+			lowDepositHouseholdConsumptionCounter += h.getConsumption();
+			lowDepositHouseholdSavingCounter += h.getAnnualGrossTotalIncome();
+		}
+
+		// TODO record these measures at the beginning of the period in the household.java file to be consistent
+		
+		
+		// calculate the financial margins with different basic-living cost calculations
+		// fin. margin is hh net income less mortgage payments (i.e. disposable income + essential consumption)
+		// only households holding debt are considered as we are interested in the exposure at default.
+		double financialMargin20BLC = h.returnMonthlyDisposableIncome() + 
+				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+				0.2*medianIncome; 
+		double financialMargin40BLC = h.returnMonthlyDisposableIncome() + 
+				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+				0.4*medianIncome;
+		double financialMargin70BLC = h.returnMonthlyDisposableIncome() + 
+				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+				0.7*medianIncome;
+		double financialMargin = h.returnMonthlyDisposableIncome() + 
+				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+				config.povertyLinePercentMedianIncome * medianIncome;
+		if (financialMargin20BLC < 0) { ExposureAtDefaultFinancialMarginBLC20Counter +=  householdDebt;	}
+		if (financialMargin40BLC < 0) { ExposureAtDefaultFinancialMarginBLC40Counter +=  householdDebt;	}
+		if (financialMargin70BLC < 0) { ExposureAtDefaultFinancialMarginBLC70Counter +=  householdDebt;	}
+		//
+		//			// calculate finanical margin if unemployment was to hit 
+		//			// TODO: decide how much lower income would be on employment benefits
+		//			double unemployedFinancialMargin70BLC = 0.7*h.returnMonthlyDisposableIncome() + 
+		//					config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+		//					0.7*medianIncome;
+
+		// calculate the Ampudia measure. We use BLC = 0.7 but have to find the month-measure to arrive at 
+		// 2.4% EAD (following the EAB measure for household debt averaged over 2015-19)
+		double monthsCoveredByDepositsVar = deposits / financialMargin;
+		// test the negative financial margin is at least X times the deposits
+		if(financialMargin < 0 & (- config.finVulMonthsToCover * financialMargin) > deposits) {
+			// do not simply add all debt, but between 0 and 100% of it, according to a linear function 
+			// with 100% for no deposits and 0% for deposits being equal to the month threshold
+			double factor = monthsCoveredByDepositsVar / 6  + 1; 
+			ExposureAtDefaultAmpudiaMeasure1Counter += factor * householdDebt;
+		}
+		if(h.isVulnerable()) {
+			double factor = h.getEADFactor(); 
+			ExposureAtDefaultAmpudiaMeasure2Counter += factor * householdDebt;
+			householdsVulnerableAmpudiaMeasure2Counter += 1;
+			// active BTL
+			if (h.behaviour.isPropertyInvestor() & h.getNProperties() > 1) {
+				activeBTLVulnerableCounter += 1;
+				activeBTLEADCounter += factor * householdDebt;
+				// record cause for vulnerability if the household became newly vulnerable
+				if(!h.isVulnerableTMinus1()) vulnerabilityCause(h, "BTL");
+				// SSB -> homeowner and not in First Home
+				// households need not to be homeowners right now (at the end of period t)
+				// because they might just have sold their home. Which will render them 
+				// non-vulnerable by the beginning of t+1, where their reason for becoming
+				// non-vulnerable will be recorded (sales)
+			} else if (!h.isInFirstHome()){
+				SSBVulnerableCounter += 1;
+				SSBEADCounter += factor * householdDebt;
+				if(!h.isVulnerableTMinus1()) vulnerabilityCause(h, "SSB");
+				// inFirstHome 
+			} else if (h.isInFirstHome()){
+				inFirstHomeVulnerableCounter += 1;
+				inFirstHomeEADCounter += factor * householdDebt;
+				if(!h.isVulnerableTMinus1()) vulnerabilityCause(h, "inFirstHome");
+				// Renting (BTL, SSB and FTB)	
+			} else if (!h.isVulnerableTMinus1()){
+				System.out.println("weird, not a (newly vulnerable) household that I know (vulnerability recorder)");
+			}
+		}
+
+
+		// check if household used to be vulnerable, but is not this period anymore
+		// then record the reason why it isn't anymore
+		if(!h.isVulnerable() && h.isVulnerableTMinus1()) {
+			notVulnerableBecause(h);
+			// reset the period where the households vulnerability started
+			h.setVulnerableSince(-1);
+		}
+
+		// only count households with mortgage debt that already pay their debt (so the period after they bought a house)
+		if(householdDebt > 0 && debtPayments > 0) { 
+			double DSR = debtPayments/h.returnMonthlyNetTotalIncome();
+			// record Debt of households matching the following conditions:
+			// debt-service ratios above...
+			if(DSR >= 0.3)  { ExposureAtDefaultDSR30Counter += householdDebt; }
+			if(DSR >= 0.35) { ExposureAtDefaultDSR35Counter += householdDebt; }
+			if(DSR >= 0.7)  { ExposureAtDefaultDSR70Counter += householdDebt; }
+
+			// TODO WARNING this code is adopted, the variable names are not coherent
+			if(DSR > 0.35) {
+				unemploymentExposureAtDefaultAmpudiaMeasure2Counter += householdDebt;
+				unemploymentHouseholdsVulnerableAmpudiaMeasure2Counter += 1;
+				// active BTL
+				if (h.behaviour.isPropertyInvestor() && h.getNProperties() > 1) {
+					unemploymentActiveBTLVulnerableCounter += 1;
+					unemploymentActiveBTLEADCounter += householdDebt;
+					// SSB -> homeowner and not in First Home
+				} else if (h.isHomeowner() && !h.isInFirstHome()){
+					unemploymentSSBVulnerableCounter += 1;
+					unemploymentSSBEADCounter += householdDebt;
+					// inFirstHome 
+				} else if (h.isHomeowner() && h.isInFirstHome()){
+					unemploymentinFirstHomeVulnerableCounter += 1;
+					unemploymentinFirstHomeEADCounter += householdDebt;
+					// Renting (BTL, SSB and FTB)	
+				} else {
+					System.out.println("weird, not a household that I know (vulnerability recorder)");
+				}
+			}
+		}
+	}
+	
+	// households that became vulnerable enter here
+	private void vulnerabilityCause(Household h, String AgentType) {
+		// saving is calculated with the values from the beginning of the period
+		double saving = h.returnMonthlyDisposableIncome() - h.getConsumption();
+		int lastPurchasePeriod = (Model.getTime() - h.getLastHousePurchasePeriod());
+
+		// first case: household just bought a home (in period t-1)
+		if( lastPurchasePeriod == 1 ) { // normal: lastPurchasePeriod ==1 or  <= 120
+			h.setVulnerableBecause("purchase");
+			vulnerableByPurchaseCounter += 1;
+			if (AgentType == "BTL") {
+				vulnerableByPurchaseBTLCounter += 1;
+			}
+			else if (AgentType == "SSB") vulnerableByPurchaseSSBCounter += 1;
+			else if (AgentType == "inFirstHome") vulnerableByPurchaseInFirstHomeCounter += 1;
+		} 
+		// second case: household didn't not just buy a home and was dissaving
+		else if ( lastPurchasePeriod != 1 && saving < 0.0 ) { // normal: lastPurchasePeriod !=1 or > 120
+			h.setVulnerableBecause("dissaving");
+			vulnerableByConsumptionCounter +=1;
+			if (AgentType == "BTL") {
+				vulnerableByConsumptionBTLCounter += 1;
+			}
+			else if (AgentType == "SSB") vulnerableByConsumptionSSBCounter += 1;
+			else if (AgentType == "inFirstHome") vulnerableByConsumptionInFirstHomeCounter += 1;
+//			System.out.println("lastPurchase: " + lastPurchasePeriod);
+		} 
+		// third case: odd, if it didn't dissave and didn't just buy a home, how can
+		// it become vulnerable?
+		else if ( lastPurchasePeriod != 1 && saving >= 0.0 ) { // normal: lastPurchasePeriod !=1 or > 120
+//			System.out.println("weird, household became vulnerable without dissaving or buying a house");
+			h.setVulnerableBecause("other");
+			vulnerableByOtherCounter += 1;
+			if (AgentType == "BTL") vulnerableByOtherBTLCounter += 1;
+			else if (AgentType == "SSB") vulnerableByOtherSSBCounter += 1;
+			else if (AgentType == "inFirstHome") vulnerableByOtherInFirstHomeCounter += 1;
+		} else {
+			System.out.println("weird, household became vulnerable but not caught by the functions before");
+		}
+		h.setVulnerableSince(Model.getTime());
+	}
+		
+	// households that have been vulnerable the period before but are not anymore enter here
+	// to record the reason they are not vulnerable anymore
+	// additionally their agent-type has to be determined
+	private void notVulnerableBecause(Household h) {
+		// saving is calculated with the values from the beginning of the period
+		double saving = h.returnMonthlyDisposableIncome() - h.getConsumption();
+		int lastSalePeriod 	   = (Model.getTime() - h.getLastHouseSalePeriod());
+				
+		// first case: household sold property (thereby possibly reducing debt payments and increasing deposits)
+		if( lastSalePeriod == 1 ) {
+			notVulnerableBecauseSaleCounter += 1;
+			if(h.behaviour.isPropertyInvestor() & h.getNProperties() > 1) notVulnerableBecauseSaleBTLCounter +=1;
+			// I do not check for homeownership, as some households become renters, but the important information is what they were before
+			else if (!h.isInFirstHome()) notVulnerableBecauseSaleSSBCounter +=1; 
+			else if (h.isInFirstHome()) notVulnerableBecauseSaleInFirstHomeCounter +=1;
+			else notVulnerableBecauseSaleOthersCounter +=1;
+		} 
+		// second case: household did not sell anything recently but saved 
+		else if ( lastSalePeriod != 1 && saving > 0.0 ) {
+			notVulnerableBecauseSavingCounter += 1;
+			if(h.behaviour.isPropertyInvestor() & h.getNProperties() > 1) {
+				notVulnerableBecauseSavingBTLCounter += 1;
+//				System.out.println("have been vulnerable for: " + (Model.getTime()-h.getVulnerableSince()) + "  because: " + h.getVulnerableBecause());
+			}
+			else if (h.isHomeowner() & !h.isInFirstHome()) notVulnerableBecauseSavingSSBCounter +=1;
+			else if (h.isHomeowner() & h.isInFirstHome()) notVulnerableBecauseSavingInFirstHomeCounter +=1;
+			else notVulnerableBecauseSavingOthersCounter += 1;
+		} 	
+		else if ( lastSalePeriod != 1 && saving <= 0.0 ) {
+//			System.out.println("weird, household ceased to be vulnerable without saving or selling a house");
+			notVulnerableBecauseOtherCounter += 1;
+			if(h.behaviour.isPropertyInvestor() & h.getNProperties() > 1) notVulnerableBecauseOtherBTLCounter += 1;
+			else if (h.isHomeowner() & !h.isInFirstHome()) notVulnerableBecauseOtherSSBCounter += 1;
+			else if (h.isHomeowner() & h.isInFirstHome()) notVulnerableBecauseOtherInFirstHomeCounter += 1;
+			else notVulnerableBecauseOtherOthersCounter += 1;
+		} else {
+			System.out.println("weird, household ceased to be vulnerable but not caught by the functions before");
+		}
+		h.setVulnerableBecause("not vulnerable");
+	}
+	
+	
+	private void countCurrentlyVulnerableHouseholds(Household h){
+		vulnerableHouseholdsDSR.addValue( ( h.getPrincipalPaidBack() + h.getInterestPaidBack() ) / h.returnMonthlyGrossTotalIncome() );
+		if(h.getVulnerableBecause() == "purchase") nowVulnerableByPurchaseCounter += 1;
+		if(h.getVulnerableBecause() == "dissaving") nowVulnerableByDissavingCounter += 1;
+		if(h.getVulnerableBecause() == "other") nowVulnerableByOtherCounter += 1;
+		
+		// agent-specific
+		if (h.behaviour.isPropertyInvestor() & h.getNProperties() > 1) {
+			if(h.getVulnerableBecause() == "purchase") nowVulnerableByPurchaseBTLCounter += 1;
+			if(h.getVulnerableBecause() == "dissaving") nowVulnerableByDissavingBTLCounter += 1;
+			if(h.getVulnerableBecause() == "other") nowVulnerableByOtherBTLCounter += 1;
+		}
+		else if (h.isHomeowner() & !h.isInFirstHome()) {
+			if(h.getVulnerableBecause() == "purchase") nowVulnerableByPurchaseSSBCounter += 1;
+			if(h.getVulnerableBecause() == "dissaving") nowVulnerableByDissavingSSBCounter += 1;
+			if(h.getVulnerableBecause() == "other") nowVulnerableByOtherSSBCounter += 1;			
+		}
+		else if (h.isHomeowner() & h.isInFirstHome()) {
+			if(h.getVulnerableBecause() == "purchase") nowVulnerableByPurchaseFTBCounter += 1;
+			if(h.getVulnerableBecause() == "dissaving") nowVulnerableByDissavingFTBCounter += 1;
+			if(h.getVulnerableBecause() == "other") nowVulnerableByOtherFTBCounter += 1;			
+		}			
+	}
+	
+		
+	// Method to calculate the EaD by setting the nominal debt in relation to aggregate debt
+	private void recordExposureAtDefault() {
+
+		double aggregateDebt = Model.creditSupply.getTotalBTLCredit() + Model.creditSupply.getTotalOOCredit();
+		ExposureAtDefaultDSR30 = ExposureAtDefaultDSR30Counter / aggregateDebt;
+		ExposureAtDefaultDSR30Counter = 0;
+		ExposureAtDefaultDSR35 = ExposureAtDefaultDSR35Counter / aggregateDebt;
+		ExposureAtDefaultDSR35Counter = 0;
+		ExposureAtDefaultDSR70 = ExposureAtDefaultDSR70Counter / aggregateDebt;
+		ExposureAtDefaultDSR70Counter = 0;
+
+		ExposureAtDefaultFinancialMarginBLC20= ExposureAtDefaultFinancialMarginBLC20Counter / aggregateDebt;
+		ExposureAtDefaultFinancialMarginBLC20Counter = 0;
+		ExposureAtDefaultFinancialMarginBLC40= ExposureAtDefaultFinancialMarginBLC40Counter / aggregateDebt;
+		ExposureAtDefaultFinancialMarginBLC40Counter = 0;
+		ExposureAtDefaultFinancialMarginBLC70= ExposureAtDefaultFinancialMarginBLC70Counter / aggregateDebt;
+		ExposureAtDefaultFinancialMarginBLC70Counter = 0;
+
+		ExposureAtDefaultAmpudiaMeasure1 = ExposureAtDefaultAmpudiaMeasure1Counter / aggregateDebt;
+		ExposureAtDefaultAmpudiaMeasure1Counter = 0;
+		ExposureAtDefaultAmpudiaMeasure2 = ExposureAtDefaultAmpudiaMeasure2Counter / aggregateDebt;
+		ExposureAtDefaultAmpudiaMeasure2Counter = 0;
+
+		HouseholdsWithLessThan400p = HouseholdsWithLessThan400pCounter;
+		HouseholdsWithLessThan400pCounter = 0;
+		lowDepositHouseholdConsumption = lowDepositHouseholdConsumptionCounter ;
+		lowDepositHouseholdConsumptionCounter = 0;
+		lowDepositHouseholdSaving = lowDepositHouseholdSavingCounter;
+		lowDepositHouseholdSavingCounter = 0; 
+
+
+		householdsVulnerableAmpudiaMeasure2 = householdsVulnerableAmpudiaMeasure2Counter;
+		householdsVulnerableAmpudiaMeasure2Counter = 0;
+
+		activeBTLVulnerable = activeBTLVulnerableCounter; 
+		activeBTLVulnerableCounter = 0;
+		SSBVulnerable = SSBVulnerableCounter;
+		SSBVulnerableCounter = 0;
+		inFirstHomeVulnerable = inFirstHomeVulnerableCounter;
+		inFirstHomeVulnerableCounter = 0;
+
+		activeBTLEAD = activeBTLEADCounter / aggregateDebt; 
+		activeBTLEADCounter = 0;
+		SSBEAD = SSBEADCounter / aggregateDebt; 
+		SSBEADCounter = 0; 
+		inFirstHomeEAD = inFirstHomeEADCounter / aggregateDebt;
+		inFirstHomeEADCounter = 0;
+
+		// Unemployment simulation
+		unemploymentExposureAtDefaultAmpudiaMeasure2 = unemploymentExposureAtDefaultAmpudiaMeasure2Counter / aggregateDebt;
+		unemploymentExposureAtDefaultAmpudiaMeasure2Counter = 0;
+		unemploymentHouseholdsVulnerableAmpudiaMeasure2 = unemploymentHouseholdsVulnerableAmpudiaMeasure2Counter ;
+		unemploymentHouseholdsVulnerableAmpudiaMeasure2Counter = 0;
+
+		unemploymentActiveBTLVulnerable = unemploymentActiveBTLVulnerableCounter;
+		unemploymentActiveBTLVulnerableCounter = 0;
+		unemploymentActiveBTLEAD = unemploymentActiveBTLEADCounter / aggregateDebt;
+		unemploymentActiveBTLEADCounter = 0; 
+
+		unemploymentSSBVulnerable = unemploymentSSBVulnerableCounter;
+		unemploymentSSBVulnerableCounter = 0;
+		unemploymentSSBEAD = unemploymentSSBEADCounter / aggregateDebt;
+		unemploymentSSBEADCounter = 0;
+
+		unemploymentinFirstHomeVulnerable = unemploymentinFirstHomeVulnerableCounter;
+		unemploymentinFirstHomeVulnerableCounter = 0;
+		unemploymentinFirstHomeEAD = unemploymentinFirstHomeEADCounter / aggregateDebt;
+		unemploymentinFirstHomeEADCounter = 0;
+		
+		vulnerableByPurchase = vulnerableByPurchaseCounter;
+		vulnerableByPurchaseCounter = 0;
+		vulnerableByConsumption = vulnerableByConsumptionCounter;
+		vulnerableByConsumptionCounter = 0;
+		vulnerableByOther = vulnerableByOtherCounter;
+		vulnerableByOtherCounter = 0;
+		
+		notVulnerableBecauseSale = notVulnerableBecauseSaleCounter;
+		notVulnerableBecauseSaleCounter = 0;
+		notVulnerableBecauseSaving = notVulnerableBecauseSavingCounter;
+		notVulnerableBecauseSavingCounter = 0;
+		notVulnerableBecauseOther = notVulnerableBecauseOtherCounter;
+		notVulnerableBecauseOtherCounter = 0;
+		
+		vulnerableByPurchaseBTL = vulnerableByPurchaseBTLCounter;
+		vulnerableByPurchaseBTLCounter = 0;
+		vulnerableByPurchaseSSB = vulnerableByPurchaseSSBCounter;
+		vulnerableByPurchaseSSBCounter = 0;
+		vulnerableByPurchaseInFirstHome = vulnerableByPurchaseInFirstHomeCounter;
+		vulnerableByPurchaseInFirstHomeCounter = 0;
+		vulnerableByConsumptionBTL = vulnerableByConsumptionBTLCounter;
+		vulnerableByConsumptionBTLCounter = 0;
+		vulnerableByConsumptionSSB = vulnerableByConsumptionSSBCounter;
+		vulnerableByConsumptionSSBCounter = 0;
+		vulnerableByConsumptionInFirstHome = vulnerableByConsumptionInFirstHomeCounter;
+		vulnerableByConsumptionInFirstHomeCounter = 0;
+		vulnerableByOtherBTL = vulnerableByOtherBTLCounter;
+		vulnerableByOtherBTLCounter = 0;
+		vulnerableByOtherSSB = vulnerableByOtherSSBCounter;
+		vulnerableByOtherSSBCounter = 0;
+		vulnerableByOtherInFirstHome = vulnerableByOtherInFirstHomeCounter;
+		vulnerableByOtherInFirstHomeCounter = 0;
+
+		notVulnerableBecauseSaleBTL = notVulnerableBecauseSaleBTLCounter;
+		notVulnerableBecauseSaleBTLCounter = 0;
+		notVulnerableBecauseSaleSSB = notVulnerableBecauseSaleSSBCounter;
+		notVulnerableBecauseSaleSSBCounter = 0;
+		notVulnerableBecauseSaleInFirstHome = notVulnerableBecauseSaleInFirstHomeCounter;
+		notVulnerableBecauseSaleInFirstHomeCounter = 0;
+		notVulnerableBecauseSaleOthers = notVulnerableBecauseSaleOthersCounter;
+		notVulnerableBecauseSaleOthersCounter = 0;
+		notVulnerableBecauseSavingBTL = notVulnerableBecauseSavingBTLCounter;
+		notVulnerableBecauseSavingBTLCounter = 0;
+		notVulnerableBecauseSavingSSB = notVulnerableBecauseSavingSSBCounter;
+		notVulnerableBecauseSavingSSBCounter = 0;
+		notVulnerableBecauseSavingInFirstHome = notVulnerableBecauseSavingInFirstHomeCounter;
+		notVulnerableBecauseSavingInFirstHomeCounter = 0;
+		notVulnerableBecauseSavingOthers = notVulnerableBecauseSavingOthersCounter;
+		notVulnerableBecauseSavingOthersCounter = 0;
+		notVulnerableBecauseOtherBTL = notVulnerableBecauseOtherBTLCounter;
+		notVulnerableBecauseOtherBTLCounter = 0;
+		notVulnerableBecauseOtherSSB = notVulnerableBecauseOtherSSBCounter;
+		notVulnerableBecauseOtherSSBCounter = 0;
+		notVulnerableBecauseOtherInFirstHome = notVulnerableBecauseOtherInFirstHomeCounter;
+		notVulnerableBecauseOtherInFirstHomeCounter = 0;
+		notVulnerableBecauseOtherOthers = notVulnerableBecauseOtherOthersCounter;
+		notVulnerableBecauseOtherOthersCounter = 0;
+		
+		nowVulnerableByPurchase = nowVulnerableByPurchaseCounter;
+		nowVulnerableByPurchaseCounter = 0;
+		nowVulnerableByPurchaseBTL = nowVulnerableByPurchaseBTLCounter;
+		nowVulnerableByPurchaseBTLCounter = 0;
+		nowVulnerableByPurchaseSSB = nowVulnerableByPurchaseSSBCounter;
+		nowVulnerableByPurchaseSSBCounter = 0;
+		nowVulnerableByPurchaseFTB = nowVulnerableByPurchaseFTBCounter;
+		nowVulnerableByPurchaseFTBCounter = 0;
+		
+		nowVulnerableByDissaving = nowVulnerableByDissavingCounter;
+		nowVulnerableByDissavingCounter = 0;
+		nowVulnerableByDissavingBTL = nowVulnerableByDissavingBTLCounter;
+		nowVulnerableByDissavingBTLCounter = 0;
+		nowVulnerableByDissavingSSB = nowVulnerableByDissavingSSBCounter;
+		nowVulnerableByDissavingSSBCounter = 0;
+		nowVulnerableByDissavingFTB = nowVulnerableByDissavingFTBCounter;
+		nowVulnerableByDissavingFTBCounter = 0;
+		
+		nowVulnerableByOther = nowVulnerableByOtherCounter;
+		nowVulnerableByOtherCounter = 0;
+		nowVulnerableByOtherBTL = nowVulnerableByOtherBTLCounter;
+		nowVulnerableByOtherBTLCounter = 0;
+		nowVulnerableByOtherSSB = nowVulnerableByOtherSSBCounter;
+		nowVulnerableByOtherSSBCounter = 0;
+		nowVulnerableByOtherFTB = nowVulnerableByOtherFTBCounter;
+		nowVulnerableByOtherFTBCounter = 0;
+		
+	}
+	
 	
 //	public void record
 	
 	
     //----- Getter/setter methods -----//
 
-    // Getters for numbers of households variables
+
+	// Getters for numbers of households variables
     int getnBTL() { return nBTL; }
     int getnActiveBTL() { return nActiveBTL; }
     int getnBTLOwnerOccupier() { return nBTLOwnerOccupier; }
@@ -877,6 +1493,293 @@ public class HouseholdStats {
 	public double getRenterNetHousingWealthConsumption() {
 		return renterNetHousingWealthConsumption;
 	}
+	
+	public double getExposureAtDefaultDSR30() {
+		return ExposureAtDefaultDSR30;
+	}
 
+	public double getExposureAtDefaultDSR35() {
+		return ExposureAtDefaultDSR35;
+	}
 
+	public double getExposureAtDefaultDSR70() {
+		return ExposureAtDefaultDSR70;
+	}
+
+	public double getExposureAtDefaultFinancialMarginBLC20() {
+		return ExposureAtDefaultFinancialMarginBLC20;
+	}
+
+	public double getExposureAtDefaultFinancialMarginBLC40() {
+		return ExposureAtDefaultFinancialMarginBLC40;
+	}
+
+	public double getExposureAtDefaultFinancialMarginBLC70() {
+		return ExposureAtDefaultFinancialMarginBLC70;
+	}
+	
+    public double getExposureAtDefaultAmpudiaMeasure1() {
+		return ExposureAtDefaultAmpudiaMeasure1;
+	}
+
+	public double getExposureAtDefaultAmpudiaMeasure2() {
+		return ExposureAtDefaultAmpudiaMeasure2;
+	}
+
+	public int getHouseholdsWithLessThan400p() {
+		return HouseholdsWithLessThan400p;
+	}
+
+	public int getHouseholdsVulnerableAmpudiaMeasure2() {
+		return householdsVulnerableAmpudiaMeasure2;
+	}
+
+	public int getActiveBTLVulnerable() {
+		return activeBTLVulnerable;
+	}
+
+	public int getSSBVulnerable() {
+		return SSBVulnerable;
+	}
+
+	public int getInFirstHomeVulnerable() {
+		return inFirstHomeVulnerable;
+	}
+
+	public double getActiveBTLEAD() {
+		return activeBTLEAD;
+	}
+
+	public double getSSBEAD() {
+		return SSBEAD;
+	}
+
+	public double getInFirstHomeEAD() {
+		return inFirstHomeEAD;
+	}
+
+    public double getLowDepositHouseholdConsumption() {
+		return lowDepositHouseholdConsumption;
+	}
+
+	public double getLowDepositHouseholdSaving() {
+		return lowDepositHouseholdSaving;
+	}
+
+	public double getUnemploymentExposureAtDefaultAmpudiaMeasure2() {
+		return unemploymentExposureAtDefaultAmpudiaMeasure2;
+	}
+
+	public int getUnemploymentHouseholdsVulnerableAmpudiaMeasure2() {
+		return unemploymentHouseholdsVulnerableAmpudiaMeasure2;
+	}
+
+	public int getUnemploymentActiveBTLVulnerable() {
+		return unemploymentActiveBTLVulnerable;
+	}
+
+	public double getUnemploymentActiveBTLEAD() {
+		return unemploymentActiveBTLEAD;
+	}
+
+	public int getUnemploymentSSBVulnerable() {
+		return unemploymentSSBVulnerable;
+	}
+
+	public double getUnemploymentSSBEAD() {
+		return unemploymentSSBEAD;
+	}
+
+	public int getUnemploymentinFirstHomeVulnerable() {
+		return unemploymentinFirstHomeVulnerable;
+	}
+
+	public double getUnemploymentinFirstHomeEAD() {
+		return unemploymentinFirstHomeEAD;
+	}
+	
+	public int getVulnerableByPurchase() {
+		return vulnerableByPurchase;
+	}
+
+	public int getVulnerableByConsumption() {
+		return vulnerableByConsumption;
+	}
+	
+	public int getVulnerableByOther() {
+		return vulnerableByOther;
+	}
+
+	public int getNotVulnerableBecauseSale() {
+		return notVulnerableBecauseSale;
+	}
+
+	public int getNotVulnerableBecauseSaving() {
+		return notVulnerableBecauseSaving;
+	}
+	
+	public int getNotVulnerableBecauseOther() {
+		return notVulnerableBecauseOther;
+	}
+	
+
+	public int getVulnerableByPurchaseBTL() {
+		return vulnerableByPurchaseBTL;
+	}
+
+	public int getVulnerableByPurchaseSSB() {
+		return vulnerableByPurchaseSSB;
+	}
+
+	public int getVulnerableByPurchaseInFirstHome() {
+		return vulnerableByPurchaseInFirstHome;
+	}
+
+	public int getVulnerableByConsumptionBTL() {
+		return vulnerableByConsumptionBTL;
+	}
+
+	public int getVulnerableByConsumptionSSB() {
+		return vulnerableByConsumptionSSB;
+	}
+
+	public int getVulnerableByConsumptionInFirstHome() {
+		return vulnerableByConsumptionInFirstHome;
+	}
+
+	public int getVulnerableByOtherBTL() {
+		return vulnerableByOtherBTL;
+	}
+
+	public int getVulnerableByOtherSSB() {
+		return vulnerableByOtherSSB;
+	}
+
+	public int getVulnerableByOtherInFirstHome() {
+		return vulnerableByOtherInFirstHome;
+	}
+
+	public int getNotVulnerableBecauseSaleBTL() {
+		return notVulnerableBecauseSaleBTL;
+	}
+
+	public int getNotVulnerableBecauseSaleSSB() {
+		return notVulnerableBecauseSaleSSB;
+	}
+
+	public int getNotVulnerableBecauseSaleInFirstHome() {
+		return notVulnerableBecauseSaleInFirstHome;
+	}
+
+	public int getNotVulnerableBecauseSaleOthers() {
+		return notVulnerableBecauseSaleOthers;
+	}
+
+	public int getNotVulnerableBecauseSavingBTL() {
+		return notVulnerableBecauseSavingBTL;
+	}
+
+	public int getNotVulnerableBecauseSavingSSB() {
+		return notVulnerableBecauseSavingSSB;
+	}
+
+	public int getNotVulnerableBecauseSavingInFirstHome() {
+		return notVulnerableBecauseSavingInFirstHome;
+	}
+
+	public int getNotVulnerableBecauseSavingOthers() {
+		return notVulnerableBecauseSavingOthers;
+	}
+
+	public int getNotVulnerableBecauseOtherBTL() {
+		return notVulnerableBecauseOtherBTL;
+	}
+
+	public int getNotVulnerableBecauseOtherSSB() {
+		return notVulnerableBecauseOtherSSB;
+	}
+
+	public int getNotVulnerableBecauseOtherInFirstHome() {
+		return notVulnerableBecauseOtherInFirstHome;
+	}
+
+	public int getNotVulnerableBecauseOtherOthers() {
+		return notVulnerableBecauseOtherOthers;
+	}
+	
+
+	public int getNowVulnerableByPurchase() {
+		return nowVulnerableByPurchase;
+	}
+
+	public int getNowVulnerableByPurchaseBTL() {
+		return nowVulnerableByPurchaseBTL;
+	}
+
+	public int getNowVulnerableByPurchaseSSB() {
+		return nowVulnerableByPurchaseSSB;
+	}
+
+	public int getNowVulnerableByPurchaseFTB() {
+		return nowVulnerableByPurchaseFTB;
+	}
+
+	public int getNowVulnerableByDissaving() {
+		return nowVulnerableByDissaving;
+	}
+
+	public int getNowVulnerableByDissavingBTL() {
+		return nowVulnerableByDissavingBTL;
+	}
+
+	public int getNowVulnerableByDissavingSSB() {
+		return nowVulnerableByDissavingSSB;
+	}
+
+	public int getNowVulnerableByDissavingFTB() {
+		return nowVulnerableByDissavingFTB;
+	}
+
+	public int getNowVulnerableByOther() {
+		return nowVulnerableByOther;
+	}
+
+	public int getNowVulnerableByOtherBTL() {
+		return nowVulnerableByOtherBTL;
+	}
+
+	public int getNowVulnerableByOtherSSB() {
+		return nowVulnerableByOtherSSB;
+	}
+
+	public int getNowVulnerableByOtherFTB() {
+		return nowVulnerableByOtherFTB;
+	}
+
+	public double getMonthlyMedianIncome() {
+		return medianIncome;
+	}
+	
+	public double getMedianDebtServiceRatio() {
+		return medianDSR;
+	}
+	
+	public double getMedianDSRVulnerableHouseholds() {
+		return medianDSRVulnerableHouseholds;
+	}
+
+	public double getMedianAgeVulnerableHouseholds() {
+		return medianAgeVulnerableHouseholds;
+	}
+	
+	public double getMedianAgeNonVulnerableHouseholds() {
+		return medianAgeNonVulnerableHouseholds;
+	}
+
+	public int getIndebtedHouseholds() {
+		return indebtedHouseholds;
+	}
+	
+	
+	
 }

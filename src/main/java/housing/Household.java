@@ -54,6 +54,10 @@ public class Household implements IHouseOwner {
     private boolean                         isFirstTimeBuyer;
     private boolean							isInFirstHome;
     private boolean                         isBankrupt;
+    private boolean							isVulnerable; // is the household vulnerable now?
+    private boolean							vulnerableTMinus1; // has the household been vulnerable in the period before?
+    private int								vulnerableSince; // records the period the household became vulnerable last
+    private String							vulnerableBecause; // records a string standing for the reason (set in householdStats) the household became vulnerable ("not vulnerable" if not)
     private double 							monthlyPayments;
     private double							principalPaidBack; // records how much of mortgage principal this household paid back this period
     private double							principalPaidBackForInheritance; // this records the repayment of principal the bequeather paid back, before passing its wealth on to this household
@@ -66,6 +70,9 @@ public class Household implements IHouseOwner {
     private double 							cashInjection; // records the amount of cash injection when household goes bankrupt
     private double							netHouseTransactionRevenue; // records the households income due to the sale of a house or household expenditure for buying a house (negative value)
     private double							newCredit; // new credit (principal) taken out is recorded hereter
+    private int								lastHousePurchasePeriod; // records the period of last house purchase (indiscriminate of home or investment property)
+    private int								lastHouseSalePeriod; // records the period of last house sale (indiscriminate of home or investment property)
+    private double							ExposureAtDefaultFactor; // factor for calculating the Exposure at default (following Ampudia et al. (2016)
     private double							airBnBRentalIncome; //PAUL rental income by AirBnB investors
     private int								nAirBnBRentedOut; // PAUL keep track of the number of airbnbs rented out
     
@@ -85,9 +92,15 @@ public class Household implements IHouseOwner {
         isFirstTimeBuyer = true;
         isInFirstHome = false;
         isBankrupt = false;
+        isVulnerable = false;
+        vulnerableTMinus1 = false;
+        vulnerableSince = -1;
+        vulnerableBecause = "not vulnerable";
         id = ++id_pool;
         incomePercentile = this.prng.nextDouble();
         behaviour = new HouseholdBehaviour(incomePercentile);
+        lastHousePurchasePeriod = -1;
+        lastHouseSalePeriod = -1;
         // Find initial values for the annual and monthly gross employment income
         annualGrossEmploymentIncome = data.EmploymentIncome.getAnnualGrossEmploymentIncome(age, incomePercentile);
         monthlyGrossEmploymentIncome = annualGrossEmploymentIncome/config.constants.MONTHS_IN_YEAR;
@@ -95,8 +108,7 @@ public class Household implements IHouseOwner {
 //        bankBalance = data.Wealth.getDesiredBankBalance(getAnnualGrossTotalIncome(), behaviour.getPropensityToSave()); // Desired bank balance is used as initial value for actual bank balance
         // record deposits entering the simulation by initial endowment
         Model.householdStats.recordBankBalanceEndowment(bankBalance);
-        monthlyGrossRentalIncome = 0.0;
-        
+       
     }
 
     //-------------------//
@@ -121,6 +133,7 @@ public class Household implements IHouseOwner {
     	socialHousingRent = 0.0;
     	interestPaidBack = 0.0; 
     	monthlyDividendIncome = 0.0;
+        monthlyGrossRentalIncome = 0.0;
     	rentalPayment = 0.0;
     	cashInjection = 0.0;
     	monthlyPayments = 0.0;
@@ -160,6 +173,9 @@ public class Household implements IHouseOwner {
     		bankBalance = 1.0;
     		isBankrupt = true;
     	}
+    	// check if the household is vulnerable by Ampudia et al. (2016) measures
+    	recordVulnerability();
+    	
     	// Manage owned properties and close debts on previously owned properties. To this end, first, create an
     	// iterator over the house-paymentAgreement pairs at the household's housePayments object
     	Iterator<Entry<House, PaymentAgreement>> paymentIt = housePayments.entrySet().iterator();
@@ -329,11 +345,11 @@ public class Household implements IHouseOwner {
      */
     public double getMonthlyGrossTotalIncome() { 
 //    	// if true, Monthly Interest payments of t-1 will be distributed according to their share of deposits/totalDeposits 
-//    	if(config.dividendPayments) {
-//    		monthlyGrossTotalIncome = monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome() + calculateMonthlyDividendIncome();
-//       	} else {
+    	if(config.dividendPayments) {
+    		monthlyGrossTotalIncome = monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome() + calculateMonthlyDividendIncome();
+       	} else {
     		monthlyGrossTotalIncome = monthlyGrossEmploymentIncome + getMonthlyGrossRentalIncome();
-//    	}
+    	}
     	return monthlyGrossTotalIncome; 
     }
 
@@ -341,7 +357,7 @@ public class Household implements IHouseOwner {
      * Adds up this month's rental income from all currently owned and rented properties
      */
     public double getMonthlyGrossRentalIncome() {
-    	double monthlyGrossRentalIncome = 0.0;
+//    	double monthlyGrossRentalIncome = 0.0;
     	for(RentalAgreement rentalAgreement: rentalContracts.values()) {
     		monthlyGrossRentalIncome += rentalAgreement.nextPayment();
     	}
@@ -349,10 +365,35 @@ public class Household implements IHouseOwner {
     }
     
     public double calculateMonthlyDividendIncome() {
-    	monthlyDividendIncome = Model.householdStats.getTotalInterestRepayments()
+    	return monthlyDividendIncome = Model.householdStats.getTotalInterestRepayments()
     			*bankBalance/Math.max(Model.householdStats.getTotalBankBalancesVeryBeginningOfPeriod(),0.01);
-
-    	return monthlyDividendIncome;
+    }
+    
+    // test if the household is vulnerable 
+    private void recordVulnerability() {
+    	vulnerableTMinus1 = isVulnerable;
+    	double financialMargin = monthlyDisposableIncome + 
+				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+				config.povertyLinePercentMedianIncome * Model.householdStats.getMonthlyMedianIncome();
+    	
+    	double monthsCoveredByDeposits = bankBalance / financialMargin;
+    	// only vulnerable if household has mortgage debt and deposits are less than 24 (or X) times the
+    	// negative financial margin
+    	if(getTotalDebt() < 0.0 && principalPaidBack == 0.0 && !config.BTLinterestOnly) {
+    		System.out.println("weird, household is vulnerable withoug having paid back principle");
+    	}
+    	if(monthsCoveredByDeposits < 0.0 &
+    			( - config.finVulMonthsToCover * financialMargin) > bankBalance &
+    			getTotalDebt() < 0.0 ) {
+    		isVulnerable = true;
+    	} else {
+    		isVulnerable = false;
+    	}
+    	// calculate the factor with which the exposure at default will be calculated with
+    	// as a linear function where the factor is 1 if months covered are 0 and 1 when 
+    	// the months covered are at the threshold for the households to be counted as vulnerable (24)
+    	// months covered by deposits calculated negative
+    	ExposureAtDefaultFactor = 1 + monthsCoveredByDeposits / config.finVulMonthsToCover ; 	
     }
     
 //    // PAUL this method calculats airbnb rental income and counts the number of airbnbs rented out
@@ -532,6 +573,9 @@ public class Household implements IHouseOwner {
             } else { isInFirstHome = false;}
 
             isFirstTimeBuyer = false;
+            
+            // record the time of this purchase
+            lastHousePurchasePeriod = Model.getTime();
         }
     }
 
@@ -567,6 +611,9 @@ public class Household implements IHouseOwner {
         	rentalContracts.remove(sale.getHouse());
             sale.getHouse().resident.getEvicted();
         }
+        // record the time of this sale
+        lastHouseSalePeriod = Model.getTime();
+        
     }
     
     /**
@@ -1132,6 +1179,54 @@ public class Household implements IHouseOwner {
 		return monthlyDividendIncome;
 	}
 	
+	public boolean isVulnerable() {
+		return isVulnerable;
+	}
+
+	public void setVulnerable(boolean isVulnerable) {
+		this.isVulnerable = isVulnerable;
+	}
+	
+	public boolean isVulnerableTMinus1() {
+		return vulnerableTMinus1;
+	}
+
+	public int getLastHousePurchasePeriod() {
+		return lastHousePurchasePeriod;
+	}
+
+	public void setLastHousePurchasePeriod(int lastHousePurchasePeriod) {
+		this.lastHousePurchasePeriod = lastHousePurchasePeriod;
+	}
+
+	public int getLastHouseSalePeriod() {
+		return lastHouseSalePeriod;
+	}
+
+	public void setLastHouseSalePeriod(int lastHouseSalePeriod) {
+		this.lastHouseSalePeriod = lastHouseSalePeriod;
+	}
+	
+	public double getEADFactor() {
+		return ExposureAtDefaultFactor;
+	}
+
+	public int getVulnerableSince() {
+		return vulnerableSince;
+	}
+
+	public void setVulnerableSince(int vulnerableSince) {
+		this.vulnerableSince = vulnerableSince;
+	}
+
+	public String getVulnerableBecause() {
+		return vulnerableBecause;
+	}
+
+	public void setVulnerableBecause(String vulnerableBecause) {
+		this.vulnerableBecause = vulnerableBecause;
+	}
+
 	public int getnAirBnBRentedOut() {
 		return nAirBnBRentedOut;
 	}

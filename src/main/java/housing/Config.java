@@ -64,6 +64,7 @@ public class Config {
 	public boolean recordPrincipalRepSale;		// True to write agents paying off outstanding mortgage when selling their property
 	public boolean recordBankcuptcyCashInjection; // True to write agents cash injection when going bankrupt
 	public boolean recordPrincipalPaidBackInheritance; // True to write principal paid back due to inheritance
+	public boolean recordFinancialVulnerability;       // True to write the reason an agent is vulnerable and for how long
 
 
     
@@ -105,7 +106,8 @@ public class Config {
     public double paymentsToIncome;							// share of MonthlyNetTotalIncome used for mortgage payments
     public double liquidityPreference;						// times the monthly disposable income households want to hold liquid
     public double consumptionAdjustmentForDeleveraging; 	// if households is negative lower consumption by this factor
-    
+    public int    finVulMonthsToCover; 
+    public double povertyLinePercentMedianIncome; 
     // House parameters
     public int N_QUALITY;                   // Number of quality bands for houses
 

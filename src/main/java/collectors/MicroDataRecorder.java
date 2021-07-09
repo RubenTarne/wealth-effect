@@ -45,6 +45,8 @@ public class MicroDataRecorder {
     private PrintWriter outfilePrincipalRepSale;
     private PrintWriter outfileBankcuptcyCashInjection;
     private PrintWriter outfilePrincipalPaidBackInheritance;
+    private PrintWriter outfileFinancialVulnerabilityReason;
+    private PrintWriter outfileFinancialVulnerabilitySince;
     
 
     //------------------------//
@@ -68,7 +70,8 @@ public class MicroDataRecorder {
                                                  boolean recordFTB, boolean recordInFirstHome, boolean recordAge, boolean recordTransactionRevenue,
                                                  boolean recordId, boolean recordNewCredit, boolean recordPrincipalRepRegular,
                                                  boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
-                                                 boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance) {
+                                                 boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance,
+                                                 boolean recordFinancialVulnerability) {
         if (recordBankBalance) {
             try {
                 outfileBankBalance = new PrintWriter(outputFolder + "BankBalance-run" + nRun
@@ -293,7 +296,16 @@ public class MicroDataRecorder {
         		e.printStackTrace();
         	}
         }
-        
+        if(recordFinancialVulnerability) {
+        	try {
+        		outfileFinancialVulnerabilityReason = new PrintWriter(outputFolder + 
+        				"FinVulReason-run" + nRun + ".csv", "UTF-8");
+        		outfileFinancialVulnerabilitySince = new PrintWriter(outputFolder + 
+        				"FinVulSince-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
     }
 
     void timeStampSingleRunSingleVariableFiles(int time, boolean recordBankBalance, boolean recordHousingWealth,
@@ -307,7 +319,8 @@ public class MicroDataRecorder {
                                                boolean recordBTL, boolean recordFTB, boolean recordInFirstHome, boolean recordAge, 
                                                boolean recordTransactionRevenue, boolean recordId, boolean recordNewCredit, 
                                                boolean recordPrincipalRepRegular, boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
-                                               boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance
+                                               boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance,
+                                               boolean recordFinancialVulnerability
                                                ) {
         if (time % Model.config.microDataRecordIntervall == 0 && time >= Model.config.TIME_TO_START_RECORDING) {
             if (recordBankBalance) {
@@ -478,6 +491,14 @@ public class MicroDataRecorder {
             	}
             	outfilePrincipalPaidBackInheritance.print(time);
             }
+            if (recordFinancialVulnerability) {
+            	if (time != 0) {
+            		outfileFinancialVulnerabilityReason.println("");
+            		outfileFinancialVulnerabilitySince.println("");
+            	}
+            	outfileFinancialVulnerabilityReason.print(time);
+        		outfileFinancialVulnerabilitySince.print(time);
+            }
         }
     }
 	
@@ -584,6 +605,11 @@ public class MicroDataRecorder {
     void recordPrincipalPaidBackInheritance(int time, double principalPaidBackInheritance) {
     	outfilePrincipalPaidBackInheritance.print(", " + round(principalPaidBackInheritance,3));
     }
+    void recordFinancialVulnerability(int time, String vulCause, int vulSince) {
+    	outfileFinancialVulnerabilityReason.print(", " + vulCause);
+		outfileFinancialVulnerabilitySince.print(", " + (time - vulSince));
+    }
+    
 
 
 	public void finishRun(boolean recordBankBalance, boolean recordHousingWealth, boolean recordNHousesOwned,
@@ -595,7 +621,8 @@ public class MicroDataRecorder {
                           boolean recordFTB, boolean recordInFirstHome, boolean recordAge, boolean recordTransactionRevenue,
                           boolean recordId, boolean recordNewCredit, boolean recordPrincipalRepRegular,
                           boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
-                          boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance) {
+                          boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance,
+                          boolean recordFinancialVulnerability) {
         if (recordBankBalance) {
             outfileBankBalance.close();
         }
@@ -679,6 +706,10 @@ public class MicroDataRecorder {
         }
         if (recordPrincipalPaidBackInheritance) {
         	outfilePrincipalPaidBackInheritance.close();
+        }
+        if (recordFinancialVulnerability) {
+        	outfileFinancialVulnerabilityReason.close();
+    		outfileFinancialVulnerabilitySince.close();
         }
 	}
 	

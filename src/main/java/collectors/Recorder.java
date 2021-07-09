@@ -176,7 +176,7 @@ public class Recorder {
     					+ "totalBankruptcyCashInjection, totalDebtReliefDueToDeceasedHousehold, "
     					+ "creditSupplyTarget, newlyPaidDownPayments, cashPayments, newlyIssuedCredit, nNegativeEquity, "
     					+ "LTV FTB, LTV OO, LTV BTL, interestRateSpread, moneyOutflowToConstructionSector, "
-    					+ "macropruLTVOnOff, "
+    					+ "macropruLTVOnOff, medianDebtServiceRatio, vulHH medianDSR, %vulHH of indebtedHH, medianAge vulHH, medianAge nonVulHH, Top 10% wealth share, "
     					// agent-specific aggregate consumption total and per Agent-class
     					+ "activeBTLConsumption, avActiveBTLConsumption, SSBConsumption, avSSBConsumption, "
     					+ "inFirstHomeConsumption, avInFirstHomeConsumption, renterConsumption, avRenterConsumption, "
@@ -184,7 +184,26 @@ public class Recorder {
     					+ "avBTLIncomeConsumption, avBTLFinancialWealthConsumption, avBTLNetHousingWealthConsumption, "
     					+ "avSSBIncomeConsumption, avSSBFinancialWealthConsumption, avSSBNetHousingWealthConsumption, "
     					+ "avInFirstHomeIncomeConsumption, avInFirstHomeFinancialWealthConsumption, avInFirstHomeNetHousingWealthConsumtpion, "
-    					+ "avrenterIncomeConsumption, avrenterFinancialWealthConsumption, avRenterNetHousingWealthConsumption"
+    					+ "avrenterIncomeConsumption, avrenterFinancialWealthConsumption, avRenterNetHousingWealthConsumption, "
+    					+ "EAD DSR>30%, EAD DSR>35%, EAD DSR>70%, EAD FM with BLC20%, EAD FM with BLC40%, EAD FM with BLC70%, "
+    					+ "EAD Ampudia (X*BLC 6m), EAD Ampudia (X*medIncome Y*m), HH with less than 400p, low-deposit HH Consumption, low-deposit HH Saving, "
+    					+ "nVulHH (X*medIncome Y*m), nVul activeBTL (X*medIncome Y*m), nVul inFirstHome (X*medIncome Y*m), nVul SSB (X*medIncome Y*m), "
+    					+ "EAD Ampudia aBTL (X*medIncome Y*m), EAD Ampudia inFirstHome (X*medIncome Y*m), EAD Ampudia SSB (X*medIncome Y*m),"
+//    					+ "unemp nVulHH (70%BLC 24m), unemp nVul activeBTL (70%BLC 24m),unemp nVul inFirstHome (70%BLC 24m), unemp nVul SSB (70%BLC 24m), "
+//    					+ "unemp EAD Ampudia aBTL (70%BLC 24m), unemp EAD Ampudia inFirstHome (70%BLC 24m), unemp EAD Ampudia SSB (70%BLC 24m)"
+						// the varible names are not consistent with what they measure - this is just to 
+    					+ "nVulHH (DSR>35%), nVul activeBTL (DSR>35%),nVul inFirstHome (DSR>35%), nVul SSB (DSR>35%),"
+    					+ "totalDebt aBTL (DSR>35%), totalDebt inFirstHome (DSR>35%), totalDebt SSB (DSR>35%),"
+    					+ "vulnerable by purchase, vulnerable by dissaving, vulnerable by other, non-vulnerable by sale, non-vulnerable by saving, non-vulnerable by other,"
+    					+ "Vulnerable By Purchase BTL, Vulnerable By Purchase SSB, Vulnerable By Purchase InFirstHome,"
+    					+ "Vulnerable By Consumption BTL, Vulnerable By Consumption SSB, Vulnerable By Consumption InFirstHome,"
+    					+ "Vulnerable By Other BTL, Vulnerable By Other SSB, Vulnerable By Other InFirstHome,"
+    					+ "Non-Vulnerable Because Sale BTL, Non-Vulnerable Because Sale SSB, Non-Vulnerable Because Sale InFirstHome, Non-Vulnerable Because Sale Now-Renters,"
+    					+ "Non-Vulnerable Because Saving BTL, Non-Vulnerable Because Saving SSB, Non-Vulnerable Because Saving InFirstHome, Non-Vulnerable Because Saving Now-Renters,"
+    					+ "Non-Vulnerable Because Other BTL, Non-Vulnerable Because Other SSB, Non-Vulnerable Because Other InFirstHome, Non-Vulnerable Because Other Now-Renters,"
+    					+ "nowVul Purchase, nowVul Dissaving, nowVul Other, nowVul Purchase BTL, nowVul Dissaving BTL, nowVul Other BTL,"
+    					+ "nowVul Purchase SSB, nowVul Dissaving SSB, nowVul Other SSB, nowVul Purchase FTB, nowVul Dissaving FTB, nowVul Other FTB"
+    					
     					);
     		} catch (FileNotFoundException | UnsupportedEncodingException e) {
     			e.printStackTrace();
@@ -386,6 +405,12 @@ public class Recorder {
 					Model.coreIndicators.getInterestRateSpread()/100 + ", " +
 					Model.housingMarketStats.getMoneyToConstructionSector() + ", " +
 					Model.centralBank.getCentralBankLTVsOnOff() + ", " +
+					Model.householdStats.getMedianDebtServiceRatio() + ", " + 
+					Model.householdStats.getMedianDSRVulnerableHouseholds() + ", " + 
+					((double)Model.householdStats.getHouseholdsVulnerableAmpudiaMeasure2() / (double)Model.householdStats.getIndebtedHouseholds()) + ", " + 
+					Model.householdStats.getMedianAgeVulnerableHouseholds() + ", " +
+					Model.householdStats.getMedianAgeNonVulnerableHouseholds() + ", " +
+					Model.coreIndicators.getS90TotalNetWealth() + ", " + 
 					// additional consumption parameters
 					// active BTL total and per BTL investor
 					(Model.householdStats.getActiveBTLIncomeConsumption() +
@@ -433,7 +458,88 @@ public class Recorder {
 					(Model.householdStats.getInFirstHomeNetHousingWealthConsumption() / Model.householdStats.getnInFirstHome()) +", " + 
 					(Model.householdStats.getRenterIncomeConsumption() / Model.householdStats.getnNonOwner()) +", " + 
 					(Model.householdStats.getRenterFinancialWealthConsumption() / Model.householdStats.getnNonOwner()) +", " + 
-					(Model.householdStats.getRenterNetHousingWealthConsumption() / Model.householdStats.getnNonOwner())
+					(Model.householdStats.getRenterNetHousingWealthConsumption() / Model.householdStats.getnNonOwner()) +", " + 
+					
+					// Measures for exposure at default
+					Model.householdStats.getExposureAtDefaultDSR30() +", " + 
+					Model.householdStats.getExposureAtDefaultDSR35() +", " + 
+					Model.householdStats.getExposureAtDefaultDSR70() +", " + 
+					Model.householdStats.getExposureAtDefaultFinancialMarginBLC20() +", " + 
+					Model.householdStats.getExposureAtDefaultFinancialMarginBLC40() +", " + 
+					Model.householdStats.getExposureAtDefaultFinancialMarginBLC70() +", " + 
+					
+					// Ampudia measures 
+					Model.householdStats.getExposureAtDefaultAmpudiaMeasure1() +", " + 
+					Model.householdStats.getExposureAtDefaultAmpudiaMeasure2() +", " + 
+					
+					// households with less than X pounds as deposits
+					Model.householdStats.getHouseholdsWithLessThan400p() +", " +
+					Model.householdStats.getLowDepositHouseholdConsumption() +", " +
+					Model.householdStats.getLowDepositHouseholdSaving() +", " +
+					Model.householdStats.getHouseholdsVulnerableAmpudiaMeasure2() + ", " +
+					Model.householdStats.getActiveBTLVulnerable() + ", " +
+					Model.householdStats.getInFirstHomeVulnerable() + ", " +
+					Model.householdStats.getSSBVulnerable() + ", " +
+					Model.householdStats.getActiveBTLEAD() + ", " +
+					Model.householdStats.getInFirstHomeEAD() + ", " +
+					Model.householdStats.getSSBEAD() + ", " +
+					Model.householdStats.getUnemploymentHouseholdsVulnerableAmpudiaMeasure2() + ", " +
+					Model.householdStats.getUnemploymentActiveBTLVulnerable() + ", " +
+					Model.householdStats.getUnemploymentinFirstHomeVulnerable() + ", " +
+					Model.householdStats.getUnemploymentSSBVulnerable() + ", " +
+//					Model.householdStats.getUnemploymentExposureAtDefaultAmpudiaMeasure2() + ", " +
+					Model.householdStats.getUnemploymentActiveBTLEAD() + ", " +
+					Model.householdStats.getUnemploymentinFirstHomeEAD() + ", " +
+					Model.householdStats.getUnemploymentSSBEAD() + ", " +
+					Model.householdStats.getVulnerableByPurchase() + ", " +
+					Model.householdStats.getVulnerableByConsumption() + ", " + 
+					Model.householdStats.getVulnerableByOther() + ", " + 
+					Model.householdStats.getNotVulnerableBecauseSale() +", " + 
+					Model.householdStats.getNotVulnerableBecauseSaving() +", " + 
+					Model.householdStats.getNotVulnerableBecauseOther() + ", " +
+					
+					// agent-specific vulnerability causes
+					Model.householdStats.getVulnerableByPurchaseBTL() + ", " +
+					Model.householdStats.getVulnerableByPurchaseSSB() + ", " +
+					Model.householdStats.getVulnerableByPurchaseInFirstHome() + ", " +
+					Model.householdStats.getVulnerableByConsumptionBTL() + ", " +
+					Model.householdStats.getVulnerableByConsumptionSSB() + ", " +
+					Model.householdStats.getVulnerableByConsumptionInFirstHome() + ", " +
+					Model.householdStats.getVulnerableByOtherBTL() + ", " +
+					Model.householdStats.getVulnerableByOtherSSB() + ", " +
+					Model.householdStats.getVulnerableByOtherInFirstHome() + ", " +
+					Model.householdStats.getNotVulnerableBecauseSaleBTL() + ", " +
+					Model.householdStats.getNotVulnerableBecauseSaleSSB() + ", " +
+					Model.householdStats.getNotVulnerableBecauseSaleInFirstHome() + ", " +
+					Model.householdStats.getNotVulnerableBecauseSaleOthers() + ", " +
+					Model.householdStats.getNotVulnerableBecauseSavingBTL() + ", " +
+					Model.householdStats.getNotVulnerableBecauseSavingSSB() + ", " +
+					Model.householdStats.getNotVulnerableBecauseSavingInFirstHome() + ", " +
+					Model.householdStats.getNotVulnerableBecauseSavingOthers() + ", " +
+					Model.householdStats.getNotVulnerableBecauseOtherBTL() + ", " +
+					Model.householdStats.getNotVulnerableBecauseOtherSSB() + ", " +
+					Model.householdStats.getNotVulnerableBecauseOtherInFirstHome() + ", " +
+					Model.householdStats.getNotVulnerableBecauseOtherOthers() + ", " +
+					
+					Model.householdStats.getNowVulnerableByPurchase() + ", " +
+					Model.householdStats.getNowVulnerableByDissaving() + ", " +
+					Model.householdStats.getNowVulnerableByOther() + ", " +
+					
+					Model.householdStats.getNowVulnerableByPurchaseBTL() + ", " +
+					Model.householdStats.getNowVulnerableByDissavingBTL() + ", " +
+					Model.householdStats.getNowVulnerableByOtherBTL() + ", " +
+					
+					Model.householdStats.getNowVulnerableByPurchaseSSB() + ", " +
+					Model.householdStats.getNowVulnerableByDissavingSSB() + ", " +
+					Model.householdStats.getNowVulnerableByOtherSSB() + ", " +
+					
+					Model.householdStats.getNowVulnerableByPurchaseFTB() + ", " +
+					Model.householdStats.getNowVulnerableByDissavingFTB() + ", " +
+					Model.householdStats.getNowVulnerableByOtherFTB()
+					
+					
+
+					
         	);
         	
 
