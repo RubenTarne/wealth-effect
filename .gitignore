@@ -42,3 +42,17 @@ muStar\.csv
 mu\.csv
 
 morris-input\.csv
+
+Working paper drafts/
+
+statistical output R/
+
+R code files/
+
+*.RData
+
+*.rds
+
+wealth-effect-git.Rproj
+
+Working-Paper-vulnerability-Notebook.md
