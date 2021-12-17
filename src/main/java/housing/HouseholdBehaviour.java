@@ -82,14 +82,17 @@ public class HouseholdBehaviour {
 	//----- General behaviour -----//
 
 	/**
-	 * Compute the monthly non-essential or optional consumption by a household. It is calibrated so that the output
+	 * Compute the monthly consumption by a household. It is calibrated so that the output
 	 * wealth distribution fits the ONS wealth data for Great Britain.
 	 *
-	 * @param bankBalance Household's liquid wealth
+	 * @param bankBalance Household's liquid wealth after adding disposable income
 	 * @param annualGrossTotalIncome Household's annual gross total income
+	 * @param incomePercentile Household's income percentile given at "birth" to determine its MPCs
+	 * @param disposableIncome Household's income after taxes, insurance and housing consumption
+	 * @param monthlyNetTotalIncome Household's income after taxes and insurance
 	 */
 	public double getDesiredConsumption(Household me, double bankBalance, double incomePercentile,
-			double disposableIncome) {
+			double disposableIncome, double monthlyNetTotalIncome) {
 	double annualGrossTotalIncome = me.getAnnualGrossTotalIncome();
 		double propertyValues = me.getPropertyValue();
 		double totalDebt = me.getTotalDebt();
@@ -105,6 +108,10 @@ public class HouseholdBehaviour {
 			double netWealthConsumptionCoefficient = config.consumptionNetHousingWealth;
 			double liquidityPreference = config.liquidityPreference;
 			double savingForDeleveraging = 0.0;
+			// when the function is called Bank Balance of the household consists of deposits and its disposable income of the
+			// current month. This can be confusing when reading the code, so deposits are defined as the deposits before the househod
+			// earned this months income
+			double deposits = bankBalance - disposableIncome; 
 			// set the wealth effect according to the employment income position of the household, so that 
 			// households with higher employment income consume less out of their wealth
 			if(incomePercentile<0.25) {
@@ -131,104 +138,173 @@ public class HouseholdBehaviour {
 				wealthEffect = config.wealthEffectTop1;
 				consumptionFraction = config.consumptionFractionTop1;
 			}
-			// TEST to check if higher saving rates of FTB influence the drop of house prices
+			// First-time buyers have lower MPCs out of income and no wealth effect to save for a downpayment 
 			if(config.FTBSavingMotive && me.isFirstTimeBuyer() && incomePercentile > config.minIncomePercentile) { // && incomePercentile > 0.25) {
 				wealthEffect = 0;
-				consumptionFraction = config.MPCForFirstTimeBuyers;
+				// check if the MPC would actually be lower with the FTB saving motive, if not the household keeps the lower MPC
+				// (otherwise consumption out of income would increase for households with high income percentile)
+				if(consumptionFraction > config.MPCForFirstTimeBuyers) {
+					consumptionFraction = config.MPCForFirstTimeBuyers;
+				}
 			}
 
-			// Ruben - Test - implementing a quasi collateral channel (following Aladangady (2017)) 
+			// implementing a quasi-collateral channel (following Aladangady (2017)) 
 			// households with DSRs above median have a housing wealth effect of 0.127 (yearly), 
 			// households below 0
 			double DSR = (me.getPrincipalPaidBack() + me.getInterestPaidBack())/me.returnMonthlyGrossTotalIncome();
 			if(DSR >= Model.householdStats.getMedianDebtServiceRatio()) {
 				consumption = consumptionFraction * disposableIncome 
-						+ wealthEffect * (bankBalance - disposableIncome)
+						+ wealthEffect * deposits
 						+ 0.01 * (propertyValues+ totalDebt);
 			} else {
 				consumption = consumptionFraction * disposableIncome 
-						+ wealthEffect * ((bankBalance - disposableIncome));
+						+ wealthEffect * deposits;
 			}
 
-			//			// calculate the desired consumption
-			//			consumption = consumptionFraction*disposableIncome 
-			//					+ wealthEffect*((bankBalance-disposableIncome) 
-			//							+ netWealthConsumptionCoefficient*(propertyValues + totalDebt));
-
-			// add a stronger effect on consumption if the household is "under water", in order to restore their balance sheet
-			// the additional restrictions entail that negative equity has only a limiting effect if...
-			if(equityPosition < 0 
-					// ...desired consumption would be smaller than disposable income and liquid wealth as it gets already limited..
-					&& consumption < bankBalance 
-					// ... consumption is positive
-					&& consumption > 0) {
-				savingForDeleveraging = consumption * (1-config.consumptionAdjustmentForDeleveraging);
-				consumption = config.consumptionAdjustmentForDeleveraging * consumption;
-			}
 			// calculate the different parts of consumption in order to extract this data
 			double incomeConsumption = consumptionFraction*disposableIncome;
-			double financialWealthConsumption = wealthEffect*(bankBalance-disposableIncome); 
-			//			double housingWealthConsumption = wealthEffect*netWealthConsumptionCoefficient*propertyValues;
-			//			double debtConsumption = wealthEffect*netWealthConsumptionCoefficient*totalDebt;
-			//			
-			// alternate housing effect
+			double financialWealthConsumption = wealthEffect*deposits; 		
 			double housingWealthConsumption = 0.0;
 			double debtConsumption = 0.0;
-			if(DSR >= Model.householdStats.getMedianDebtServiceRatio()) {
+			// from the quasi-collateral channel follows that only households with above-median
+			// DSRs have a positive net housing wealth effect and NO liquidity preference
+			if(DSR > Model.householdStats.getMedianDebtServiceRatio()) {
 				housingWealthConsumption = 0.01 * propertyValues;
 				debtConsumption = 0.01 * totalDebt;
 				liquidityPreference = 0.0;
 			}
 
-			// TEST this is to test an alternative minimum consumption based on the poverty line approach
-			if(consumption + config.GOVERNMENT_MONTHLY_INCOME_SUPPORT < 
-					2750 *  0.4) { // config.povertyLinePercentMedianIncome) {
-				consumption = 2750 * 0.4 - // config.povertyLinePercentMedianIncome - 
-						config.GOVERNMENT_MONTHLY_INCOME_SUPPORT;
+//
+//			// bankBalance includes the disposable income of this month (where housing consumtpion and essential
+//			// consumption are already substracted) -> the first term gives the bank balance after consumption ...
+//			if(bankBalance-consumption < 
+//					// ...if this bank balance is smaller than liquidity preference times the disposable income (after taxes
+//					// and housing consumption, but BEFORE essential consumption)...
+//					liquidityPreference * (disposableIncome ))  {
+//				//... then the non-essential consumption will only be out of income (times the MPC of income)
+//				consumption = incomeConsumption;
+//			}
+//
+//			// TEST this is to test an alternative minimum consumption based on the poverty line approach
+//			if(consumption  < 
+//					2750 *  0.4) { // config.povertyLinePercentMedianIncome) {
+//				consumption = 2750 * 0.4 ;
+//			}
+//			
+//			// if HH wants to consume more than it has in cash, then limit to cash (otherwise bankrupt)
+//			// as disposable income is already added to the bankBalance before the method is called, the HH
+//			// effectively consumes all its disposable income
+//			if(consumption > bankBalance) { 
+//				consumption = bankBalance;
+//			}
+//
+//			// if consumption is negative (due to high debt), consume at least either essential consumption
+//			// but not more than the actual bank balance to avoid bankruptcy
+//			// as essential consumption is already subtracted from disposable income, consumption here would be zero
+//			if(consumption < 0) {
+//				//they never consume negative (which could happen when bank balance negative
+//				consumption = Math.max(Math.min(0, bankBalance), 0);
+//			}
+//
+////			// Households with negative disposable income can consume consume some minimal amount, if they can (with deposits), 
+////			// hold on, they could consume a large amount if they have the deposits... 
+////			
+////			
+			// -------- liquidity preference constraint -------
+			// Households with below-median DSRs have a liquidity preference being a multiple of their disposable income.
+			// the first term gives the bank balance after consumption ...
+			if(deposits + disposableIncome - consumption < 
+					// ...if this bank balance is smaller than liquidity preference times net income (after taxes) ...
+					// ... one reason to use net income, not disposable income, is that disposable income can become negative.
+					liquidityPreference * monthlyNetTotalIncome)  {
+				//... then overall consumption will only be out of income (times the MPC of income) 
+				//... and in case of negative disposable income, this will be dealt with below.
+				consumption = Math.max(incomeConsumption, 0);
 			}
+	
 
-			// bankBalance includes the disposable income of this month (where housing consumtpion and essential
-			// consumption are already substracted) -> the first term gives the bank balance after consumption ...
-			if(bankBalance-consumption < 
-					// ...if this bank balance is smaller than liquidity preference times the disposable income (after taxes
-					// and housing consumption, but BEFORE essential consumption)...
-					liquidityPreference * (disposableIncome + config.GOVERNMENT_MONTHLY_INCOME_SUPPORT))  {
-				//... then the non-essential consumption will only be out of income (times the MPC of income)
-				consumption = incomeConsumption;
+			// -------- minimum consumption constraint ---------
+			// This is a different minimum consumption than Tarne, Bezemer, Theobald (2021) based on the poverty line approach.
+			// If desired consumption falls below the basic living costs (= 40% of median income), 
+			// households consume the basic living costs. 
+			if(consumption  < 0.4 * Model.householdStats.getMonthlyMedianIncome()) { 
+				// Except: their disposable income is lower than the basic living costs
+				// AND they have not enough deposits to cover the basic living costs (if their liquidity buffer would be reduced below the 
+				// desired threshold or even go bankrupt. In this case reduce consumption to the disposable income.
+				// Additionally, control for potentially negative disposable income (when BTL investors can't rent out 
+				// their property and their mortgage payments become larger than their  income from employment and rent).
+				if(disposableIncome < 0.4 * Model.householdStats.getMonthlyMedianIncome() & 
+//						deposits + disposableIncome - consumption < liquidityPreference * monthlyNetTotalIncome) {
+						// if disposable income is lower than minimal consumption check if deposits are enough -> no liquidity preference here
+					deposits + disposableIncome - 0.4 * Model.householdStats.getMonthlyMedianIncome() >= 0 ) {
+//					consumption = Math.max(disposableIncome, 0); 
+					consumption = 0.4 * Model.householdStats.getMonthlyMedianIncome();
+//					// if disposable income in combination with minimum consumption would make the household bankrupt, 
+//					// consume as much as possible but never negative
+				} else if(disposableIncome < 0.4 * Model.householdStats.getMonthlyMedianIncome() & 
+						deposits + disposableIncome - 0.4 * Model.householdStats.getMonthlyMedianIncome() < 0 ) {
+					consumption = Math.max((deposits + disposableIncome), 0) ;
+				} else {
+					consumption = 0.4 * Model.householdStats.getMonthlyMedianIncome();
+				}
 			}
-
-			// if HH wants to consume more than it has in cash, then limit to cash (otherwise bankrupt)
-			// as disposable income is already added to the bankBalance before the method is called, the HH
-			// effectively consumes all its disposable income
-			if(consumption > bankBalance) { 
-				consumption = bankBalance;
-			}
-
-			// if consumption is negative (due to high debt), consume at least either essential consumption
-			// but not more than the actual bank balance to avoid bankruptcy
-			// as essential consumption is already subtracted from disposable income, consumption here would be zero
-			if(consumption < 0) {
-				//they never consume negative (which could happen when bank balance negative
-				consumption = Math.max(Math.min(0, bankBalance), 0);
-			}
+			
+//			// ----- explicit FTB saving motive ---------
+//			if(config.FTBSavingMotive && me.isFirstTimeBuyer() && incomePercentile > config.minIncomePercentile) {
+//				// check if the MPC would actually be lower with the FTB saving motive, if not the household keeps the lower MPC
+//				// (otherwise consumption out of income would increase for households with high income percentile)
+//				if(totalDebt < 0) {
+//					System.out.println("Weird, this FTB holds debt");
+//				}
+//				if(disposableIncome < 492.7 - 329.76 ) { // social rent 
+//					System.out.println("Weird, this FTB's disposable income is lower than minimum income");
+//				}
+//				if(consumptionFraction > config.MPCForFirstTimeBuyers) {
+//					// FTB do not hold any debt, nor housing wealth (when FTB inherit a house they cease to be FTB)
+//					consumptionFraction = config.MPCForFirstTimeBuyers;
+//					consumption = consumptionFraction * disposableIncome;
+//					incomeConsumption = consumption; 
+//					financialWealthConsumption = 0.0; 		
+//					housingWealthConsumption = 0.0;
+//					debtConsumption = 0.0;					
+//				} else {
+//					// use the lower MPC of the higher percentile household
+//					consumption = consumptionFraction * disposableIncome; 
+//					incomeConsumption = consumption; 
+//					financialWealthConsumption = 0.0; 		
+//					housingWealthConsumption = 0.0;
+//					debtConsumption = 0.0;
+//				}
+//			}
+//
+////			// -------- handle special cases ---------
+////			// In cases of very high net housing wealth and comparatively low deposits households could become bankrupt.
+////			// To avoid these rather unrealistic consumption patterns, the HH effectively consumes all its 
+////			// disposable income + deposits, but not more, leaving her with 0 money units.
+////			// Additionally, the consumption equation can still yield negative values due to large negative disposable incomes 
+////			// which are not caught by the code above. In this case, households consume nothing and
+////			// go bankrupt, as their disposable income depletes their deposits.
+////			if(consumption > deposits + disposableIncome) { 
+////				consumption = Math.max((deposits + disposableIncome), 0);
+////			}
 
 			saving = disposableIncome-consumption;
 			if(consumption < 0) {
 				System.out.println("weird, consumption is negative, exactly: " + consumption + "in Time: " + Model.getTime());
 			}
+			
 			// adjust the shares of desired consumption so that it is equal to actual consumption. 
 			// otherwise, the parts themselves can add up to more, if desired consumption is higher than
 			// actual consumption 
-			double adjustmentParameter =1.0;
-			if(!Double.isNaN(consumption/(incomeConsumption+financialWealthConsumption+housingWealthConsumption+debtConsumption)))
+			double adjustmentParameter = 1.0;
+			if(!Double.isNaN(consumption /(incomeConsumption + financialWealthConsumption + housingWealthConsumption + debtConsumption)))
 			{
-				adjustmentParameter = consumption/
-						(incomeConsumption+financialWealthConsumption+housingWealthConsumption+debtConsumption);
+				adjustmentParameter = consumption /
+						(incomeConsumption + financialWealthConsumption + housingWealthConsumption + debtConsumption);
 			}
-			// in case the households consumption components - by minimum consumption > 0 and disposable income == 0 
-			// (due to the Basic living costs) are 0 - set income consumption to total consumption and let the rest be 0
+			// in case the households consumption components are 0 - set income consumption to total consumption 
 			// i.e. do not change the adjustment parameter
-			if(incomeConsumption+financialWealthConsumption+housingWealthConsumption+debtConsumption == 0) {
+			if(incomeConsumption + financialWealthConsumption + housingWealthConsumption + debtConsumption == 0) {
 				adjustmentParameter = 1.0;
 				incomeConsumption = consumption;
 				financialWealthConsumption = 0;
@@ -253,19 +329,27 @@ public class HouseholdBehaviour {
 			Model.householdStats.countIncomeAndWealthConsumption(saving, consumption, incomeConsumption, 
 					financialWealthConsumption, housingWealthConsumption, debtConsumption, savingForDeleveraging);
 
-			// record the single consumption components to be recorded b
+			// record the single consumption components
 			me.setIncomeConsumption(incomeConsumption);
 			me.setFinancialWealthConsumption(financialWealthConsumption);
 			me.setHousingWealthConsumption(housingWealthConsumption);
 			me.setDebtConsumption(debtConsumption);
 			me.setSavingForDeleveraging(savingForDeleveraging);
 
+//			// if uncommented, this string prints important consumption parameters to the console
+//			if(Model.getTime() > 1000) {
+//				System.out.println(consumption + "	" + disposableIncome + "	" + deposits + "	" +  (propertyValues+totalDebt) + "	" + 
+//			"	" + liquidityPreference + "	" +	consumptionFraction + "	" + wealthEffect + "	" + (housingWealthConsumption + debtConsumption) +
+//			"	" + monthlyNetTotalIncome + "	" + adjustmentParameter);
+//			}
+			
 			return consumption;
 		}
 
 		else{			
 			annualGrossTotalIncome = me.getAnnualGrossTotalIncome();
-			consumption = config.CONSUMPTION_FRACTION*Math.max(bankBalance
+			consumption = config.ESSENTIAL_CONSUMPTION_FRACTION * config.GOVERNMENT_MONTHLY_INCOME_SUPPORT +
+					config.CONSUMPTION_FRACTION*Math.max(bankBalance
 					- data.Wealth.getDesiredBankBalance(annualGrossTotalIncome, propensityToSave), 0.0);
 			saving = disposableIncome-consumption;
 			Model.householdStats.countIncomeAndWealthConsumption(saving, consumption, 0.0, 0.0, 0.0, 0.0, 0.0);

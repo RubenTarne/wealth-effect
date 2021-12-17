@@ -50,7 +50,7 @@ public class Household implements IHouseOwner {
     private double                          age; // Age of the household representative person
     private double                          bankBalance;
     private double                          monthlyGrossRentalIncome; // Keeps track of monthly rental income, as only tenants keep a reference to the rental contract, not landlords
-    private double                          savingRate; // (disposableIncome - nonEssentialConsumption)/grossTotalIncome
+    private double                          savingRate; // (disposableIncome - Consumption)/grossTotalIncome
     private boolean                         isFirstTimeBuyer;
     private boolean							isInFirstHome;
     private boolean                         isBankrupt;
@@ -118,8 +118,8 @@ public class Household implements IHouseOwner {
     //----- General methods -----//
 
     /**
-     * Main simulation step for each household. They age, receive employment and other forms of income, make their rent
-     * or mortgage payments, perform an essential consumption, make non-essential consumption decisions, manage their
+     * Main simulation step for each household. They age, receive employment and other forms of income, make their (social) rent
+     * or mortgage payments, make essential consumption decisions, manage their
      * owned properties, and make their housing decisions depending on their current housing state:
      * - Buy or rent if in social housing
      * - Sell house if owner-occupier
@@ -151,7 +151,7 @@ public class Household implements IHouseOwner {
 //        // PAUL calculate the Airbnb income
 //        if(behaviour.isAirBnBInvestor()) airBnBRentalIncome = calculateAirBnBIncome();
 //        
-    	// Add monthly disposable income (net total income minus essential consumption and housing expenses) to bank balance
+    	// Add monthly disposable income (net total income and housing expenses) to bank balance
     	monthlyDisposableIncome = getMonthlyDisposableIncome();
     	bankBalance += monthlyDisposableIncome;
     	// record bankBalance before consumption
@@ -160,8 +160,7 @@ public class Household implements IHouseOwner {
     	// does not recalculate the equity position with new HPI and different bank balances
     	setEquityPosition();
     	// Consume according to gross annual income and capped by current bank balance (after disposable income has been added)
-    	consumption = behaviour.getDesiredConsumption(this, bankBalance, incomePercentile,
-    			monthlyDisposableIncome); // Old implementation: if(isFirstTimeBuyer() || !isInSocialHousing()) bankBalance -= behaviour.getDesiredConsumption(getBankBalance(), getAnnualGrossTotalIncome());
+    	consumption = behaviour.getDesiredConsumption(this, bankBalance, incomePercentile, monthlyDisposableIncome, monthlyNetTotalIncome); 
     	bankBalance -= consumption;
     	// Compute saving rate
     	savingRate = (monthlyDisposableIncome - consumption)/returnMonthlyGrossTotalIncome();
@@ -253,10 +252,7 @@ public class Household implements IHouseOwner {
 
     	// Start with net monthly income
     	monthlyDisposableIncome = getMonthlyNetTotalIncome();
-    	// Subtract essential, necessary consumption
-    	// TODO: ESSENTIAL_CONSUMPTION_FRACTION is not explained in the paper, all support is said to be consumed
-    	monthlyDisposableIncome -= config.ESSENTIAL_CONSUMPTION_FRACTION*config.GOVERNMENT_MONTHLY_INCOME_SUPPORT;
-    	// Subtract housing consumption
+     	// Subtract housing consumption
     	for(PaymentAgreement payment: housePayments.values()) {
     		monthlyPayments += payment.makeMonthlyPayment(this);
     		//        	if(monthlyDisposableIncome < -1000) {
@@ -273,16 +269,10 @@ public class Household implements IHouseOwner {
     	// households in social housing pay rent equal to average local authority rent prices for England from 2013-14 
     	// https://data.london.gov.uk/dataset/local-authority-average-rents
     	// = 82.44 pounds of WEEKLY rent 
-    	// TODO this is yearly rental cost of 3,957.12 pounds per year and can therefore be higher than private rents
+    	// this is yearly rental cost of 3,957.12 pounds per and can therefore be higher than private rents
     	if(home==null && !config.GERVersion) {
     		socialHousingRent = 4*82.44;
     		monthlyDisposableIncome -= socialHousingRent;
-    		// in case disposable income becomes negative, assume the government covering the rent, so households don't dissave
-    		// adjust the social housing rent recorder
-    		if(monthlyDisposableIncome<0) {
-    			socialHousingRent = socialHousingRent+monthlyDisposableIncome;
-    			monthlyDisposableIncome=0;
-    		}
     	}
     	monthlyDisposableIncome -= monthlyPayments;
     	return monthlyDisposableIncome;
@@ -372,8 +362,7 @@ public class Household implements IHouseOwner {
     // test if the household is vulnerable 
     private void recordVulnerability() {
     	vulnerableTMinus1 = isVulnerable;
-    	double financialMargin = monthlyDisposableIncome + 
-				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+    	double financialMargin = monthlyDisposableIncome -
 				config.povertyLinePercentMedianIncome * Model.householdStats.getMonthlyMedianIncome();
     	
     	double monthsCoveredByDeposits = bankBalance / financialMargin;
