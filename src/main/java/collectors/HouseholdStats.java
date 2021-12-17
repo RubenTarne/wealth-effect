@@ -167,6 +167,16 @@ public class HouseholdStats {
     private double medianAgeNonVulnerableHouseholds;
     private int indebtedHouseholds;
     private int indebtedHouseholdsCounter;
+    
+    // adjust these income dependent values of households with a buffer used
+    // to calibrate the model's vulnerable households to that of the WAS, specifically
+    // reduce the income by 20% of median income (the difference between 40% and 60%)
+    
+    private DescriptiveStatistics debtServiceRatiosAdjusted;
+    private double medianDSRAdjusted;
+    private DescriptiveStatistics vulnerableHouseholdsDSRAdjusted;
+    private double medianDSRVulnerableHouseholdsAdjusted;
+    
     // fields for caluclating exposures at default
     private double ExposureAtDefaultDSR30; 
     private double ExposureAtDefaultDSR30Counter;
@@ -186,8 +196,8 @@ public class HouseholdStats {
 	private double ExposureAtDefaultAmpudiaMeasure2;
 	private double ExposureAtDefaultAmpudiaMeasure2Counter;
 	
-	private int HouseholdsWithLessThan400p;
-	private int HouseholdsWithLessThan400pCounter;
+	private int HouseholdsWithLessThan1500p;
+	private int HouseholdsWithLessThan1500pCounter;
 	private double lowDepositHouseholdConsumption ;
 	private double lowDepositHouseholdConsumptionCounter ;
 	private double lowDepositHouseholdSaving; 
@@ -390,6 +400,9 @@ public class HouseholdStats {
         vulnerableHouseholdsAge = new DescriptiveStatistics();
         nonVulnerableHouseholdsAge = new DescriptiveStatistics();
         
+        debtServiceRatiosAdjusted = new DescriptiveStatistics();
+        vulnerableHouseholdsDSRAdjusted = new DescriptiveStatistics();
+        
         totalDividendIncome = 0.0;
     }
 
@@ -451,6 +464,11 @@ public class HouseholdStats {
         vulnerableHouseholdsAge.clear();
         medianAgeNonVulnerableHouseholds = nonVulnerableHouseholdsAge.getPercentile(50);
         nonVulnerableHouseholdsAge.clear();
+        
+        medianDSRAdjusted = debtServiceRatiosAdjusted.getPercentile(50);
+        debtServiceRatiosAdjusted.clear();
+        medianDSRVulnerableHouseholdsAdjusted = vulnerableHouseholdsDSRAdjusted.getPercentile(50);
+        vulnerableHouseholdsDSRAdjusted.clear();
         // Time stamp householdStats mesoRecorders
         Model.microDataRecorder.timeStampSingleRunSingleVariableFiles(Model.getTime(), config.recordBankBalance,
                 config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate, config.recordMonthlyGrossTotalIncome,
@@ -587,6 +605,8 @@ public class HouseholdStats {
         	double debtPayments = h.getPrincipalPaidBack() + h.getInterestPaidBack();
         	if(debtPayments > 0) {
         		debtServiceRatios.addValue(debtPayments/h.returnMonthlyGrossTotalIncome());
+        		debtServiceRatiosAdjusted.addValue(debtPayments / (h.returnMonthlyGrossTotalIncome() - 
+        				0.2 * medianIncome));
         		indebtedHouseholdsCounter += 1;
         	}
         	
@@ -637,11 +657,11 @@ public class HouseholdStats {
         		}
         		if(config.recordConsumption) {
         			// record non-essential and essential consumption
-        			Model.microDataRecorder.recordConsumption(Model.getTime(), (h.getConsumption()+config.ESSENTIAL_CONSUMPTION_FRACTION*config.GOVERNMENT_MONTHLY_INCOME_SUPPORT));
+        			Model.microDataRecorder.recordConsumption(Model.getTime(), (h.getConsumption()));
         		}
         		if(config.recordIncomeConsumption) {
         			// record non-essential income consumption and essential consumption
-        			Model.microDataRecorder.recordIncomeConsumption(Model.getTime(), (h.getIncomeConsumption()+config.ESSENTIAL_CONSUMPTION_FRACTION*config.GOVERNMENT_MONTHLY_INCOME_SUPPORT));
+        			Model.microDataRecorder.recordIncomeConsumption(Model.getTime(), (h.getIncomeConsumption()));
         		}
         		if(config.recordFinancialWealthConsumption) {
         			// record consumption induced by financial wealth
@@ -920,29 +940,25 @@ public class HouseholdStats {
 		double deposits = h.getBankBalance();
 
 		// count the households with less than X dollars in their bank account
-		if (deposits < 400) { 
-			HouseholdsWithLessThan400pCounter += 1; 
+		if (deposits < 1500) { 
+			HouseholdsWithLessThan1500pCounter += 1; 
 			lowDepositHouseholdConsumptionCounter += h.getConsumption();
-			lowDepositHouseholdSavingCounter += h.getAnnualGrossTotalIncome();
+			lowDepositHouseholdSavingCounter += h.returnMonthlyDisposableIncome() - h.getConsumption();
 		}
 
 		// TODO record these measures at the beginning of the period in the household.java file to be consistent
 		
 		
 		// calculate the financial margins with different basic-living cost calculations
-		// fin. margin is hh net income less mortgage payments (i.e. disposable income + essential consumption)
+		// fin. margin is hh net income less mortgage payments (i.e. disposable income)
 		// only households holding debt are considered as we are interested in the exposure at default.
-		double financialMargin20BLC = h.returnMonthlyDisposableIncome() + 
-				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+		double financialMargin20BLC = h.returnMonthlyDisposableIncome() - 
 				0.2*medianIncome; 
-		double financialMargin40BLC = h.returnMonthlyDisposableIncome() + 
-				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+		double financialMargin40BLC = h.returnMonthlyDisposableIncome() - 
 				0.4*medianIncome;
-		double financialMargin70BLC = h.returnMonthlyDisposableIncome() + 
-				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+		double financialMargin70BLC = h.returnMonthlyDisposableIncome() - 
 				0.7*medianIncome;
-		double financialMargin = h.returnMonthlyDisposableIncome() + 
-				config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
+		double financialMargin = h.returnMonthlyDisposableIncome() - 
 				config.povertyLinePercentMedianIncome * medianIncome;
 		if (financialMargin20BLC < 0) { ExposureAtDefaultFinancialMarginBLC20Counter +=  householdDebt;	}
 		if (financialMargin40BLC < 0) { ExposureAtDefaultFinancialMarginBLC40Counter +=  householdDebt;	}
@@ -1122,6 +1138,8 @@ public class HouseholdStats {
 	
 	private void countCurrentlyVulnerableHouseholds(Household h){
 		vulnerableHouseholdsDSR.addValue( ( h.getPrincipalPaidBack() + h.getInterestPaidBack() ) / h.returnMonthlyGrossTotalIncome() );
+		vulnerableHouseholdsDSRAdjusted.addValue( ( h.getPrincipalPaidBack() + h.getInterestPaidBack() ) / 
+				(h.returnMonthlyGrossTotalIncome() - 0.2 * medianIncome) );
 		if(h.getVulnerableBecause() == "purchase") nowVulnerableByPurchaseCounter += 1;
 		if(h.getVulnerableBecause() == "dissaving") nowVulnerableByDissavingCounter += 1;
 		if(h.getVulnerableBecause() == "other") nowVulnerableByOtherCounter += 1;
@@ -1168,8 +1186,8 @@ public class HouseholdStats {
 		ExposureAtDefaultAmpudiaMeasure2 = ExposureAtDefaultAmpudiaMeasure2Counter / aggregateDebt;
 		ExposureAtDefaultAmpudiaMeasure2Counter = 0;
 
-		HouseholdsWithLessThan400p = HouseholdsWithLessThan400pCounter;
-		HouseholdsWithLessThan400pCounter = 0;
+		HouseholdsWithLessThan1500p = HouseholdsWithLessThan1500pCounter;
+		HouseholdsWithLessThan1500pCounter = 0;
 		lowDepositHouseholdConsumption = lowDepositHouseholdConsumptionCounter ;
 		lowDepositHouseholdConsumptionCounter = 0;
 		lowDepositHouseholdSaving = lowDepositHouseholdSavingCounter;
@@ -1526,8 +1544,8 @@ public class HouseholdStats {
 		return ExposureAtDefaultAmpudiaMeasure2;
 	}
 
-	public int getHouseholdsWithLessThan400p() {
-		return HouseholdsWithLessThan400p;
+	public int getHouseholdsWithLessThan1500p() {
+		return HouseholdsWithLessThan1500p;
 	}
 
 	public int getHouseholdsVulnerableAmpudiaMeasure2() {
@@ -1780,6 +1798,13 @@ public class HouseholdStats {
 		return indebtedHouseholds;
 	}
 	
+	public double getMedianDebtServiceRatioAdjusted() {
+		return medianDSRAdjusted;
+	}
+	
+	public double getMedianDSRVulnerableHouseholdsAdjusted() {
+		return medianDSRVulnerableHouseholdsAdjusted;
+	}
 	
 	
 }

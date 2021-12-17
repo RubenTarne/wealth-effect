@@ -221,7 +221,7 @@ public class AgentDataRecorder{
         		dataArray[1][h.id-oldestID] = h.getAge();
         		double equityPositionHH = dataArray[2][h.id-oldestID] = h.getEquityPosition();
         		dataArray[3][h.id-oldestID] = equityPositionHH - bankBalanceHH;
-        		dataArray[4][h.id-oldestID] = (h.getConsumption()+config.GOVERNMENT_MONTHLY_INCOME_SUPPORT*config.ESSENTIAL_CONSUMPTION_FRACTION);
+        		dataArray[4][h.id-oldestID] = (h.getConsumption());
         		dataArray[5][h.id-oldestID] = h.getAnnualGrossTotalIncome();
         		dataArray[6][h.id-oldestID] = h.returnMonthlyDisposableIncome(); 
         		dataArray[7][h.id-oldestID] = data.Wealth.getDesiredBankBalance(h.getAnnualGrossTotalIncome(), h.behaviour.getPropensityToSave()); //dataArray[3][h.id-oldestID] = h.behaviour.getDesiredBankBalance(h.getAnnualGrossTotalIncome());

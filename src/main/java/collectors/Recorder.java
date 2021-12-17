@@ -176,7 +176,7 @@ public class Recorder {
     					+ "totalBankruptcyCashInjection, totalDebtReliefDueToDeceasedHousehold, "
     					+ "creditSupplyTarget, newlyPaidDownPayments, cashPayments, newlyIssuedCredit, nNegativeEquity, "
     					+ "LTV FTB, LTV OO, LTV BTL, interestRateSpread, moneyOutflowToConstructionSector, "
-    					+ "macropruLTVOnOff, medianDebtServiceRatio, vulHH medianDSR, %vulHH of indebtedHH, medianAge vulHH, medianAge nonVulHH, Top 10% wealth share, "
+    					+ "macropruLTVOnOff, medianDebtServiceRatio, medianDebtServiceRatioAdjusted, vulHH medianDSR, vulHH medianDSR adjusted, %vulHH of indebtedHH, medianAge vulHH, medianAge nonVulHH, Top 10% wealth share, "
     					// agent-specific aggregate consumption total and per Agent-class
     					+ "activeBTLConsumption, avActiveBTLConsumption, SSBConsumption, avSSBConsumption, "
     					+ "inFirstHomeConsumption, avInFirstHomeConsumption, renterConsumption, avRenterConsumption, "
@@ -186,7 +186,7 @@ public class Recorder {
     					+ "avInFirstHomeIncomeConsumption, avInFirstHomeFinancialWealthConsumption, avInFirstHomeNetHousingWealthConsumtpion, "
     					+ "avrenterIncomeConsumption, avrenterFinancialWealthConsumption, avRenterNetHousingWealthConsumption, "
     					+ "EAD DSR>30%, EAD DSR>35%, EAD DSR>70%, EAD FM with BLC20%, EAD FM with BLC40%, EAD FM with BLC70%, "
-    					+ "EAD Ampudia (X*BLC 6m), EAD Ampudia (X*medIncome Y*m), HH with less than 400p, low-deposit HH Consumption, low-deposit HH Saving, "
+    					+ "EAD Ampudia (X*BLC 6m), EAD Ampudia (X*medIncome Y*m), HH with less than 1500p, low-deposit HH Consumption, low-deposit HH Saving, "
     					+ "nVulHH (X*medIncome Y*m), nVul activeBTL (X*medIncome Y*m), nVul inFirstHome (X*medIncome Y*m), nVul SSB (X*medIncome Y*m), "
     					+ "EAD Ampudia aBTL (X*medIncome Y*m), EAD Ampudia inFirstHome (X*medIncome Y*m), EAD Ampudia SSB (X*medIncome Y*m),"
 //    					+ "unemp nVulHH (70%BLC 24m), unemp nVul activeBTL (70%BLC 24m),unemp nVul inFirstHome (70%BLC 24m), unemp nVul SSB (70%BLC 24m), "
@@ -406,7 +406,9 @@ public class Recorder {
 					Model.housingMarketStats.getMoneyToConstructionSector() + ", " +
 					Model.centralBank.getCentralBankLTVsOnOff() + ", " +
 					Model.householdStats.getMedianDebtServiceRatio() + ", " + 
+					Model.householdStats.getMedianDebtServiceRatioAdjusted() + ", " + 
 					Model.householdStats.getMedianDSRVulnerableHouseholds() + ", " + 
+					Model.householdStats.getMedianDSRVulnerableHouseholdsAdjusted() + ", " + 
 					((double)Model.householdStats.getHouseholdsVulnerableAmpudiaMeasure2() / (double)Model.householdStats.getIndebtedHouseholds()) + ", " + 
 					Model.householdStats.getMedianAgeVulnerableHouseholds() + ", " +
 					Model.householdStats.getMedianAgeNonVulnerableHouseholds() + ", " +
@@ -473,7 +475,7 @@ public class Recorder {
 					Model.householdStats.getExposureAtDefaultAmpudiaMeasure2() +", " + 
 					
 					// households with less than X pounds as deposits
-					Model.householdStats.getHouseholdsWithLessThan400p() +", " +
+					Model.householdStats.getHouseholdsWithLessThan1500p() +", " +
 					Model.householdStats.getLowDepositHouseholdConsumption() +", " +
 					Model.householdStats.getLowDepositHouseholdSaving() +", " +
 					Model.householdStats.getHouseholdsVulnerableAmpudiaMeasure2() + ", " +
