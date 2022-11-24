@@ -154,7 +154,7 @@ public class Model {
             		|| config.recordNewCredit || config.recordPrincipalRepRegular
             		|| config.recordPrincipalRepIrregular || config.recordPrincipalRepSale
             		|| config.recordBankcuptcyCashInjection || config.recordPrincipalPaidBackInheritance
-            		|| config.recordFinancialVulnerability
+            		|| config.recordFinancialVulnerability || config.recordShockedMonthlyDisposableIncome
             		) {
                 microDataRecorder.openSingleRunSingleVariableFiles(nSimulation, config.recordBankBalance,
                         config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate,
@@ -165,7 +165,8 @@ public class Model {
                 		config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge, config.recordTransactionRevenue,
                 		config.recordId, config.recordNewCredit, config.recordPrincipalRepRegular,
                 		config.recordPrincipalRepIrregular, config.recordPrincipalRepSale, config.recordBankcuptcyCashInjection, 
-                		config.recordPrincipalPaidBackInheritance, config.recordFinancialVulnerability
+                		config.recordPrincipalPaidBackInheritance, config.recordFinancialVulnerability, 
+                		config.recordShockedMonthlyDisposableIncome
                 		);
             }
             
@@ -217,7 +218,7 @@ public class Model {
                         config.recordId, config.recordNewCredit, config.recordPrincipalRepRegular,
                         config.recordPrincipalRepIrregular, config.recordPrincipalRepSale,
                         config.recordBankcuptcyCashInjection, config.recordPrincipalPaidBackInheritance,
-                        config.recordFinancialVulnerability);
+                        config.recordFinancialVulnerability, config.recordShockedMonthlyDisposableIncome);
             }
 		}
 

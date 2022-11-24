@@ -478,7 +478,7 @@ public class HouseholdStats {
                 config.recordSavingForDeleveraging, config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge,
                 config.recordTransactionRevenue, config.recordId, config.recordNewCredit, config.recordPrincipalRepRegular
                 , config.recordPrincipalRepIrregular, config.recordPrincipalRepSale, config.recordBankcuptcyCashInjection, 
-        		config.recordPrincipalPaidBackInheritance, config.recordFinancialVulnerability);
+        		config.recordPrincipalPaidBackInheritance, config.recordFinancialVulnerability, config.recordShockedMonthlyDisposableIncome);
         // Run through all households counting population in each type and summing their gross incomes
         for (Household h : Model.households) {
         	
@@ -727,6 +727,9 @@ public class HouseholdStats {
         		if(config.recordFinancialVulnerability) {
         			Model.microDataRecorder.recordFinancialVulnerability(Model.getTime(), h.getVulnerableBecause(), h.getVulnerableSince());
         		}
+        		if(config.recordShockedMonthlyDisposableIncome) {
+        			Model.microDataRecorder.recordShockedMonthlyDisposableIncome(Model.getTime(), h.getShockedMonthlyDisposableIncome());
+        		}
         	}
         }
         
@@ -958,20 +961,24 @@ public class HouseholdStats {
 				0.4*medianIncome;
 		double financialMargin70BLC = h.returnMonthlyDisposableIncome() - 
 				0.7*medianIncome;
-		double financialMargin = h.returnMonthlyDisposableIncome() - 
-				config.povertyLinePercentMedianIncome * medianIncome;
+		double financialMargin;
+    	// if gross total income is not shocked extra, then only shock according to "povertyLinePercentMedianIncome". If it is 0.4 it is effectively not shocked
+    	// 0.6 means a shock of 20% of median income
+    	if(config.incomeShock == 0) {
+    		financialMargin = 
+    				h.returnMonthlyDisposableIncome() - config.povertyLinePercentMedianIncome * medianIncome;
+    	} else {
+        	// to arrive a the shocked disposable income, the new shocked net income is reduced 
+        	// by the difference between original net income and disposable income
+    		financialMargin = 
+    				h.calculateShockedDisposableIncomeForVulnerability() - 
+    				config.povertyLinePercentMedianIncome * medianIncome;
+    	}
 		if (financialMargin20BLC < 0) { ExposureAtDefaultFinancialMarginBLC20Counter +=  householdDebt;	}
 		if (financialMargin40BLC < 0) { ExposureAtDefaultFinancialMarginBLC40Counter +=  householdDebt;	}
 		if (financialMargin70BLC < 0) { ExposureAtDefaultFinancialMarginBLC70Counter +=  householdDebt;	}
-		//
-		//			// calculate finanical margin if unemployment was to hit 
-		//			// TODO: decide how much lower income would be on employment benefits
-		//			double unemployedFinancialMargin70BLC = 0.7*h.returnMonthlyDisposableIncome() + 
-		//					config.GOVERNMENT_MONTHLY_INCOME_SUPPORT * config.ESSENTIAL_CONSUMPTION_FRACTION - 
-		//					0.7*medianIncome;
 
-		// calculate the Ampudia measure. We use BLC = 0.7 but have to find the month-measure to arrive at 
-		// 2.4% EAD (following the EAB measure for household debt averaged over 2015-19)
+		// calculate the Ampudia et al. (2016) measure.
 		double monthsCoveredByDepositsVar = deposits / financialMargin;
 		// test the negative financial margin is at least X times the deposits
 		if(financialMargin < 0 & (- config.finVulMonthsToCover * financialMargin) > deposits) {
@@ -1080,7 +1087,7 @@ public class HouseholdStats {
 //			System.out.println("lastPurchase: " + lastPurchasePeriod);
 		} 
 		// third case: odd, if it didn't dissave and didn't just buy a home, how can
-		// it become vulnerable?
+		// it become vulnerable? For instance lower income, turning financial margin negative
 		else if ( lastPurchasePeriod != 1 && saving >= 0.0 ) { // normal: lastPurchasePeriod !=1 or > 120
 //			System.out.println("weird, household became vulnerable without dissaving or buying a house");
 			h.setVulnerableBecause("other");

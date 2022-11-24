@@ -47,6 +47,7 @@ public class MicroDataRecorder {
     private PrintWriter outfilePrincipalPaidBackInheritance;
     private PrintWriter outfileFinancialVulnerabilityReason;
     private PrintWriter outfileFinancialVulnerabilitySince;
+    private PrintWriter outfileShockedMonthlyDisposableIncome;
     
 
     //------------------------//
@@ -71,7 +72,7 @@ public class MicroDataRecorder {
                                                  boolean recordId, boolean recordNewCredit, boolean recordPrincipalRepRegular,
                                                  boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
                                                  boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance,
-                                                 boolean recordFinancialVulnerability) {
+                                                 boolean recordFinancialVulnerability, boolean recordShockedMonthlyDisposableIncome) {
         if (recordBankBalance) {
             try {
                 outfileBankBalance = new PrintWriter(outputFolder + "BankBalance-run" + nRun
@@ -306,6 +307,16 @@ public class MicroDataRecorder {
         		e.printStackTrace();
         	}
         }
+        if(recordShockedMonthlyDisposableIncome) {
+        	try {
+        		outfileShockedMonthlyDisposableIncome = new PrintWriter(outputFolder + 
+        				"ShockedMonthlyDisposableIncome-run" + nRun + ".csv", "UTF-8");
+        		outfileShockedMonthlyDisposableIncome = new PrintWriter(outputFolder + 
+        				"ShockedMonthlyDisposableIncome-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
     }
 
     void timeStampSingleRunSingleVariableFiles(int time, boolean recordBankBalance, boolean recordHousingWealth,
@@ -320,7 +331,7 @@ public class MicroDataRecorder {
                                                boolean recordTransactionRevenue, boolean recordId, boolean recordNewCredit, 
                                                boolean recordPrincipalRepRegular, boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
                                                boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance,
-                                               boolean recordFinancialVulnerability
+                                               boolean recordFinancialVulnerability, boolean recordShockedMonthlyDisposableIncome
                                                ) {
         if (time % Model.config.microDataRecordIntervall == 0 && time >= Model.config.TIME_TO_START_RECORDING) {
             if (recordBankBalance) {
@@ -499,6 +510,12 @@ public class MicroDataRecorder {
             	outfileFinancialVulnerabilityReason.print(time);
         		outfileFinancialVulnerabilitySince.print(time);
             }
+            if (recordShockedMonthlyDisposableIncome) {
+            	if (time != 0) {
+            		outfileShockedMonthlyDisposableIncome.println("");
+            	}
+            	outfileShockedMonthlyDisposableIncome.print(time);
+            }
         }
     }
 	
@@ -609,6 +626,9 @@ public class MicroDataRecorder {
     	outfileFinancialVulnerabilityReason.print(", " + vulCause);
 		outfileFinancialVulnerabilitySince.print(", " + (time - vulSince));
     }
+    void recordShockedMonthlyDisposableIncome(int time, double shockedMonthlyDisposableIncome) {
+    	outfileShockedMonthlyDisposableIncome.print(", " + round(shockedMonthlyDisposableIncome,3));
+    }
     
 
 
@@ -622,7 +642,7 @@ public class MicroDataRecorder {
                           boolean recordId, boolean recordNewCredit, boolean recordPrincipalRepRegular,
                           boolean recordPrincipalRepIrregular, boolean recordprincipalRepSale,
                           boolean recordBankcuptcyCashInjection, boolean recordPrincipalPaidBackInheritance,
-                          boolean recordFinancialVulnerability) {
+                          boolean recordFinancialVulnerability, boolean recordShockedMonthlyDisposableIncome) {
         if (recordBankBalance) {
             outfileBankBalance.close();
         }
@@ -710,6 +730,9 @@ public class MicroDataRecorder {
         if (recordFinancialVulnerability) {
         	outfileFinancialVulnerabilityReason.close();
     		outfileFinancialVulnerabilitySince.close();
+        }
+        if (recordShockedMonthlyDisposableIncome) {
+        	outfileShockedMonthlyDisposableIncome.close();
         }
 	}
 	

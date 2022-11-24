@@ -65,6 +65,7 @@ public class Config {
 	public boolean recordBankcuptcyCashInjection; // True to write agents cash injection when going bankrupt
 	public boolean recordPrincipalPaidBackInheritance; // True to write principal paid back due to inheritance
 	public boolean recordFinancialVulnerability;       // True to write the reason an agent is vulnerable and for how long
+	public boolean recordShockedMonthlyDisposableIncome; 
 
 
     
@@ -113,6 +114,7 @@ public class Config {
     public double consumptionAdjustmentForDeleveraging; 	// if households is negative lower consumption by this factor
     public int    finVulMonthsToCover; 
     public double povertyLinePercentMedianIncome; 
+    public double incomeShock; 
     // House parameters
     public int N_QUALITY;                   // Number of quality bands for houses
 

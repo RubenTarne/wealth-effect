@@ -58,6 +58,7 @@ public class Household implements IHouseOwner {
     private boolean							vulnerableTMinus1; // has the household been vulnerable in the period before?
     private int								vulnerableSince; // records the period the household became vulnerable last
     private String							vulnerableBecause; // records a string standing for the reason (set in householdStats) the household became vulnerable ("not vulnerable" if not)
+    private double							shockedMonthlyDisposableIncome; // the shocked disposable income in case there is an actual shock
     private double 							monthlyPayments;
     private double							principalPaidBack; // records how much of mortgage principal this household paid back this period
     private double							principalPaidBackForInheritance; // this records the repayment of principal the bequeather paid back, before passing its wealth on to this household
@@ -154,6 +155,8 @@ public class Household implements IHouseOwner {
     	// Add monthly disposable income (net total income and housing expenses) to bank balance
     	monthlyDisposableIncome = getMonthlyDisposableIncome();
     	bankBalance += monthlyDisposableIncome;
+    	// reset shockedMonthlyDisposableIncome to monthlyDisposable income
+    	shockedMonthlyDisposableIncome = 0.0;
     	// record bankBalance before consumption
     	Model.householdStats.recordBankBalanceBeforeConsumption(bankBalance);
     	// set the equityPosition of the household for the beginning of the period. This way HouseholdStats at the end of the period 
@@ -245,7 +248,7 @@ public class Household implements IHouseOwner {
     }
     
     /**
-     * Subtracts the essential, necessary consumption and housing expenses (mortgage and rental payments) from the net
+     * Subtracts housing expenses (mortgage and rental payments) from the net
      * total income (employment income plus property income minus taxes)
      */
     public double getMonthlyDisposableIncome() {
@@ -362,9 +365,18 @@ public class Household implements IHouseOwner {
     // test if the household is vulnerable 
     private void recordVulnerability() {
     	vulnerableTMinus1 = isVulnerable;
-    	double financialMargin = monthlyDisposableIncome -
+    	double financialMargin;
+    	// if gross total income is not shocked extra, then only shock according to "povertyLinePercentMedianIncome". If it is 0.4 it is effectively not shocked
+    	// 0.6 means a shock of 20% of median income
+    	if(config.incomeShock == 0) {
+    		financialMargin = 
+    				monthlyDisposableIncome - config.povertyLinePercentMedianIncome * Model.householdStats.getMonthlyMedianIncome();
+    	} else {
+        	
+    		financialMargin = 
+    				calculateShockedDisposableIncomeForVulnerability()  - 
 				config.povertyLinePercentMedianIncome * Model.householdStats.getMonthlyMedianIncome();
-    	
+    	}
     	double monthsCoveredByDeposits = bankBalance / financialMargin;
     	// only vulnerable if household has mortgage debt and deposits are less than 24 (or X) times the
     	// negative financial margin
@@ -383,7 +395,31 @@ public class Household implements IHouseOwner {
     	// the months covered are at the threshold for the households to be counted as vulnerable (24)
     	// months covered by deposits calculated negative
     	ExposureAtDefaultFactor = 1 + monthsCoveredByDeposits / config.finVulMonthsToCover ; 	
+//    	    	System.out.println("Financial margin went from " + (monthlyDisposableIncome - config.povertyLinePercentMedianIncome * Model.householdStats.getMonthlyMedianIncome()) + 
+//    	    			" to " + financialMargin);
     }
+    
+    
+    public double calculateShockedDisposableIncomeForVulnerability () {
+    	// for using an %-income shock to Gross total income: calculate net income from a reduced GTI, while not 
+    	// overriding the recorded values for the household
+    	// first: calculate the share of employment income in gross total income
+    	double shareEmploymentIncomeInTotalIncome = annualGrossEmploymentIncome / (12 * monthlyGrossTotalIncome);
+    	double shockedMonthlyGrossTotalIncome = monthlyGrossTotalIncome - config.incomeShock * monthlyGrossTotalIncome;
+    	// to arrive a the shocked disposable income, the new shocked net income is reduced 
+    	// by the difference between original net income and disposable income
+    	double differenceNetIncomeDisposableIncome = monthlyNetTotalIncome - monthlyDisposableIncome;
+    	double shockedMonthlyDisposableIncome_tmp = shockedMonthlyGrossTotalIncome - differenceNetIncomeDisposableIncome -
+    			// minus income tax (with finance costs tax relief)
+    			Model.government.incomeTaxDue(shockedMonthlyGrossTotalIncome - getAnnualFinanceCosts()) / config.constants.MONTHS_IN_YEAR - 
+    			// minus national insurance contributions (they are calculated with employment income)
+    			Model.government.class1NICsDue(shareEmploymentIncomeInTotalIncome * (12 * shockedMonthlyGrossTotalIncome)) / config.constants.MONTHS_IN_YEAR;
+//    	System.out.println("Total Income = " + monthlyGrossTotalIncome + " and with the shock, it is now only " + shockedMonthlyGrossTotalIncome);
+//    	System.out.println("Total Net Income = " + monthlyNetTotalIncome + " and with the shock, it is now only " + shockedMonthlyNetTotalIncome);
+    	shockedMonthlyDisposableIncome = shockedMonthlyDisposableIncome_tmp;
+    	return shockedMonthlyDisposableIncome;
+    }
+    
     
 //    // PAUL this method calculats airbnb rental income and counts the number of airbnbs rented out
 //    private double calculateAirBnBIncome() {
