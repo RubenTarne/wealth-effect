@@ -127,14 +127,14 @@ public class Household implements IHouseOwner {
      * - Buy/sell/rent out properties if BTL investor
      */
     public void step() {
-        isBankrupt = false; // Delete bankruptcies from previous time step
+    	isBankrupt = false; // Delete bankruptcies from previous time step
     	// set payment counters and cashInjection to zero, so they can be updated 
     	principalPaidBack = 0.0;
     	principalPaidBackDueToHouseSale = 0.0;
     	socialHousingRent = 0.0;
     	interestPaidBack = 0.0; 
     	monthlyDividendIncome = 0.0;
-        monthlyGrossRentalIncome = 0.0;
+    	monthlyGrossRentalIncome = 0.0;
     	rentalPayment = 0.0;
     	cashInjection = 0.0;
     	monthlyPayments = 0.0;
@@ -143,17 +143,28 @@ public class Household implements IHouseOwner {
     	// PAUL reset the airBnB income (and number of flats rented each month) in every step, so that it does not add up over the periods
     	airBnBRentalIncome = 0.0;
     	nAirBnBRentedOut = 0;
-    	
+
+    	//    	if(id == 1825) {
+    	//    		System.out.println("stop");
+    	//    	}
+
     	// record bankBalance very beginning of period
     	Model.householdStats.recordBankBalanceVeryBeginningOfPeriod(bankBalance);
-        // Update annual and monthly gross employment income
-        annualGrossEmploymentIncome = data.EmploymentIncome.getAnnualGrossEmploymentIncome(age, incomePercentile);
-        monthlyGrossEmploymentIncome = annualGrossEmploymentIncome/config.constants.MONTHS_IN_YEAR;
-//        // PAUL calculate the Airbnb income
-//        if(behaviour.isAirBnBInvestor()) airBnBRentalIncome = calculateAirBnBIncome();
-//        
+    	// Update annual and monthly gross employment income
+    	annualGrossEmploymentIncome = data.EmploymentIncome.getAnnualGrossEmploymentIncome(age, incomePercentile);
+    	monthlyGrossEmploymentIncome = annualGrossEmploymentIncome/config.constants.MONTHS_IN_YEAR;
+    	//        // PAUL calculate the Airbnb income
+    	//        if(behaviour.isAirBnBInvestor()) airBnBRentalIncome = calculateAirBnBIncome();
+    	//        
     	// Add monthly disposable income (net total income and housing expenses) to bank balance
+//    	
+//    	if(id == 99) {
+//    		System.out.println("hammertime");
+//    	}
     	monthlyDisposableIncome = getMonthlyDisposableIncome();
+//    	if(monthlyNetTotalIncome / monthlyGrossTotalIncome > 0.95 && behaviour.isPropertyInvestor() == false && monthlyGrossTotalIncome > 5000 && bankBalance < 5000) {
+//    		System.out.println("stop_checkNetincome");
+//    	}
     	bankBalance += monthlyDisposableIncome;
     	// reset shockedMonthlyDisposableIncome to monthlyDisposable income
     	shockedMonthlyDisposableIncome = 0.0;
@@ -177,7 +188,7 @@ public class Household implements IHouseOwner {
     	}
     	// check if the household is vulnerable by Ampudia et al. (2016) measures
     	recordVulnerability();
-    	
+
     	// Manage owned properties and close debts on previously owned properties. To this end, first, create an
     	// iterator over the house-paymentAgreement pairs at the household's housePayments object
     	Iterator<Entry<House, PaymentAgreement>> paymentIt = housePayments.entrySet().iterator();
@@ -186,42 +197,58 @@ public class Household implements IHouseOwner {
     	PaymentAgreement payment;
     	//TODO TEST -> deactivate the housing market from time t on, i.e. deactivate the following code 
     	if (Model.getTime() < config.startTimeDeactivateTransactions) {
-        	// Iterate over these house-paymentAgreement pairs...
-        	while (paymentIt.hasNext()) {
-        		entry = paymentIt.next();
-        		h = entry.getKey();
-        		payment = entry.getValue();
-        		// ...if the household is the owner of the house, then manage it
-        		if (h.owner == this) {
-        			manageHouse(h);
-        			// ...otherwise, if the household is not the owner nor the resident, then it is an old debt due to
-        			// the household's inability to pay the remaining principal off after selling a property...
-        		} else if (h.resident != this) {
-        			MortgageAgreement mortgage = (MortgageAgreement) payment;
-        			// ...remove this type of houses from payments as soon as the household pays the debt off
-        			if ((payment.nPayments == 0) & (mortgage.principal == 0.0)) {
-        				paymentIt.remove();
-        			}
-        		}
-        	}
-        	// Make housing decisions depending on current housing state
-        	if (isInSocialHousing()) {
-        		bidForAHome(); // When BTL households are born, they enter here the first time and until they manage to buy a home!
-        	} else if (isRenting()) {
-        		if (housePayments.get(home).nPayments == 0) { // End of rental period for this tenant
-        			endTenancy();
-        			bidForAHome();
-        		}            
-        	} else if (behaviour.isPropertyInvestor()) { // Only BTL investors who already own a home enter here
-        		// BTL investors always bid the price corresponding to the maximum mortgage they could get
-        		double price = Model.bank.getMaxMortgage(this, false, false);
-        		Model.householdStats.countBTLBidsAboveExpAvSalePrice(price);
-        		if (behaviour.decideToBuyInvestmentProperty(this)) {
-        			Model.houseSaleMarket.bid(this, price, true);
-        		}
-        	} else if (!isHomeowner()){
-        		System.out.println("Strange: this household is not a type I recognize");
-        	}
+    		// Iterate over these house-paymentAgreement pairs...
+    		while (paymentIt.hasNext()) {
+    			entry = paymentIt.next();
+    			h = entry.getKey();
+    			payment = entry.getValue();
+    			// ...if the household is the owner of the house, then manage it
+    			if (h.owner == this) {
+    				manageHouse(h);
+    				// ...otherwise, if the household is not the owner nor the resident, then it is an old debt due to
+    				// the household's inability to pay the remaining principal off after selling a property...
+    			} else if (h.resident != this) {
+    				MortgageAgreement mortgage = (MortgageAgreement) payment;
+    				// ...remove this type of houses from payments as soon as the household pays the debt off
+    				if ((payment.nPayments == 0) & (mortgage.principal == 0.0)) {
+    					paymentIt.remove();
+    				}
+    			}
+    		}
+    		// Make housing decisions depending on current housing state
+    		if (isInSocialHousing()) {
+    			// if the Dutch model version is active, the non-BTL household in social housing
+    			// with income below the social housing income limit 
+    			// and only if enough social housing is available (i.e. the limitationas of procyclical renting
+    			// do not hold, checks if...
+    			if(config.NDLVersion == true && !behaviour.isPropertyInvestor() 
+    					&& getMonthlyGrossTotalIncome() <= config.socialHousingIncomeLimit / 12 ) {
+//    					&& config.procyclicalRentalMarket && Model.getTime() > 50 // allow for some burning-in period, as in the first few periods all houses are empty
+//    					&& Model.householdStats.getnEmptyHouses() < config.nEmptyHousesAboveWhichBidForRent) {
+    				//... current market prices for either housing OR renting are below social rent...
+    				double lowestHousingCost = behaviour.lowestMonthlyHousingCost(this);
+    				if(lowestHousingCost < config.socialHousingRent) {
+    					// ... only then it enters the markets
+    					bidForAHome();
+    				} 
+    			} else {
+    				bidForAHome(); // When BTL households are born, they enter here the first time and until they manage to buy a home!
+    			}
+    		} else if (isRenting()) {
+    			if (housePayments.get(home).nPayments == 0) { // End of rental period for this tenant
+    				endTenancy();
+    				bidForAHome();
+    			}            
+    		} else if (behaviour.isPropertyInvestor()) { // Only BTL investors who already own a home enter here
+    			// BTL investors always bid the price corresponding to the maximum mortgage they could get
+    			double price = Model.bank.getMaxMortgage(this, false, false);
+    			Model.householdStats.countBTLBidsAboveExpAvSalePrice(price);
+    			if (behaviour.decideToBuyInvestmentProperty(this)) {
+    				Model.houseSaleMarket.bid(this, price, true);
+    			}
+    		} else if (!isHomeowner()){
+    			System.out.println("Strange: this household is not a type I recognize");
+    		}
     	}
     }
 
@@ -373,7 +400,7 @@ public class Household implements IHouseOwner {
         	
     		financialMargin = 
     				calculateShockedDisposableIncomeForVulnerability()  - 
-				config.povertyLinePercentMedianIncome * Model.householdStats.getMonthlyMedianIncome();
+    				config.povertyLinePercentMedianIncome * Model.householdStats.getMonthlyMedianIncome();
     	}
     	double monthsCoveredByDeposits = bankBalance / financialMargin;
     	// only vulnerable if household has mortgage debt and deposits are less than 24 (or X) times the
@@ -700,13 +727,13 @@ public class Household implements IHouseOwner {
     	rent.nPayments = config.TENANCY_LENGTH_AVERAGE + prng.nextInt(2*config.TENANCY_LENGTH_EPSILON + 1)
     	- config.TENANCY_LENGTH_EPSILON;
 
-    	// the German rental market has high standard deviations, leading to possibly negative nPayments.
+    	// the German and Dutch rental market has high standard deviations, leading to possibly negative nPayments.
     	// additionally, contracts are not shorter than 1 year.   
-    	if(config.GERVersion && rent.nPayments < 12) {
-    		//        	double  length = config.TENANCY_LENGTH_AVERAGE + prng.nextGaussian() * config.TENANCY_LENGTH_EPSILON;
-    		//        			rent.nPayments = (int) Math.round(length);
-    		rent.nPayments = 12;
-    	}
+//    	if( (config.GERVersion | config.NDLVersion) && rent.nPayments < 12) {
+//    		//        	double  length = config.TENANCY_LENGTH_AVERAGE + prng.nextGaussian() * config.TENANCY_LENGTH_EPSILON;
+//    		//        			rent.nPayments = (int) Math.round(length);
+//    		rent.nPayments = 12;
+//    	}
     	// Add the rental agreement to the house payments object of the tenant household
     	housePayments.put(sale.getHouse(), rent);
     	// Set the house as the tenant's home and the tenant as the house's resident
@@ -1248,6 +1275,10 @@ public class Household implements IHouseOwner {
 
 	public void setVulnerableBecause(String vulnerableBecause) {
 		this.vulnerableBecause = vulnerableBecause;
+	}
+	
+	public double getShockedMonthlyDisposableIncome() {
+		return shockedMonthlyDisposableIncome;
 	}
 
 	public int getnAirBnBRentedOut() {

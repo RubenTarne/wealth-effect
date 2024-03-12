@@ -79,7 +79,11 @@ public class Config {
     boolean procyclicalRentalMarket;				// 
     boolean dividendPayments;					// interest payments by mortgage holders end up as dividend income to households (boolean)
     boolean anticyclicalCBLTVs; 					
-    // GER version 
+    // Dutch model
+    boolean NDLVersion;							// Dutch model version changes the structure of the Model
+    double socialHousingIncomeLimit; 
+    
+    // German model 
     boolean GERVersion;		
     
     // First time buyer Saving Motive
@@ -148,6 +152,9 @@ public class Config {
     public double rentMaxAmortisationPeriodsAirBnB; // PAUL what is the maximum rent armortisation for AirBnBs
    
     // Household behaviour parameters: rent
+    double DESIRED_RENT_SCALE;    //
+    double	DESIRED_RENT_MU;    //
+    double	DESIRED_RENT_SIGMA;    //
     double DESIRED_RENT_INCOME_FRACTION;    // Desired proportion of income to be spent on rent
     public double PSYCHOLOGICAL_COST_OF_RENTING;   // Annual psychological cost of renting
     double SENSITIVITY_RENT_OR_PURCHASE;    // Sensitivity parameter of the decision between buying and renting
@@ -188,7 +195,7 @@ public class Config {
     double DOWNPAYMENT_BTL_MEAN;                    // Average downpayment, as percentage of house price, by but-to-let investors
     double DOWNPAYMENT_BTL_EPSILON;                 // Standard deviation of the noise
     // Household behaviour parameters: selling decision
-    private double HOLD_PERIOD;                 // Average period, in years, for which owner-occupiers hold their houses
+    double HOLD_PERIOD;                 // Average period, in years, for which owner-occupiers hold their houses
     // Household behaviour parameters: BTL buy/sell choice
     double BTL_CHOICE_INTENSITY;            // Shape parameter, or intensity of choice on effective yield
     public double BTL_CHOICE_MIN_BANK_BALANCE;     // Minimun bank balance, as a percentage of the desired bank balance, to buy new properties

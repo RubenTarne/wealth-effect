@@ -78,25 +78,30 @@ public class HouseSaleMarket extends HousingMarket {
 	
 	@Override
 	protected HouseOfferRecord getBestOffer(HouseBidderRecord bid) {
-		double minDownpayment;
-		if (bid.isBTLBid()) { // BTL bidder (yield driven)
-			HouseOfferRecord bestOffer = (HouseOfferRecord)offersPY.peek(bid);
-			if (bestOffer != null) {
-				if(config.allCreditConstraintsActive==false 
-						&& config.procyclicalCreditConstraints) {
-					minDownpayment = bestOffer.getPrice() * (1.0 - Model.bank.getLoanToValueLimit(false, false));
-				} else {
-					minDownpayment = 
-							bestOffer.getPrice()*(1.0
-									- Model.rentalMarketStats.getExpAvFlowYield()
-									/(Model.centralBank.getInterestCoverRatioLimit(false)
-											*config.CENTRAL_BANK_BTL_STRESSED_INTEREST));
-				}
-				if (bid.getBidder().getBankBalance() >= minDownpayment) {
-					return bestOffer;
-				}
-			}
-			return null;
+		// BTL bids are yield-driven, thus use the offersPY priority queue
+        if (bid.isBTLBid()) {
+            return (HouseOfferRecord)offersPY.peek(bid);
+//      // This code is redundant, referring to commit from the 27.3.2020 by Adrian Carro to the original INET model.
+//		double minDownpayment;
+//		if (bid.isBTLBid()) { // BTL bidder (yield driven)
+//			HouseOfferRecord bestOffer = (HouseOfferRecord)offersPY.peek(bid);
+//			if (bestOffer != null) {
+//				if(config.allCreditConstraintsActive==false 
+//						&& config.procyclicalCreditConstraints) {
+//					minDownpayment = bestOffer.getPrice() * (1.0 - Model.bank.getLoanToValueLimit(false, false));
+//				} else {
+//					minDownpayment = 
+//							bestOffer.getPrice()*(1.0
+//									- Model.rentalMarketStats.getExpAvFlowYield()
+//									/(Model.centralBank.getInterestCoverRatioLimit(false)
+//											*config.CENTRAL_BANK_BTL_STRESSED_INTEREST));
+//				}
+//				if (bid.getBidder().getBankBalance() >= minDownpayment) {
+//					return bestOffer;
+//				}
+//			}
+//			return null;
+            // Non-BTL bids are quality-driven, thus use the main (offersPQ) priority queue
 		} else { // must be OO buyer (quality driven)
 			return super.getBestOffer(bid);
 		}

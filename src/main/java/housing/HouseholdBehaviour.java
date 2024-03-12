@@ -155,22 +155,22 @@ public class HouseholdBehaviour {
 			if(DSR >= Model.householdStats.getMedianDebtServiceRatio()) {
 				consumption = consumptionFraction * disposableIncome 
 						+ wealthEffect * deposits
-						+ 0.01 * (propertyValues+ totalDebt);
+						+ config.consumptionNetHousingWealth * (propertyValues+ totalDebt);
 			} else {
 				consumption = consumptionFraction * disposableIncome 
 						+ wealthEffect * deposits;
 			}
 
 			// calculate the different parts of consumption in order to extract this data
-			double incomeConsumption = consumptionFraction*disposableIncome;
-			double financialWealthConsumption = wealthEffect*deposits; 		
+			double incomeConsumption = consumptionFraction * disposableIncome;
+			double financialWealthConsumption = wealthEffect * deposits; 		
 			double housingWealthConsumption = 0.0;
 			double debtConsumption = 0.0;
 			// from the quasi-collateral channel follows that only households with above-median
 			// DSRs have a positive net housing wealth effect and NO liquidity preference
 			if(DSR > Model.householdStats.getMedianDebtServiceRatio()) {
-				housingWealthConsumption = 0.01 * propertyValues;
-				debtConsumption = 0.01 * totalDebt;
+				housingWealthConsumption = config.consumptionNetHousingWealth * propertyValues;
+				debtConsumption = config.consumptionNetHousingWealth * totalDebt;
 				liquidityPreference = 0.0;
 			}
 
@@ -365,6 +365,14 @@ public class HouseholdBehaviour {
 	 * @param annualGrossEmploymentIncome Annual gross employment income of the household
 	 */
 	double getDesiredPurchasePrice(double annualGrossEmploymentIncome) {
+		if(config.NDLVersion) {
+			// this fits the Dutch HFCS data to a log-linear model
+			double exponent = config.BUY_SCALE + 
+					config.BUY_MU * Math.log(annualGrossEmploymentIncome) + 
+					config.BUY_SIGMA * prng.nextGaussian();
+			double desiredPP = Math.exp(exponent);
+			return desiredPP;
+		} 
 		// Note the capping of the HPA factor to a arbitrary maximum level (0.9) to avoid dividing by zero as well as
 		// unrealistically large desired budgets
 		double HPAFactor = Math.min(config.BUY_WEIGHT_HPA*getLongTermHPAExpectation(), 0.9);
@@ -423,8 +431,8 @@ public class HouseholdBehaviour {
 		if (me.isFirstTimeBuyer()) {
 			// Since the function of the HPI is to move the down payments distribution upwards or downwards to
 			// accommodate current price levels, and the distribution is itself aggregate, we use the aggregate HPI
-			downpayment = housingMarketStats.getHPI()*downpaymentDistFTB.inverseCumulativeProbability(Math.max(0.0,
-					(me.incomePercentile - config.DOWNPAYMENT_MIN_INCOME)/(1 - config.DOWNPAYMENT_MIN_INCOME)));
+          downpayment = housingMarketStats.getHPI()
+          * downpaymentDistFTB.inverseCumulativeProbability(me.incomePercentile);
 		} else if (isPropertyInvestor()) {
 			//TODO: by Ruben, this method also gets called by the completeTransaction method (via the requestLoan method)
 			// Does this mean the random number generator uses a different number here than before the household is making 
@@ -432,8 +440,8 @@ public class HouseholdBehaviour {
 			downpayment = housePrice*(Math.max(0.0,
 					config.DOWNPAYMENT_BTL_MEAN + config.DOWNPAYMENT_BTL_EPSILON * prng.nextGaussian()));
 		} else {
-			downpayment = housingMarketStats.getHPI()*downpaymentDistOO.inverseCumulativeProbability(Math.max(0.0,
-					(me.incomePercentile - config.DOWNPAYMENT_MIN_INCOME)/(1 - config.DOWNPAYMENT_MIN_INCOME)));
+            downpayment = housingMarketStats.getHPI()
+                    * downpaymentDistOO.inverseCumulativeProbability(me.incomePercentile);
 		}
 		if (downpayment > me.getBankBalance()) {
 			//System.out.println("bankBalance restricts downpayment, desired downpayment " + downpayment/me.getBankBalance()+ "% bigger");
@@ -466,6 +474,26 @@ public class HouseholdBehaviour {
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// Renter behaviour
 	///////////////////////////////////////////////////////////////////////////////////////////////
+	
+	// For the Dutch model version households in social housing only enter the markets when prices fall below
+	// their social housing rent
+	double lowestMonthlyHousingCost(Household h) {
+		// Find household's desired housing expenditure
+		double desiredPurchasePrice = h.behaviour.getDesiredPurchasePrice(h.getAnnualGrossEmploymentIncome());
+		// Cap this expenditure to the maximum mortgage available to the household
+		double price = Math.min(desiredPurchasePrice, Model.bank.getMaxMortgage(h, true, false));
+
+		MortgageAgreement mortgageApproval = Model.bank.requestApproval(h, price,
+				decideDownPayment(h, price), true, false);
+		int newHouseQuality = Model.housingMarketStats.getMaxQualityForPrice(price);
+		if (newHouseQuality < 0) {
+			return Double.POSITIVE_INFINITY; // can't afford a house anyway, stay in social housing   
+		}
+		double costOfHouse = mortgageApproval.monthlyPayment * config.constants.MONTHS_IN_YEAR
+				- ( 1 / config.HOLD_PERIOD ) * price * getLongTermHPAExpectation();
+		double costOfRent = Model.rentalMarketStats.getExpAvSalePriceForQuality(newHouseQuality) * config.constants.MONTHS_IN_YEAR;
+		return(Math.min(costOfHouse, costOfRent));
+	}
 
 	/*** renters or OO after selling home decide whether to rent or buy
 	 * N.B. even though the HH may not decide to rent a house of the
@@ -491,11 +519,11 @@ public class HouseholdBehaviour {
 			}
 			return false; // can't afford a house anyway   
 		}
-		double costOfHouse = mortgageApproval.monthlyPayment*config.constants.MONTHS_IN_YEAR
-				- purchasePrice*getLongTermHPAExpectation();
+		double costOfHouse = mortgageApproval.monthlyPayment * config.constants.MONTHS_IN_YEAR
+				- (1 / config.HOLD_PERIOD) * purchasePrice*getLongTermHPAExpectation();
 		double costOfRent = Model.rentalMarketStats.getExpAvSalePriceForQuality(newHouseQuality)
-				*config.constants.MONTHS_IN_YEAR;
-		double probabilityPlaceBidOnHousingMarket = sigma(config.SENSITIVITY_RENT_OR_PURCHASE*(costOfRent
+				* config.constants.MONTHS_IN_YEAR;
+		double probabilityPlaceBidOnHousingMarket = sigma(config.SENSITIVITY_RENT_OR_PURCHASE * (costOfRent
 				//				        		*(1.0 + config.PSYCHOLOGICAL_COST_OF_RENTING) 
 				- costOfHouse));
 		boolean placeBidOnHousingMarket = prng.nextDouble() < probabilityPlaceBidOnHousingMarket;
@@ -507,8 +535,8 @@ public class HouseholdBehaviour {
 					placeBidOnHousingMarket);
 		}
 		// allow for some burning-in period, as in the first few periods all houses are empty
-		if(config.procyclicalRentalMarket && Model.getTime() > 500) {
-			if(Model.householdStats.getnEmptyHouses()>config.nEmptyHousesAboveWhichBidForRent) { return false;}
+		if(config.procyclicalRentalMarket && Model.getTime() > 50) {
+			if(Model.householdStats.getnEmptyHouses() > config.nEmptyHousesAboveWhichBidForRent) { return false;}
 		}
 		return placeBidOnHousingMarket;
 
@@ -519,6 +547,15 @@ public class HouseholdBehaviour {
 	 * Source: Zoopla rental prices 2008-2009 (at Bank of England)
 	 ********************************************************/
 	double desiredRent(double monthlyGrossEmploymentIncome) {
+		if (config.NDLVersion) {
+			// this fits the Dutch HFCS data to a log-linear model
+			double exponent = config.DESIRED_RENT_SCALE + 
+					config.DESIRED_RENT_MU * Math.log(12 * monthlyGrossEmploymentIncome) + 
+					config.DESIRED_RENT_SIGMA * prng.nextGaussian();
+			double desiredPP = Math.exp(exponent) / 12 ; // the parameters are estimated on yearly values
+			return desiredPP;
+		}
+		
 		// allow for some burning-in period, as in the first few periods all houses are empty
 		if (config.procyclicalRentalMarket && Model.getTime() > 500) {
 			double fraction;
@@ -533,6 +570,7 @@ public class HouseholdBehaviour {
 			return monthlyGrossEmploymentIncome*fraction;
 		} else {
 			return monthlyGrossEmploymentIncome*config.DESIRED_RENT_INCOME_FRACTION;
+//			return Math.min(2350.0, monthlyGrossEmploymentIncome*config.DESIRED_RENT_INCOME_FRACTION);
 		}
 	}
 
@@ -561,7 +599,7 @@ public class HouseholdBehaviour {
 			return false;
 		}
 		// ...don't sell while occupied by tenant
-		//		if(!h.isOnRentalMarket()) return false;
+		if(!h.isOnRentalMarket()) return false;
 
 		// Find the expected equity yield rate of this property as a weighted mix of both rental yield and capital gain
 		// times the leverage
@@ -575,28 +613,28 @@ public class HouseholdBehaviour {
 		double leverage = currentMarketPrice / equity;
 		// ...find the expected rental yield of this property as its current rental price (under current average
 		// occupancy) divided by its current (fair market value) sale price
-		//        double currentRentalYield = h.getRentalRecord().getPrice() * config.constants.MONTHS_IN_YEAR
-		//                * rentalMarketStats.getAvOccupancyForQuality(h.getQuality()) / currentMarketPrice;
-		double currentRentalYield = Model.rentalMarketStats.getAvFlowYieldForQuality(h.getQuality()) * 
-				rentalMarketStats.getAvOccupancyForQuality(h.getQuality()) / currentMarketPrice;;
-				// ...find the mortgage rate (pounds paid a year per pound of equity)
-				double mortgageRate = mortgage.nextPayment()*config.constants.MONTHS_IN_YEAR/equity;
-				// ...finally, find expected equity yield, or yield on equity
-				double expectedEquityYield = leverage*((1.0 - BTLCapGainCoefficient)*currentRentalYield
-						+ BTLCapGainCoefficient*getLongTermHPAExpectation())
-						- mortgageRate;
-				// Compute a probability to keep the property as a function of the effective yield
-				double pKeep = Math.pow(sigma(config.BTL_CHOICE_INTENSITY*expectedEquityYield),
-						1.0/config.constants.MONTHS_IN_YEAR);
+		        double currentRentalYield = h.getRentalRecord().getPrice() * config.constants.MONTHS_IN_YEAR *
+		//                 rentalMarketStats.getAvOccupancyForQuality(h.getQuality()) / currentMarketPrice;
+//		double currentRentalYield = Model.rentalMarketStats.getAvFlowYieldForQuality(h.getQuality()) * 
+				rentalMarketStats.getAvOccupancyForQuality(h.getQuality()) / currentMarketPrice;
+		// ...find the mortgage rate (pounds paid a year per pound of equity)
+		double mortgageRate = mortgage.nextPayment()*config.constants.MONTHS_IN_YEAR/equity;
+		// ...finally, find expected equity yield, or yield on equity
+		double expectedEquityYield = leverage*((1.0 - BTLCapGainCoefficient)*currentRentalYield
+				+ BTLCapGainCoefficient*getLongTermHPAExpectation())
+				- mortgageRate;
+		// Compute a probability to keep the property as a function of the effective yield
+		double pKeep = Math.pow(sigma(config.BTL_CHOICE_INTENSITY*expectedEquityYield),
+				1.0/config.constants.MONTHS_IN_YEAR);
 
-				boolean sell = prng.nextDouble() < (1.0 - pKeep);
-				// if agent decision recorder is active, record decision parameters
-				if(config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
-					Model.agentDecisionRecorder.recordDivestmentDecision(me, h, currentMarketPrice, equity, 
-							leverage, currentRentalYield, mortgageRate, expectedEquityYield, pKeep, sell);
-				}
-				// Return true or false as a random draw from the computed probability
-				return sell;
+		boolean sell = prng.nextDouble() < (1.0 - pKeep);
+		// if agent decision recorder is active, record decision parameters
+		if(config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
+			Model.agentDecisionRecorder.recordDivestmentDecision(me, h, currentMarketPrice, equity, 
+					leverage, currentRentalYield, mortgageRate, expectedEquityYield, pKeep, sell);
+		}
+		// Return true or false as a random draw from the computed probability
+		return sell;
 	}
 
 	/**

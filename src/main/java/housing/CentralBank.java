@@ -83,6 +83,13 @@ public class CentralBank {
     	//		 		ownerOccupierLTVLimit = 0.999;
     	//		 		BTLLTVLimit = 0.999;
     	//		 	}
+//    	
+//    	if(Model.getTime() > 2000) {
+//			firstTimeBuyerLTVLimit = 0.9999;
+//			ownerOccupierLTVLimit = 0.9999;
+//			BTLLTVLimit = 0.9999;
+//    	}
+    	
     	
     	if(config.anticyclicalCBLTVs) {
     		if(macroprudentialActive == true & Model.housingMarketStats.getAnnualHPA() < -0.2) {

@@ -114,7 +114,7 @@ public class Bank {
 	 */
 	private double recalculateInterestRate() {
 	    // TODO: Need to decide whether to keep and calibrate the 1/2 factor or to get rid of it
-		double rate = getMortgageInterestRate() + 0.5*(supplyVal - supplyTarget)/config.BANK_D_DEMAND_D_INTEREST;
+		double rate = getMortgageInterestRate() + 0.5 * (supplyVal - supplyTarget)/config.BANK_D_DEMAND_D_INTEREST;
 		if (rate < centralBank.getBaseRate()) rate = centralBank.getBaseRate();
 		return rate;
 	}
@@ -272,43 +272,78 @@ public class Bank {
      * @return The MortgageApproval object, or NULL if the mortgage is declined
 	 */
 	MortgageAgreement requestApproval(Household h, double housePrice, double desiredDownPayment,
-                                      boolean isHome, boolean methodCalledFromRequestLoan) {
+			boolean isHome, boolean methodCalledFromRequestLoan) {
 		MortgageAgreement approval = new MortgageAgreement(h, !isHome);
 		double r = getMortgageInterestRate()/config.constants.MONTHS_IN_YEAR; // monthly interest rate
 		double lti_principal = 0.0;
 		double affordable_principal = 0.0;
 		double icr_principal = 0.0;
 		double liquidWealth = h.getBankBalance();
-		
-		if(isHome) liquidWealth += h.getHomeEquity();
+
+		if(isHome) liquidWealth += h.getHomeEquity(); // I can probably remove this, as homeowners always sell their property before they buy a new home
 
 		// --- LTV constraint
 		double ltv_principal = housePrice * getLoanToValueLimit(h.isFirstTimeBuyer(), isHome); //Math.min(0.99, (getLoanToValueLimit(h.isFirstTimeBuyer(), isHome)+ 15*h.behaviour.getLongTermHPAExpectation()));
 		approval.principal = ltv_principal;
-		
-		if(config.allCreditConstraintsActive) {
-			if(isHome) {
-				// --- affordability constraint TODO: affordability for BTL?
-				affordable_principal = Math.max(0.0,config.CENTRAL_BANK_AFFORDABILITY_COEFF*h.getMonthlyNetEmploymentIncome())
-	                    / getMonthlyPaymentFactor(isHome, h.getAge());
-				approval.principal = Math.min(approval.principal, affordable_principal);
 
-				// --- lti constraint
-				lti_principal = h.getAnnualGrossEmploymentIncome()*getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome);
-				approval.principal = Math.min(approval.principal, lti_principal);
-			} else {
-				// --- BTL ICR constraint
-				icr_principal = Model.rentalMarketStats.getExpAvFlowYield()*housePrice
-	                    /(Model.centralBank.getInterestCoverRatioLimit(isHome)*config.CENTRAL_BANK_BTL_STRESSED_INTEREST);
-				approval.principal = Math.min(approval.principal, icr_principal);
+		if (getNPayments(isHome, h.getAge()) > 0) {
+
+			//		// DSTI constraint
+			//		double dsti = 0.25;
+			//		double dsti_principal = (h.getMonthlyGrossEmploymentIncome() * dsti) / getMonthlyPaymentFactor(isHome, h.getAge());
+			//		if(dsti_principal > ltv_principal ) {
+			//			System.out.println("stop!");
+			//		}
+			//		approval.principal = Math.min(dsti_principal, ltv_principal);
+
+			/*
+			 * Constraints specific to non-BTL mortgages
+			 */
+
+			if(config.allCreditConstraintsActive) {
+				if(isHome) {
+					// Affordability constraint: it sets a maximum value for the monthly mortgage payment divided by the
+					// household's monthly gross employment income
+					affordable_principal = config.CENTRAL_BANK_AFFORDABILITY_COEFF * h.getMonthlyGrossEmploymentIncome()
+							/ getMonthlyPaymentFactor(true, h.getAge());
+					
+					if (getMonthlyPaymentFactor(true, h.getAge()) == 1.0) affordable_principal = 0.0;
+					approval.principal = Math.min(approval.principal, affordable_principal);
+					// Loan-To-Income (LTI) constraint: it sets a maximum value for the principal divided by the household's
+					// annual gross employment income. 
+					// Not active in the Dutch version of the model
+					if(!config.NDLVersion) {
+						lti_principal = h.getAnnualGrossEmploymentIncome() * getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome);
+						approval.principal = Math.min(approval.principal, lti_principal);
+
+					}
+
+					/*
+					 * Constraints specific to BTL mortgages
+					 */
+
+				} else {
+					// BTL agents have no further credit limit in the NDL version, except the LTV 
+					if(!config.NDLVersion) {
+						// Interest Coverage Ratio (ICR) constraint: it sets a minimum value for the expected annual rental
+						// income divided by the annual interest expenses
+						icr_principal = Model.rentalMarketStats.getExpAvFlowYield() * housePrice
+								/ (Model.centralBank.getInterestCoverRatioLimit(isHome) * r); 
+						approval.principal = Math.min(approval.principal, icr_principal);
+					}
+
+				}
 			}
+		} else {
+			approval.principal = 0.0;
 		}
+
 
 		approval.downPayment = housePrice - approval.principal;
 
-        if(liquidWealth < approval.downPayment) {
+		if(liquidWealth < approval.downPayment) {
 			System.out.println("Failed down-payment constraint: bank balance = " + liquidWealth + " downpayment = "
-                    + approval.downPayment);
+					+ approval.downPayment);
 			System.exit(0);
 		}
 		// --- allow larger downpayments
@@ -319,30 +354,30 @@ public class Bank {
 			approval.downPayment = desiredDownPayment;
 			approval.principal = housePrice - desiredDownPayment;
 		}
-//
-//		approval.monthlyPayment = approval.principal* getMonthlyPaymentFactor(isHome, h.getAge());
-//		approval.nPayments = config.derivedParams.N_PAYMENTS;
-//		approval.monthlyInterestRate = r;
-//		approval.purchasePrice = approval.principal + approval.downPayment;
-//		
-        /*
-         * Set the rest of the variables of the MortgageAgreement object
-         */
+		//
+		//		approval.monthlyPayment = approval.principal* getMonthlyPaymentFactor(isHome, h.getAge());
+		//		approval.nPayments = config.derivedParams.N_PAYMENTS;
+		//		approval.monthlyInterestRate = r;
+		//		approval.purchasePrice = approval.principal + approval.downPayment;
+		//		
+		/*
+		 * Set the rest of the variables of the MortgageAgreement object
+		 */
 
-        if (getNPayments(isHome, h.getAge()) > 0) {
-            approval.monthlyPayment = approval.principal * getMonthlyPaymentFactor(isHome, h.getAge());
-        } else {
-            approval.monthlyPayment = 0.0;
-        }
-        approval.nPayments = getNPayments(isHome, h.getAge());
-        approval.monthlyInterestRate = getMortgageInterestRate() / config.constants.MONTHS_IN_YEAR;
-        approval.purchasePrice = approval.principal + approval.downPayment;
-        // Throw error and stop program if requested mortgage has down-payment larger than household's liquid wealth
-        if (approval.downPayment > liquidWealth) {
-            System.out.println("Error at Bank.requestApproval(), down-payment larger than household's bank balance: "
-                    + "downpayment = " + approval.downPayment + ", bank balance = " + liquidWealth);
-            System.exit(0);
-        }
+		if (getNPayments(isHome, h.getAge()) > 0) {
+			approval.monthlyPayment = approval.principal * getMonthlyPaymentFactor(isHome, h.getAge());
+		} else {
+			approval.monthlyPayment = 0.0;
+		}
+		approval.nPayments = getNPayments(isHome, h.getAge());
+		approval.monthlyInterestRate = getMortgageInterestRate() / config.constants.MONTHS_IN_YEAR;
+		approval.purchasePrice = approval.principal + approval.downPayment;
+		// Throw error and stop program if requested mortgage has down-payment larger than household's liquid wealth
+		if (approval.downPayment > liquidWealth) {
+			System.out.println("Error at Bank.requestApproval(), down-payment larger than household's bank balance: "
+					+ "downpayment = " + approval.downPayment + ", bank balance = " + liquidWealth);
+			System.exit(0);
+		}
 
 		/*
 		 * RECORDER ******************************************************
@@ -379,45 +414,62 @@ public class Bank {
 		double lti_max_price = 0.0; // Loan to income constraint for maximum house price
 		double icr_max_price = 0.0; // Interest cover ratio constraint for maximum house price
 		double liquidWealth = h.getBankBalance(); // No home equity needs to be added here: households always sell their homes before trying to buy new ones
-        double max_downpayment = liquidWealth - 0.01; // Maximum down-payment the household could make, where 1 cent is subtracted to avoid rounding errors
+		double max_downpayment = liquidWealth - 0.01; // Maximum down-payment the household could make, where 1 cent is subtracted to avoid rounding errors
 
-        // LTV constraint: maximum house price the household could pay with the maximum mortgage the bank could provide
-        // to the household given the Loan-To-Value limit and the maximum down-payment the household could make
+        // If number of payments is zero, then no principal is approved, purchase must be paid outright
+        if (getNPayments(isHome, h.getAge()) == 0) return max_downpayment;
+		
+		// LTV constraint: maximum house price the household could pay with the maximum mortgage the bank could provide
+		// to the household given the Loan-To-Value limit and the maximum down-payment the household could make
 		// LTVFLEXIBLE
 		// the maximum LTV ratio is 0.999
-        
-        max_price = ltv_max_price = max_downpayment/(1.0 - getLoanToValueLimit(h.isFirstTimeBuyer(), isHome));
 
-        if(config.allCreditConstraintsActive) {
-		if(isHome) { // No LTI nor affordability constraints for BTL investors
-			// Affordability constraint
-            affordability_max_price = max_downpayment + Math.max(0.0, config.CENTRAL_BANK_AFFORDABILITY_COEFF
-                    * h.getMonthlyNetEmploymentIncome())/getMonthlyPaymentFactor(isHome, h.getAge());
-			max_price = Math.min(max_price, affordability_max_price);
-            // Loan-To-Income constraint
-			lti_max_price = h.getAnnualGrossEmploymentIncome()*getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome)
-                    + max_downpayment;
-			max_price = Math.min(max_price, lti_max_price);
-		} else {
-		    // Interest-Cover-Ratio constraint
-			icr_max_price = max_downpayment/(1.0 - Model.rentalMarketStats.getExpAvFlowYield()
-                    /(centralBank.getInterestCoverRatioLimit(isHome)*config.CENTRAL_BANK_BTL_STRESSED_INTEREST));
-			if (icr_max_price < 0.0) icr_max_price = Double.POSITIVE_INFINITY; // When rental yield is larger than interest rate times ICR, then ICR does never constrain
-            max_price = Math.min(max_price,  icr_max_price);
-        	}
-        }
-        // First part of the DECISION DATA SH output
-        if (config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
-        	if(isHome) {
-        		Model.agentDecisionRecorder.recordMaxMortgageSH(h, ltv_max_price, affordability_max_price, lti_max_price);
-        	}
-        	// First part of the DECISION DATA BTL output
-        	// agents 
-        	else if(methodCallFromDecideToBuyInvestmentProperty){
-        		Model.agentDecisionRecorder.recordMaxMortgageBTL(h, ltv_max_price, icr_max_price);
-        	}
-        }
-        return max_price;
+		ltv_max_price = max_downpayment/(1.0 - getLoanToValueLimit(h.isFirstTimeBuyer(), isHome));
+
+//		// DSTI constraint
+//		double dsti = 0.25;
+//		double dsti_max_price = max_downpayment + (h.getMonthlyGrossEmploymentIncome() * dsti) / getMonthlyPaymentFactor(isHome, h.getAge());
+//
+//		max_price = Math.min(dsti_max_price, ltv_max_price);
+		max_price = ltv_max_price;
+
+		if(config.allCreditConstraintsActive) {
+			if(isHome) { // No LTI nor affordability constraints for BTL investors
+				// Affordability constraint
+				affordability_max_price = max_downpayment + Math.max(0.0, config.CENTRAL_BANK_AFFORDABILITY_COEFF
+						* h.getMonthlyGrossEmploymentIncome()) / getMonthlyPaymentFactor(isHome, h.getAge());
+				max_price = Math.min(max_price, affordability_max_price);
+				// Loan-To-Income constraint
+				// not active in the Dutch version of the model
+				if(!config.NDLVersion) {
+					lti_max_price = h.getAnnualGrossEmploymentIncome() * getLoanToIncomeLimit(h.isFirstTimeBuyer(), isHome)
+							+ max_downpayment;
+					max_price = Math.min(max_price, lti_max_price);
+				}
+			} else {
+				// not active in the NDL version of the model
+				if(!config.NDLVersion) {
+					// Interest-Cover-Ratio constraint
+					icr_max_price = max_downpayment / (1.0 - Model.rentalMarketStats.getExpAvFlowYield() 
+							/ (centralBank.getInterestCoverRatioLimit(isHome) * getMortgageInterestRate()));
+					if (icr_max_price < 0.0) icr_max_price = Double.POSITIVE_INFINITY; // When rental yield is larger than interest rate times ICR, then ICR does never constrain
+					max_price = Math.min(max_price,  icr_max_price);
+				}
+
+			}
+		}
+		// First part of the DECISION DATA SH output
+		if (config.recordAgentDecisions && (Model.getTime() >= config.TIME_TO_START_RECORDING)) {
+			if(isHome) {
+				Model.agentDecisionRecorder.recordMaxMortgageSH(h, ltv_max_price, affordability_max_price, lti_max_price);
+			}
+			// First part of the DECISION DATA BTL output
+			// agents 
+			else if(methodCallFromDecideToBuyInvestmentProperty){
+				Model.agentDecisionRecorder.recordMaxMortgageBTL(h, ltv_max_price, icr_max_price);
+			}
+		}
+		return max_price;
 	}
 
     /**
@@ -447,12 +499,12 @@ public class Bank {
     			if(isFirstTimeBuyer) {
     				// return at least the set limit, but possibly higher, and at most 1.0
     				//return Math.max(Math.min(Model.housingMarketStats.getLongTermHPA()*0.2+firstTimeBuyerLTVLimit, 1.0), firstTimeBuyerLTVLimit);
-    				limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+firstTimeBuyerLTVLimit, 0.999);
+    				limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor + firstTimeBuyerLTVLimit, 0.9999);
     			} else {
-    				limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+ownerOccupierLTVLimit, 0.999);
+    				limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor + ownerOccupierLTVLimit, 0.9999);
     			}
     		} else {
-    			limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor+buyToLetLTVLimit, 0.999);
+    			limit = Math.min(Model.housingMarketStats.getLongTermHPA()*config.LTVAdjustmentFactor + buyToLetLTVLimit, 0.9999);
     		}
     		// If the fraction of mortgages already underwritten over the Central Bank LTV limit exceeds a certain
     		// maximum (regulated also by the Central Bank)...
