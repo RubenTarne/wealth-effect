@@ -1,0 +1,755 @@
+
+\documentclass[]{article}
+\usepackage{graphicx}
+\usepackage{amsmath,amsfonts,amssymb, setspace}
+\usepackage{tabulary}
+\usepackage{longtable}
+\usepackage{placeins}
+
+
+%opening
+\title{Variables, Parameters, Equations - Tarne \& Bezemer \& Theobald (2022)}
+\author{Ruben Tarne}
+
+\begin{document}
+\maketitle 
+
+\section{Variables}
+
+
+\begin{tabular}{p{0.5cm} p{11cm}}
+	
+	\multicolumn{2}{c}{Indices}\\
+	\hline
+	
+	
+	$i$ & index for household, unique identifier; attributes of $i$ include ${y, b, \Xi, k...}$  \\ 
+		
+	$j$ & index for each individual housing and rental transaction; attributes for $j$ include $i$ of seller and buyer, ${k, p_{k,t}, r_{k,t} }$  \\ 	
+	
+	$k$ & index for house, from 1 to total number of houses,  attributes of $k$ include $Q$, owner$_{i}$, resident$_{i}$, days on the market,... \\
+		
+	$t$ & index for the current month \\ 
+	
+	$Q$ & index quality value of house, value between 0 and 34 \\
+	
+
+	
+	
+\end{tabular}
+
+\begin{longtable}{p{4cm} p{7cm}p{1cm}}
+
+	\multicolumn{3}{c}{Variables} \\ 
+	\hline 
+	
+
+	$c_{i,t}$ & non-essential consumption & \eqref{eq:d_consumption}\\ 
+		
+	$y_{i,t}$ & annual gross total income & \eqref{eq:income_y}\\ 
+	
+	$y^{m}_{i,t}$ & monthly gross total income & \eqref{eq:income_m}\\
+	
+	$y^{m, emp}_{i,t} $& monthly employment income, dependent on age and income percentile of hh. Calibrated against UK data &\eqref{eq:emp_income}\\
+	
+	$y^{m,rent}_{i,t} $& monthly rental income, dependent on rented-out property & \eqref{eq:rent_income}\\
+	
+	$y^{m,div}_{i,t} $& monthly dividend income, paid out of commercial bank's interest income, dependant on household's deposits & \eqref{eq:div_income}\\
+	
+	$I_{t} $& aggregate monthly interest payments & \eqref{eq:div_income}\\
+	
+	$\sum_{i=1}^{i=n_{p,t}} b_{i,t} $& total financial wealth & \eqref{eq:div_income}\\
+	
+	$y^{disp}_{i,t}$& monthly disposable income & \eqref{eq:disp_income}\\	
+	
+	$y^{m, net}_{i,t}$  & monthly net total income &  \eqref{eq:net_income}\\	
+	
+	$T(y^{emp}_{i,t})$& monthly tax expenditure, dependent on annual gross employment income & \eqref{eq:net_income}\\
+	
+	$Insurance(y^{emp}_{i,t})$& monthly insurance expenditure, dependent on annual gross employment income & \eqref{eq:net_income}\\
+	
+	$s^{m}_{i,t}$ & monthly saving of hh $i$&\eqref{eq:saving}\\ 
+	
+	$b_{i,t}$ & current bank balance  & \eqref{eq:bank_balance}\\
+	
+	$W^{h}_{t}$& total housing wealth& \eqref{eq:housing wealth}\\
+	
+	$SH$ & set of hhs in social housing. This includes BTL investors when they enter the simulation and bid for their home. &\eqref{eq:SH}\\
+	
+	$R$ & set of hhs renting a house. &\eqref{eq:R}\\
+	
+	$OO$ & set of hhs living in their bought home without having investment property. &\eqref{eq:OO}\\
+	
+	$BTL$ & set of hhs that live in their bought home and bought at least one more house. If a household can buy more than its home is set exogenously.&\eqref{eq:BTL}\\
+	
+	$action$&types of actions agents perform involving a probability &\eqref{eq:action}\\
+	
+	$Prob$ $(\text{placing a bid})^{SH \rightarrow OO}_{i,t,k}$&probability of i $\in$ SH to bid for home&\eqref{eq:rent_or_buy}\\
+	
+	$p^{SH \rightarrow OO}_{i,t,k}$ & desired expenditure for buying a home & \eqref{eq:desired_Expenditure}\\
+	
+	$q^{SH \rightarrow OO}_{i,t}$& maximum mortgage principal for $i \in$ SH &\eqref{eq:max_loan_principal} \\
+	
+	$d^{SH\rightarrow OO}_{i,t}$&downpayment for $i \in$ SH& \eqref{eq:downpayment_SH}\\
+	
+	$d^{SH\rightarrow OO}_{\text{min},i,t}$&downpayment for $i \in$ SH set by bank&\eqref{eq:min_d_SH}\\
+	
+	$int_{t}$& mortgage interest rate&\eqref{eq:interest_rate}\\
+	
+	$int_{t}^{spread}$& interest rate spread, set by the bank& \eqref{eq:interest_rate}\\
+	
+	$g_{t}$&expected monthly house price appreciation, same for all HHs &\eqref{eq:HPI_expected} \\
+	
+	$h_{t}$& house price index & \eqref{eq:hpi}\\
+	
+	$p^{ref}_{Q}$& reference price for quality $Q$&\eqref{eq:hpi}\\
+	
+	$n^{hm sales}_{t}$& total number of housing transactions in $t$&\eqref{eq:hpi}\\
+	
+	$m_{i,t,k}$&mortgage payment for house $k$ in month $t$ paid by household $i$.&\eqref{eq:m_SH}\\
+	
+	$q_{i,t}$& principal, either calculated as $q^{SH \rightarrow OO}$ \newline or $q^{^{BTL}_{OO} \rightarrow BTL}_{t}$, depending on the agents class &\eqref{eq:m_SH}\\
+		
+	$\overline{r_{Q, t}}$&expected average rental price for $Q$&\eqref{eq:exp_rent_per_q}\\
+		
+	$r^{ref}_{Q}$&rental reference price&\eqref{eq:RPI}\\
+	
+	$Prob$ $(\text{placing a bid})^{SH \rightarrow R}_{i,t,k}$&probability to place bid on rental market&\eqref{eq:prob_rent}\\
+	
+	$r^{SH \rightarrow R}_{i,t}$ &bid price rental market $i \in$ SH&\eqref{eq:rent_bid}\\
+	
+	$Prob(\text{to SH})^{R\rightarrow SH}_{i,t}$& probability to go to social housing for agent $i \in$ R&\eqref{eq:R_SH}\\
+	
+	$Prob$ $(\text{offering home})^{OO \rightarrow SH}_{i}$&probability of i $\in$ OO to place an offer for its home on the housing market&\eqref{eq:sell_or_not}\\
+	
+	$p_{i,t,k}$&initial offer price for home ($p^{OO \rightarrow SH}_{i,t,k}$) or investment property ($p^{^{BTL}_{OO} \rightarrow BTL}_{i,t,k}$)&\eqref{eq:selling_price}\\
+	
+	if $k$ unsold in $t-1$: \newline
+	$p_{t, k}$&monthly price reduction of unsold houses already on the market&\eqref{eq:price_reduction}\\
+	
+	$n_{p, t}$& total number of households&\eqref{eq:n_p}\\
+	
+%	$\overline{f^{hm}_{t}}$& expected average days on the housing market&\eqref{eq:days_on_market}\\
+	
+%	$\overline{D^{hm}_{t-1}}$&average days houses are on the housing market&\eqref{eq:average_days_hm}\\
+	
+	$\overline{p_{Q, t}}$&expected average sale price for house with quality $Q$&\eqref{eq:average_sale_price}\\
+	
+	$Prob$ $(\text{placing a bid})^{^{BTL}_{OO} \rightarrow BTL}_{i,t,k}$& probability to invest&\eqref{eq:probabilitiy_invest}\\
+	
+	$p^{^{BTL}_{OO} \rightarrow BTL}_{i,t,k}$&bid price for investment property&\eqref{eq:bid_price_BTL}\\
+	
+	$\Omega_{i,t}$& expected yield of capital investment& \eqref{eq:expected_yield_buy}\\
+	 
+	$d^{^{BTL}_{OO}\rightarrow BTL}_{i,t}$&downpayment for $i \in$ BTL&\eqref{eq:downpayment_BTL}\\
+	
+	$d^{^{BTL}_{OO}\rightarrow BTL}_{\text{min},i,t}$&downpayment for $i \in$ BTL set by bank&\eqref{eq:min_d_BTL}\\
+	
+	$q^{^{BTL}_{OO}\rightarrow BTL}_{i,t}$&maximum mortgage principal for $i \in$ BTL & \eqref{eq:ICR}\\
+	
+%	$m^{^{BTL}_{OO} \rightarrow BTL}_{k,i,t}$&mortgage payment for $i \in$ BTL&\eqref{eq:m_BTL}\\
+	
+	$\overline{r^{yield}_{t}}$& overall rental yield&\eqref{eq:rental_yield}\\
+	
+	$\overline{o_{Q, t}}$&average occupancy for a house of quality $Q$& \eqref{eq:average_occ_q}\\
+	
+	$\overline{D^{rm}_{t}}$&average days on rental market&\eqref{eq:average_days_rm}\\
+
+	$D^{rm}_{k,t}$ &{days on the rental market of house }k &\eqref{eq:average_days_rm}\\
+	
+	$r^{BTL \rightarrow BTL}_{i,t,k}$&initial offer rental price&\eqref{eq:rental_price_offer}\\
+	
+	if $k$ not rented out in $t-1$: $r^{BTL \rightarrow BTL}_{i,t,k}$&price reduction rental offer& \eqref{eq:r_p_red}\\
+	
+%	$\overline{f^{rm}_{t}}$&expected average days on the rental market&\eqref{eq:days_on_rm}\\
+	
+	$Prob(\text{placing offer})^{BTL\rightarrow BTL}_{i,t,k}$&probability of placing offer for investment property&\eqref{eq:probability_divest}\\
+	 
+	$\Psi_{i,t,k}$&expected effective yield&\eqref{eq:expected_yield_sell}\\
+	
+	$u_{k, t}$& equity of house $k$&\eqref{eq:equity}\\
+	
+	$r^{yield}_{k,t}$&rental yield of house $k$&\eqref{eq:rental_yield_k}\\
+	
+	$p_{k,t}$& sale price of house $k$ realised in auction&\eqref{eq:realised_price}\\
+	
+	$p^{offer}_{t,k}$& set of offer prices in housing market&\eqref{eq:p_offer}\\
+	
+	$p^{bid}_{t}$& set of bid prices in housing market&\eqref{eq:p_bid}\\
+	
+	$r^{exp\ yield}_{k,t}$&expected rental gross yield&\eqref{eq:exp_rent_g_y}\\
+	
+	$o^{exp}_{Q}$&expected occupancy&\eqref{eq:exp_occ}\\
+	
+	$p^{\text{bid up}}_{k}$& when offered house receives more than one bid, the price is 'bid up'& \eqref{eq:bid_up_price}\\	
+
+	$l$& bid-up price variable, chosen at random from a geometric distribution & \eqref{eq:bidding}\\
+	
+	$B$& number of bids received in time stamp& \eqref{eq:bidding}\\
+	
+	$r_{k,t}$& rental price of house $k$ realised in auction&\eqref{eq:realised_rent}\\
+	
+		 
+\end{longtable} 
+
+
+
+\section{Parameters}
+Recurring distributional parameters $\epsilon$ and decay parameters $\rho$ are numbered according to the number of the equation they appear in first. 
+\begin{longtable}{p{1cm} p{4cm} p{5cm} p{3cm}}
+	
+	\multicolumn{4}{c}{Parameters} \\ 
+	\cline{1-4} 
+	
+	\eqref{eq:d_consumption}& $c_{0} = y^{param}_{m,min}$ & essential consumption, set to minimum monthly earnings  & \\ 
+	
+	\eqref{eq:d_consumption} &  $\alpha_{i} ={0.99, 0.96, 0.93,}$\newline${ 0.9, 0.85, 0.6}$;\newline  $\beta_{i}=0.0075, 0.006,0.005, $\newline$ 0.004, 0.002, 0.0002$; \newline $\gamma = 0.25$& marginal propensities to consume due to income ($\alpha_{i}$) and wealth ($\beta_{i}$) set according to households income percentile $\Xi_{i}$ (1st quarter, 2nd quarter, 3rd quarter, 4th quarter, top 10\%, top 1\%)  & Calibrated to match the UK wealth distribution and financial wealth to mortgage debt relation (Wealth and Asset Survey (2020))\\
+	
+	\eqref{eq:consumption} & $\zeta = 2$ & liquidity preference results from this factor times the households monthly disposable income & \\
+	
+	\eqref{eq:emp_income}& $\Xi_{i}$, value between 0 and 1& income percentile of hh $i$, set at birth of hh, according to calibrated distribution&\\
+
+	\eqref{eq:disp_income}& $y^{param}_{m,min}=492.7$& monthly essential consumption by every hh. $y^{param}_{m,min}=$ monthly minimum earnings (\pounds492.7) & minimum earnings for a married couple from income support\\
+	
+	\eqref{eq:rent_or_buy}&	$ \eta = \frac{1}{3500} $ & sensitivity parameter& \\
+	
+	\eqref{eq:desired_Expenditure} & $\sigma=4.5$, $\varphi=0.08$, $\epsilon_{\eqref{eq:desired_Expenditure}}~=~N(0,0.5)$& 	equation can be understood as setting the desired expenditure so that the long-term cost of the house (which takes into account the expected house capital appreciation) is a noisy fraction of income&\\
+	
+	\eqref{eq:max_loan_principal}& $\chi =0.8$& LTV ratio (can be specified differently for for first-time buyers, owner-occupiers, buy-to-let investors. Set exogenously.&\\
+	
+	\eqref{eq:max_loan_principal} & $\psi = 6$ & LTI ratio set exogenously by the bank and central bank, and dependent on characteristic of hh.&\\
+	
+	\eqref{eq:max_loan_principal}& $\nu = 0.5$ & Maximum fraction of the hh's income to be spent on mortgage repayments under stressed conditions & \\
+	
+	\eqref{eq:max_loan_principal}& $\varpi = 300$ & 25-year mortgage contract with monthly payments & \\
+	
+	\eqref{eq:downpayment_SH}& $\kappa=10.35$ ($11.15$),\newline $\iota=0.898$ ($0.958$) & scale parameter $\kappa$ and the shape parameter $\iota$ for first-time buyers (owner-occupiers) &Calibrated against mortgage approval/housing transaction ratio, Bank of England core indicators average 1987-2006\\
+
+	\eqref{eq:interest_rate}& $i^{param}_{base} = 0.005$,\newline $i^{spread}_{t=0} = 0.03 $& base and interest rate is set exogenously, fixed&\\
+
+	\eqref{eq:HPI_expected} &$\lambda=0.44$, $\mu=0.007$& represents the house price trend households estimate &estimated from NMG Survey and Land Registry data for 2014/2018\\
+	
+	
+	\eqref{eq:hpi} &$\ln(p^{ref}_{Q}) = N(12.1186, 0.6414)$ & Distribution of house reference prices for each quality band &Input calibrated from Land Registry Price Paid Data for 2011\\
+	
+	\eqref{eq:exp_rent_per_q}& $\rho_{\eqref{eq:exp_rent_per_q}} = 0.84$ & Decay factor to adjust for lower absolute market turnover in the model opposed to the real economy&\\
+	
+%	\eqref{eq:exp_rent_per_q}& $tp^{param}=10000$ & target population, set exogenously&\\
+
+	\eqref{eq:exp_rent_per_q}& $\ln(r^{ref}_{Q}) = N(6.0708,0.4796)$&Distribution of rental reference prices for each quality band &calibrated from English Housing Survey data for 2012-2013\\
+	
+	\eqref{eq:sell_or_not}& $\omega = \frac{1}{204}$& long-term selling probability once every 17 years& English Housing Survey (EHS) data for 2011\\
+
+	\eqref{eq:selling_price}&  $\theta(0,1)^{p} $& Distribution of initial house sale price mark-ups over average price of same quality houses; defined between 0 and 1& based on back-projecting Zoopla data using HPI data\\
+	
+	\eqref{eq:selling_price}&  $\epsilon_{\eqref{eq:selling_price}}=U(0,1)$& random number between 0 and 1 &\\
+	
+	\eqref{eq:price_reduction}& $\epsilon_{\eqref{eq:price_reduction}}=N(1.603,0.617)$&Monthly probability of reducing the price of a house on the market & calibrated against Zoopla data\\
+	
+	\eqref{eq:probabilitiy_invest}& $\varsigma = 0.5$, $\tau = 50.0$ & $\alpha$ is the maximum share of post-tax income that investors want to spend on mortgage payments, $\beta$ is intensity of choice on effective yield&\\
+	
+	\eqref{eq:expected_yield_buy}& $\delta_{i}$ = 0.5 or 0.9 & weight of BTL hh $i$ on capital yield (as opposed to rental yield) & \\
+	
+	\eqref{eq:downpayment_BTL}& $\epsilon_{\eqref{eq:downpayment_BTL}}=RN \sim U[0,1] $ & Random number between 0 and 1&\\
+	
+	\eqref{eq:ICR}& $\xi=~1.25, i^{param}_{BTL}~=0.05$& Interest Cover Ratio (ICR) value and "stress interest rate" for BTL-investors exogenously set by Central Bank&\\
+	
+	\eqref{eq:rental_yield} & $ \rho_{\eqref{eq:rental_yield}}=0.82$ & Decay factor to adjust for lower absolute market turnover in the model's rental market than in the real economy&\\
+	
+	\eqref{eq:average_occ_q}& $\rho_{\eqref{eq:average_occ_q}}=0.995$& Decay factor to adjust for lower absolute market turnover in the model opposed to the real economy & \\
+	
+	\eqref{eq:average_occ_q}& $\varkappa = 18$ & average tenancy length in months &ARLA - Members survey of the Private Rented Sector Q4 2013\\
+		
+	\eqref{eq:rental_price_offer}&  $\theta(0,1)^{r} $& Distribution of initial rental price mark-ups over average price of same quality houses; defined between 0 and 1& based on back-projecting Zoopla data using HPI data\\
+
+	\eqref{eq:exp_occ}& $12\varkappa + 7 $ & expected occupancy based on 18 month rental contract followed by a number of days waiting&\\	
+	
+	
+
+\end{longtable} 
+
+
+%\begin{longtable}{c p{8cm}c}
+%	
+%	\multicolumn{3}{c}{Initialisation} \\ 
+%	\hline 
+%	
+%	variable & value & comments\\
+%	\hline
+%	
+%	
+%\end{longtable}
+\section{Agent regimes and how they can change in between them}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=1.0\textwidth]{prob_and_prices}
+	\caption{Agent regimes, probabilities to change their regimes and respective bid and ask prices}
+	\label{fig:probandprices}
+\end{figure}
+
+\FloatBarrier
+\section{Equations}
+
+desired consumption:
+\begin{equation} \label{eq:d_consumption}
+c^{desired}_{i,t} = c_{0} + \alpha_{i} y^{m,disp}_{i,t} + \beta_{i}\left(b_{i,t} + \gamma (w^{h}_{i,t} -  q_{i,t})\right)
+\end{equation}
+\\
+consumption:
+\begin{equation} \label{eq:consumption}
+	c_{i,t} = 
+		\begin{cases}
+		c_{0} + \alpha_{i} y^{m,disp}_{i,t} & \text{if } b_{i,t} + y^{m,disp}_{i,t} - c^{desired}_{i,t} <\zeta y^{m,disp}_{i,t}\\
+		c_{0} & \text{if } c^{desired}_{i,t} < c_{0} \\
+		c_{i,t}=c^{desired}_{i,t} & \text{else }
+		\end{cases}
+\end{equation}
+\\
+gross income yearly:
+\begin{equation} \label{eq:income_y}
+y_{i,t}=  12y^{m}_{i,t}
+\end{equation}
+\\
+gross income monthly:
+\begin{equation} \label{eq:income_m}
+y^{m}_{i,t}= y^{m, emp}_{i,t} + y^{m,rent}_{i,t} +y^{m,div}_{i,t}
+\end{equation}
+\\
+employment income:
+\begin{equation} \label{eq:emp_income}
+	y^{m, emp}_{i,t} = f(age_{i, t}, \Xi_{i})
+\end{equation}
+\\
+rent income:
+\begin{equation} \label{eq:rent_income}
+y^{m, rent}_{i,t} = r^{BTL\rightarrow BTL}_{k, i, t}
+\end{equation}
+\\
+dividend income:
+\begin{equation} \label{eq:div_income}
+y^{m,div}_{i,t} = I_{t} \cdot \frac{b_{i,t}}{\sum_{i=1}^{i=n_{p,t}} b_{i,t}}
+\end{equation}
+\\
+disposable income:
+\begin{equation} \label{eq:disp_income}
+y^{m,disp}_{i,t}= y^{m,net}_{i,t}- y^{param}_{m,min} - m_{i,t,k} - r^{SH\rightarrow R}_{k,i}
+\end{equation}
+\\
+net income:
+\begin{equation} \label{eq:net_income}
+y^{m,net}_{i,t}=  y^{m}_{i,t} - T(y^{emp}_{i,t}) - Insurance(y^{emp}_{i,t})
+\end{equation}
+\\
+saving:
+\begin{equation} \label{eq:saving}
+s^{m}_{i, t}= y^{m,disp}_{i, t} - c_{i, t}
+\end{equation}
+\\
+bank balance:
+\begin{equation} \label{eq:bank_balance}
+b_{i,t}= b_{i,t-1}+s^{m}_{i, t}
+\end{equation}
+\\
+total housing wealth:
+\begin{equation} \label{eq:housing wealth}
+W^{h}_{t}=\sum_{i=0}^{k}\overline{p_{Q,k, t}}
+\end{equation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\\
+states agents can be in:
+\begin{equation}
+i \in SH \cup R \cup OO \cup BTL
+\end{equation}
+\\
+agents in social housing:
+\begin{equation} \label{eq:SH}
+\begin{split}
+SH=\{&\text{households who enter the simulation,}\\ 
+&\text{renters whose contracts just ended,} \\
+&\text{homeowners who sold their home in }t-1\}
+\end{split}
+\end{equation}
+\\
+renters:
+\begin{equation} \label{eq:R}
+R=\{\text{households who rented a home}\}
+\end{equation}
+\\
+owner-occupiers:
+\begin{equation} \label{eq:OO}
+OO=\{\text{households who bought a home}\}
+\end{equation}
+\\
+buy-to-let investors:
+\begin{equation} \label{eq:BTL}
+BTL=\{\text{households who bought more than one house}\}
+\end{equation}
+\\
+general rule for bids and offers to be made:
+\begin{equation} \label{eq:bid_offer}
+	i 
+	\begin{cases}
+	&\text{bids or offers if}~ RN \sim U[0,1] < Prob(\text{action}) \\
+	&\text{does not act if}~ RN \sim U[0,1] \geq Prob(\text{action}) 
+	\end{cases}
+\end{equation}
+\\
+types of actions:
+\begin{equation}\label{eq:action}
+	\begin{split}
+		action = \{&\text{SH bids on housing market,}\\
+		&\text{SH bids on rental market,}\\
+		&\text{OO bids on housing market,}\\
+		&\text{BTL bids on housing market,}\\
+		&\text{R becomes SH,}\\
+		&\text{OO places offer on housing market,}\\
+		&\text{BTL places offer on housing market,}\\
+		&\text{BTL places offer on rental market}\}\\
+	\end{split}
+\end{equation}
+\\
+probability of i $\in$ SH to bid for home (see arrow 1 in Figure \ref{fig:probandprices}):
+\begin{equation} \label{eq:rent_or_buy}
+	\begin{split}
+	Prob&(\text{placing a bid})^{SH \rightarrow OO}_{i,t,k} \\
+	&= \frac{1}{1+exp(-\eta [12\overline{r_{Q,t}} - (12\cdot m^{SH \rightarrow OO}_{i,t,k} - p^{SH \rightarrow OO}_{i,t,k}\cdot g_{t})])},
+	\end{split}
+\end{equation}
+\begin{center}
+	\textit{	if action is taken is decided by using equation \eqref{eq:bid_offer}.}
+	\\
+\end{center}
+
+\begin{flushleft}
+	desired expenditure for buying a house\footnote{$SH\rightarrow OO$ can be read as: "for changing from the social housing to owner occupier state."}:
+\end{flushleft}
+\begin{equation} \label{eq:desired_Expenditure}
+p^{SH \rightarrow OO}_{i,t,k} = \min\left(q^{SH\rightarrow OO}_{i,t}+b_{i,t},\quad  \dfrac{\sigma 12y^{m, emp}_{i} \exp(\epsilon_{\eqref{eq:desired_Expenditure}})}{1 - \varphi g_{t}}\right)
+\end{equation}
+\\
+\begin{flushleft}
+	maximum mortgage principal for $i \in$ SH\footnote{LTI and Affordability constraint can be deactivated. LTV ratios can be agent-type and time dependent.}:
+\end{flushleft}
+\begin{equation*}
+q^{SH\rightarrow OO}_{i,t} =\min (\text{LTV, LTI, Affordability constraint})
+\end{equation*}
+\begin{equation} \label{eq:max_loan_principal}
+q^{SH\rightarrow OO}_{i,t} = \min \left(\dfrac{b_{i}\chi_{i,t}}{1-\chi_{i,t}}, \quad y_{i}\psi, \quad y^{m,d}_{i}\nu
+\dfrac{1-(1+\frac{int}{12})^{-\varpi}}{\frac{int}{12}} \right)
+\end{equation}
+\\
+downpayment for $i \in$ SH:
+\begin{equation} \label{eq:downpayment_SH}
+d^{SH\rightarrow OO}_{i,t} = 
+\begin{cases}
+0, &\quad \text{if }  \Xi \leq 0.3\\
+\max \left(d^{SH\rightarrow OO}_{\text{min},i,t}, \quad h_{t} F^{-1}((\Xi_{i} - 0.3)/0.7)\right), &\quad \text{if } \Xi>0.3  
+\end{cases}
+\end{equation}
+\begin{equation*}
+F^{-1}(\kappa, \iota): \text{inverse cumulative log-normal distribution function}
+\end{equation*}
+\\
+downpayment for $i \in$ SH set by bank:
+\begin{equation} \label{eq:min_d_SH}
+d^{SH\rightarrow OO}_{\text{min},i,t}=p^{SH\rightarrow OO}_{i,t,k}-q^{SH\rightarrow OO}_{i,t}
+\end{equation}
+\\
+mortgage interest rate:
+\begin{equation} \label{eq:interest_rate}
+int_{t} = int^{param}_{base} + int^{spread}_{t}
+\end{equation}
+\\
+expected HPI appreciation:
+\begin{equation} \label{eq:HPI_expected}
+g_{t} = \lambda \left[\left(\frac{h_{t-1} + h_{t-2} + h_{t-3}}
+		{h_{t-25} + h_{t-26} + h_{t-26}}\right)^{\frac{1}{24}} - 1 \right] - \mu 
+\end{equation}
+\\
+house price index:
+\begin{equation} \label{eq:hpi}
+	h_{t}=\frac{\sum_{j=1}^{n^{hm\ sales}_{t-1}}p_{k,t-1,j}}{\sum_{j=1}^{n^{hm\ sales}_{t-1}}p^{ref}_{Q,t-1,j}}
+\end{equation}
+\\
+mortgage payment:
+\begin{equation} \label{eq:m_SH}
+m_{i,t,k}= q_{i,t} \frac{\frac{int_{t=s}}{12}}{1-(1+\frac{int_{t=s}}{12})^{-300}}
+\end{equation}
+\begin{equation*}
+	s = \text{mortgage contract starting period}
+\end{equation*}
+\\
+expected average rental price for $Q$:
+\begin{equation}\label{eq:exp_rent_per_q}
+\overline{r_{Q, t}}= 0.25\cdot \left(\rho_{\eqref{eq:exp_rent_per_q}} \overline{r_{Q, t-1}} + (1 - \rho_{\eqref{eq:exp_rent_per_q}})\frac{\left(\sum_{j=1}^{n^{rm\ sales}_{Q, t-1}}{r_{k, t-1, j}}\right)}{n^{rm\ sales}_{Q, t-1}}\right) + 0.75 r^{ref}_{Q} \cdot \text{RPI}_{t}
+\end{equation}
+\\
+rental price index:
+\begin{equation} \label{eq:RPI}
+\text{RPI}_{t}=\frac{\sum_{j=1}^{n^{rm\ sales}_{t-1}}r_{k,t-1,j}}{\sum_{j=1}^{n^{rm\ sales}_{t-1}}r^{ref}_{Q,t-1,j}}
+\end{equation}
+\\
+\begin{flushleft}
+probability to place bid on rental market (see arrow 5 in Figure \ref{fig:probandprices}):
+\end{flushleft}
+\begin{equation} \label{eq:prob_rent}
+	Prob(\text{placing a bid})^{SH \rightarrow R}_{i,t} =
+	\begin{cases}
+	0, \quad &\text{if $i \in$ SH already placed bid on housing market} \\
+	1, \quad &\text{if $i \in$ SH did not place bid on housing market} 
+	\end{cases}
+\end{equation}
+\\
+bid price rental market $i \in$ SH:
+\begin{equation} \label{eq:rent_bid}
+	r^{SH \rightarrow R}_{i,t}= 0.33y^{m, emp}_{t,i}
+\end{equation}
+\\
+probability to enter social housing for agent $i \in$ R (see arrow 6 in Figure \ref{fig:probandprices}):
+\begin{equation}\label{eq:R_SH}
+	Prob(\text{to SH})^{R\rightarrow SH}_{i,t}=
+	\begin{cases}
+	0, \quad&\text{if rental contract valid}\\
+	1, \quad&\text{if rental contract expired}
+	\end{cases}
+\end{equation} 
+\\
+probability of i $\in$ OO to place an offer for its home on the housing market (see arrow 2 in Figure \ref{fig:probandprices}):
+\begin{equation} \label{eq:sell_or_not}
+%\begin{split}
+Prob(\text{offering home})^{OO \rightarrow SH}_{i}  = \omega
+\end{equation}
+\begin{center}
+	\textit{if action is taken is decided by using equation \eqref{eq:bid_offer}.}
+	\\
+\end{center}
+
+\begin{flushleft}
+	initial offer price for home or investment property:
+\end{flushleft}
+%\begin{equation} \label{eq:selling_price}
+%\ln (p^{OO\rightarrow SH}_{t,k}) = \max \left( \ln(q^{OO\rightarrow SH}_{k, t}) , \quad \alpha_{\ref{eq:selling_price}} + \ln(\overline{p_{Q,t}}) - \beta_{\ref{eq:selling_price}} \ln (1+\overline{f^{hm}_{t}}) + \epsilon_{\eqref{eq:selling_price}}\right)
+%\end{equation}
+\begin{equation} \label{eq:selling_price}
+p_{i,t,k} = \max \left(q_{i,t} , \quad \theta(\epsilon_{\eqref{eq:selling_price}})^{p} \cdot \overline{p_{Q,t}}\right)
+\end{equation}
+\\
+monthly price reduction of unsold homes or investment properties already on the market:
+\begin{equation} \label{eq:price_reduction}
+\text{if $k$ unsold in $t-1$: }	p_{i,t, k} = 
+\begin{cases}
+p_{i,t-1, k} (1-\exp(\epsilon_{\eqref{eq:price_reduction}})), &\quad \text{with probability 0.06} \\
+p_{i,t-1, k}, &\quad \text{with probability 0.94} 
+\end{cases}
+\end{equation}
+\\
+total number of households:
+\begin{equation} \label{eq:n_p}
+	n_{p, t}= \#SH_{t}+\#BTL_{t}+\#OO_{t}+\#R_{t}
+\end{equation}
+\\
+%expected average days on the housing market:
+%\begin{equation} \label{eq:days_on_market}
+%	\overline{f^{hm}_{t}}= \rho_{\eqref{eq:days_on_market}} \overline{f^{hm}_{t-1}} + (1-\rho_{\eqref{eq:days_on_market}}) \overline{D^{hm}_{t-1}}
+%\end{equation}
+%\\
+%average days houses are on the housing market:
+%\begin{equation} \label{eq:average_days_hm}
+% \overline{D^{hm}_{t-1}} = \frac{\sum_{j=1}^{n^{hm\ sales}_{t-1}}D^{hm}_{k,t-1, j}}{n^{hm\ sales}_{t-1}}
+%\end{equation}
+%\begin{equation*}
+%	D^{hm}_{k,t}: \text{days on the market of house }k
+%\end{equation*}
+%\\
+expected average sale price for house with quality $Q$:
+\begin{equation} \label{eq:average_sale_price}
+	\overline{p_{Q, t}}= 0.25\cdot \dfrac{\sum_{j=1}^{n^{hm\ sales}_{Q, t-1}}{p_{k, Q, t-1, j}}}{n^{hm\ sales}_{Q, t-1}}+ 0.75h_{t}p^{ref}_{Q}
+\end{equation}
+\\
+probability to invest (see arrow 3 and 4 in Figure \ref{fig:probandprices}):
+\begin{equation} \label{eq:probabilitiy_invest}
+Prob(\text{placing a bid})^{^{BTL}_{OO} \rightarrow BTL}_{i,t,k} = 
+\begin{cases}
+0, &\quad \text{if $\sum m_{i,t,k} > \varsigma y_{i,t}^{m,net}$}\\
+1-\left(1-\tfrac{1}{1+e^{(-\tau\Omega_{ i,t})}}\right)^{\frac{1}{12}},&\quad \text{if else} 
+\end{cases}
+\end{equation}
+\\
+bid price for investment property\footnote{$p^{^{BTL}_{OO}\rightarrow BTL}_{i,t,k}$ can be read as: "desired purchase price in $t$ for a house $k$ of quality $Q$ for a BTL agent or Owner-Occupier $i$ that would then become (or remain) a BTL agent."}:
+\begin{equation} \label{eq:bid_price_BTL}
+	p^{^{BTL}_{OO} \rightarrow BTL}_{i,t,k} = q^{^{BTL}_{OO} \rightarrow BTL}_{i,t} + b_{t,i}
+\end{equation}
+\\
+expected yield of capital investment:
+\begin{equation} \label{eq:expected_yield_buy}
+	\Omega_{i,t,k} = \frac{p^{^{BTL}_{OO}\rightarrow BTL}_{i,t,k}}{d^{^{BTL}_{OO}\rightarrow BTL}_{i,t}}(\delta_{i}g_{t} + (1-\delta_{i})\overline{r^{yield}_{t}}) - \frac{m_{i,t,k}}{d^{^{BTL}_{OO}\rightarrow BTL}_{i,t}}
+\end{equation}
+\\
+downpayment for $i \in$ BTL:
+\begin{equation}\label{eq:downpayment_BTL}
+d^{^{BTL}_{OO}\rightarrow BTL}_{i,t}=\max \left(d^{^{BTL}_{OO}\rightarrow BTL}_{\text{min},i,t}, \quad p^{^{BTL}_{OO} \rightarrow BTL}_{i,t,k}\cdot \left(0.3 +0.1\cdot\epsilon_{\eqref{eq:selling_price}}\right)\right)
+\end{equation}
+\\
+downpayment for $i \in$ BTL set by bank:
+\begin{equation} \label{eq:min_d_BTL}
+d^{^{BTL}_{OO}\rightarrow BTL}_{\text{min},i, t}=p^{^{BTL}_{OO} \rightarrow BTL}_{i,t,k}-q^{^{BTL}_{OO}\rightarrow BTL}_{i,t}
+\end{equation}
+\\
+maximum mortgage principal for $i \in$ BTL:
+\begin{equation*}
+q^{^{BTL}_{OO}\rightarrow BTL}_{i,t}=\min (\text{LTV, interest cover contstraint (ICR)})
+\end{equation*}
+\begin{equation} \label{eq:ICR}
+q^{^{BTL}_{OO}\rightarrow BTL}_{i,t} = \min\left(\dfrac{b_{i,t}\chi}{1-\chi}, \dfrac{b_{i,t}}{1-\dfrac{\overline{r^{yield}_{t}}}{\xi \cdot i^{param}_{BTL}}}\right)
+\end{equation}
+\\
+%mortgage payment for $i \in$ BTL:
+%\begin{equation} \label{eq:m_BTL}
+%m^{^{BTL}_{OO} \rightarrow BTL}_{k,i,t}= q^{^{BTL}_{OO}\rightarrow BTL} \frac{int_{t=s}}{12}
+%\end{equation}
+%\\
+overall rental yield\footnote{The sum being the average flow yield.}:
+\begin{equation}\label{eq:rental_yield}
+	\overline{r^{yield}_{t}} = \rho_{\eqref{eq:rental_yield}}\overline{r^{yield}_{t-1}} +(1-\rho_{\eqref{eq:rental_yield}}) \cdot \frac{\sum_{Q=1}^{N_{Q}}\left({\dfrac{12n^{rm\ sales}_{Q,t-1}\overline{r_{Q, t-1}}\cdot \overline{o_{Q,t-1}}}{\overline{p_{Q, t-1}}}}\right) }{n^{rm\ sales}_{t-1}}
+\end{equation}
+\\
+average occupancy for a house of quality $Q$:
+\begin{equation} \label{eq:average_occ_q}
+	\overline{o_{Q, t}}= \frac{\varkappa}{\varkappa + \rho_{\eqref{eq:average_occ_q}} \overline{o_{Q, t-1}} + (1-\rho_{\eqref{eq:average_occ_q}}) \overline{D^{rm}_{t-1}}}  
+\end{equation}
+\\
+average days on rental market:
+\begin{equation}\label{eq:average_days_rm}
+	\overline{D^{rm}_{t-1}} = \frac{\sum_{j=1}^{n^{rm\ sales}_{t-1}}D^{rm}_{k,t-1, j}}{n^{rm\ sales}_{t-1}}
+\end{equation}
+\\
+initial offer rental price:
+%\begin{equation} \label{eq:rental_price_offer}
+%	\ln (r^{BTL \rightarrow BTL}_{k,t}) = \alpha_{\ref{eq:rental_price_offer}} + \ln(\overline{{r}_{Q, t}}) - \beta_{\ref{eq:rental_price_offer}}\ln(1+\overline{{f^{rm}_{t}}}) + \epsilon_{\eqref{eq:selling_price}}
+%\end{equation}
+\begin{equation} \label{eq:rental_price_offer}
+r^{BTL \rightarrow BTL}_{i,t,k} = \theta(\epsilon_{\eqref{eq:selling_price}})^{r}  \cdot \overline{{r}_{Q, t}}
+\end{equation}
+\\
+price reduction rental offer%\footnote{The minimum rental price is set to 4.8\% of the house price.}:
+\begin{equation}\label{eq:r_p_red}
+\text{if $k$ not rented out in $t-1$: }r^{BTL \rightarrow BTL}_{i,t,k}= 0.95r^{BTL \rightarrow BTL}_{i,t-1,k}
+\end{equation}
+\\
+%expected average days on the rental market:
+%\begin{equation} \label{eq:days_on_rm}
+%\overline{f^{rm}_{t}}= \rho_{\eqref{eq:days_on_market}} \overline{f^{rm}_{t-1}} + (1-\rho_{\eqref{eq:days_on_market}}) \overline{D^{rm}_{t-1}}
+%\end{equation}
+%\\
+probability of placing offer for investment property (see arrow 4 in Figure \ref{fig:probandprices}):
+\begin{equation} \label{eq:probability_divest}
+Prob(\text{placing offer})^{BTL\rightarrow BTL}_{i,t,k} = 
+\begin{cases}
+0, &\quad \text{if $i$ has only 2 houses} \\
+1 - \left(\dfrac{1}{1+e^{(-\tau\Psi_{i,t,k})}}\right)^{\frac{1}{12}},&\quad \text{else} \\
+\end{cases}
+\end{equation}
+\\
+expected effective yield:
+\begin{equation} \label{eq:expected_yield_sell}
+\Psi_{i,t,k} = \frac{\overline{p_{Q,t}}}{u_{k,t}}(\delta_{i}g_{t} + (1-\delta_{i}) r^{yield}_{k,t}) - \frac{m_{i,t,k}}{u_{k,t}}
+\end{equation}
+\\
+equity of house $k$:
+\begin{equation} \label{eq:equity}
+u_{k, t} = \overline{p_{Q,t}} - q^{^{BTL}_{OO}\rightarrow BTL}_{t}
+\end{equation}
+\\
+rental yield of house $k$:
+\begin{equation}\label{eq:rental_yield_k}
+	r^{yield}_{k,t}= \frac{12r_{k,t}}{\overline{p_{Q,t}}}
+\end{equation}
+\\
+\textbf{housing market clearing process}\\
+round 1, step 1:
+\begin{equation*}
+\forall\  BTL\ \max_{k\leq \max\left(r^{exp\ yield}_{k,t}\right)} \left(p^{offer}_{t,k}\leq p^{^{BTL}_{OO}\rightarrow BTL}_{t}\right) 
+\end{equation*}
+\begin{equation*}
+\forall\  SH\ \max_{k\leq \max(Q)} \left(p^{offer}_{t,k}\leq p^{SH\rightarrow OO}_{t}\right) 
+\end{equation*}
+\\
+round 1, step2:
+\begin{equation}\label{eq:realised_price}
+	\begin{split}
+		offer\text{ is machted, if }& \exists!\ BTL \lor SH: p^{offer}_{t,k}<p^{bid}_{t} \ \rightarrow \  p_{k,t}=p^{offer}_{t,k} \\
+		\text{else } p^{offer}_{t,k}=p^{bid-up}_{k,i}&\text{, then pick randomly one bid }\\
+		\text{with } p^{bid-up}_{k,i} \leq  &p^{bid}_{t} \ \rightarrow \  p_{k,t}=p^{bid-up}_{k,i} 
+	\end{split}
+\end{equation}
+\\
+round 1, step 3:
+\begin{equation*}
+\text{return unmatched offers and bids into the pool}
+\end{equation*}
+round 2 and following:
+\\
+repeat until: \begin{itemize}
+	\item $bid=0$
+	\item $offer =0$
+\end{itemize}
+
+set of offer prices
+\begin{equation}\label{eq:p_offer}
+	p^{offer}_{t,k} = \{p^{BTL\rightarrow BTL}_{k,t}, p^{OO\rightarrow SH}_{t,k}\}
+\end{equation}
+\\
+set of bid prices:
+\begin{equation}\label{eq:p_bid}
+	p^{bid}_{t}= \{p^{^{BTL}_{OO}\rightarrow BTL}_{t}, p^{SH\rightarrow OO}_{t}\}
+\end{equation}
+\\
+expected rental gross yield
+\begin{equation}\label{eq:exp_rent_g_y}
+		r^{exp\ yield}_{k,t}= \frac{12\overline{r_{Q,t}}\cdot o^{exp}_{Q}}{p^{offer}_{k,t}}
+\end{equation}
+\\
+expected occupancy:
+\begin{equation}\label{eq:exp_occ}
+	o^{exp}_{Q}= \frac{ 12 \varkappa + 7 }{ 12 \varkappa + 7 + \overline{D^{rm}_{t-1}}}
+\end{equation}
+\\
+\\
+bid-up price in auction:
+\begin{equation} \label{eq:bid_up_price}
+p^{\text{bid up}}_{k,i}=1.0075^{l}
+\end{equation}
+\\
+choosing bidding-up variable $l$ from a geometric distribution:
+\begin{equation} \label{eq:bidding}
+P(l)= (1-e^{-7B/30})^{l-1}e^{-7B/30}
+\end{equation}
+\\
+\textbf{rental market clearing process}\\
+round 1, step 1:
+\begin{equation*}
+\forall\  SH\ \max_{k\leq \max(Q)} \left(r^{BTL\rightarrow BTL}_{t,k}\leq r^{SH\rightarrow R}_{t}\right) 
+\end{equation*}
+\\
+round 1, step2:
+\begin{equation}\label{eq:realised_rent}
+\begin{split}
+offer&\text{ is machted, if } \exists!\ SH: r^{BTL\rightarrow BTL}_{t,k}<r^{SH\rightarrow R}_{t} \ \rightarrow \  r_{k,t}=r^{BTL\rightarrow BTL}_{t,k}\\
+\text{else }& r^{BTL\rightarrow BTL}_{t,k}=p^{bid-up}_{k,i}\text{, then pick randomly one bid} \\
+&\text{with } p^{bid-up}_{k,i} \leq  r^{SH\rightarrow R}_{t} \rightarrow \  r_{k,t}=p^{bid-up}_{k,i}
+\end{split}
+\end{equation}
+\\
+round 1, step 3:
+\begin{equation*}
+\text{return unmatched offers and bids into the pool}
+\end{equation*}
+round 2 and following:
+\\
+repeat until: \begin{itemize}
+	\item $bid=0$
+	\item $offer =0$
+\end{itemize}
+
+\end{document}
