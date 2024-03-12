@@ -1251,6 +1251,10 @@ public class Household implements IHouseOwner {
 	public void setVulnerableBecause(String vulnerableBecause) {
 		this.vulnerableBecause = vulnerableBecause;
 	}
+	
+	public double getShockedMonthlyDisposableIncome() {
+		return shockedMonthlyDisposableIncome;
+	}
 
 	public int getnAirBnBRentedOut() {
 		return nAirBnBRentedOut;
