@@ -30,7 +30,7 @@ public class Household implements IHouseOwner {
     private double 				monthlyNetTotalIncome;
     private double 				monthlyDisposableIncome;
     private double 				monthlyDividendIncome;
-    private double				socialHousingRent;
+    private double				socialHousingRent; // as it is recorded what the individual HH paid in socialHousingRent, this value is stored here
     private double				equityPosition;
     private double				consumption;
     private double				incomeConsumption;
@@ -269,12 +269,10 @@ public class Household implements IHouseOwner {
     		monthlyDisposableIncome += monthlyDividendIncome;
        	}
     	
-    	// households in social housing pay rent equal to average local authority rent prices for England from 2013-14 
-    	// https://data.london.gov.uk/dataset/local-authority-average-rents
-    	// = 82.44 pounds of WEEKLY rent 
-    	// this is yearly rental cost of 3,957.12 pounds per and can therefore be higher than private rents
-    	if(home==null && !config.GERVersion) {
-    		socialHousingRent = 4*82.44;
+    	// households in social housing pay rent 
+    	// depending on the market, this can be higher than private rents
+    	if(home == null && !config.GERVersion) {
+    		socialHousingRent = config.socialHousingRent;
     		monthlyDisposableIncome -= socialHousingRent;
     	}
     	monthlyDisposableIncome -= monthlyPayments;
@@ -287,7 +285,7 @@ public class Household implements IHouseOwner {
      */
     public double getMonthlyNetTotalIncome() {
     	// Income tax (with finance costs tax relief)
-        monthlyTaxesPaid = Model.government.incomeTaxDue(getAnnualGrossTotalIncome() - getAnnualFinanceCosts())/config.constants.MONTHS_IN_YEAR;
+        monthlyTaxesPaid = Model.government.incomeTaxDue(getAnnualGrossTotalIncome()) / config.constants.MONTHS_IN_YEAR; // @Ruben: deactivated - getAnnualFinanceCosts())/config.constants.MONTHS_IN_YEAR;
         // National insurance contributions
     	monthlyNICPaid = Model.government.class1NICsDue(annualGrossEmploymentIncome)/config.constants.MONTHS_IN_YEAR; 
     	

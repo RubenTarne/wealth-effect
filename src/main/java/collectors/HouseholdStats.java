@@ -156,6 +156,11 @@ public class HouseholdStats {
     // for calculation of median income
     private DescriptiveStatistics grossTotalIncome;
     private double medianIncome; 
+    
+    // for calculating median Deposits (net financial wealth)
+    private DescriptiveStatistics Bankbalance;
+    private double medianBankbalance;
+    
     // for a quasi-collateral channel 
     private DescriptiveStatistics debtServiceRatios;
     private double medianDSR;
@@ -395,6 +400,7 @@ public class HouseholdStats {
         totalSavingForDeleveraging = 0.0;
         totalNetWealth = new DescriptiveStatistics();
         grossTotalIncome = new DescriptiveStatistics();
+        Bankbalance = new DescriptiveStatistics();
         debtServiceRatios = new DescriptiveStatistics();
         vulnerableHouseholdsDSR = new DescriptiveStatistics();
         vulnerableHouseholdsAge = new DescriptiveStatistics();
@@ -454,6 +460,8 @@ public class HouseholdStats {
         nNegativeEquity = 0;
         totalNetWealth.clear();
         totalDividendIncome = 0.0;
+        medianBankbalance = Bankbalance.getPercentile(50);
+        Bankbalance.clear();
         medianIncome = grossTotalIncome.getPercentile(50);
         grossTotalIncome.clear();
         medianDSR = debtServiceRatios.getPercentile(50);
@@ -472,7 +480,9 @@ public class HouseholdStats {
         // Time stamp householdStats mesoRecorders
         Model.microDataRecorder.timeStampSingleRunSingleVariableFiles(Model.getTime(), config.recordBankBalance,
                 config.recordHousingWealth, config.recordNHousesOwned, config.recordSavingRate, config.recordMonthlyGrossTotalIncome,
+                config.recordMonthlyNetTotalIncome,
                 config.recordMonthlyGrossEmploymentIncome, config.recordMonthlyGrossRentalIncome, config.recordMonthlyDisposableIncome,
+                config.recordMonthlyRentalPayments,
                 config.recordMonthlyMortgagePayments, config.recordDebt, config.recordConsumption, config.recordIncomeConsumption, 
                 config.recordFinancialWealthConsumption, config.recordHousingWealthConsumption, config.recordDebtConsumption, 
                 config.recordSavingForDeleveraging, config.recordBTL, config.recordFTB, config.recordInFirstHome, config.recordAge,
@@ -488,6 +498,7 @@ public class HouseholdStats {
             	// (as agent classes are divided here different than in the main method)
             	recordAgentSpecificConsumption(h);
         	}
+        	
         	
         	// record the exposure at default for each household with different measures
         	countExposureAtDefault(h);
@@ -599,6 +610,9 @@ public class HouseholdStats {
         	// this way the vulnerability measures can be calculated before the recording starts
 
         	grossTotalIncome.addValue(h.returnMonthlyGrossTotalIncome());
+        	
+        	// also record bankbalance earlier, otherwise first period = NaN
+    		Bankbalance.addValue(h.getBankBalance());
 
         	
         	// implement to capture median DSR for a quasi-collateral channel
@@ -640,6 +654,9 @@ public class HouseholdStats {
         		if(config.recordMonthlyGrossTotalIncome) {
         			Model.microDataRecorder.recordMonthlyGrossTotalIncome(Model.getTime(), h.returnMonthlyGrossTotalIncome());
         		}
+        		if(config.recordMonthlyNetTotalIncome) {
+        			Model.microDataRecorder.recordMonthlyNetTotalIncome(Model.getTime(), h.returnMonthlyNetTotalIncome());
+        		}
         		if(config.recordMonthlyGrossEmploymentIncome) {
         			Model.microDataRecorder.recordMonthlyGrossEmploymentIncome(Model.getTime(), h.getMonthlyGrossEmploymentIncome());
         		}
@@ -648,6 +665,9 @@ public class HouseholdStats {
         		}
         		if(config.recordMonthlyDisposableIncome) {
         			Model.microDataRecorder.recordMonthlyDisposableIncome(Model.getTime(), h.returnMonthlyDisposableIncome());
+        		}
+        		if(config.recordMonthlyRentalPayments) {
+        			Model.microDataRecorder.recordMonthlyRentalPayments(Model.getTime(), (h.getSocialHousingRent() + h.getRentalPayment()));
         		}
         		if(config.recordMonthlyMortgagePayments) {
         			Model.microDataRecorder.recordMonthlyMortgagePayments(Model.getTime(), (h.getPrincipalPaidBack()+h.getInterestPaidBack()));
@@ -1390,7 +1410,8 @@ public class HouseholdStats {
     double getBTLStockFraction() {
 //        return ((double)(getnEmptyHouses() - Model.housingMarketStats.getnUnsoldNewBuild()
 //                + nRenting))/Model.construction.getHousingStock();
-        return ((double)(nBTLRentalProperty))/Model.construction.getHousingStock(); // this now collects only rental property owned by investors, not heirs
+//        return ((double)(nBTLRentalProperty))/Model.construction.getHousingStock(); // this now collects only rental property owned by investors, not heirs
+        return ((double)(nBTLRentalProperty))/config.TARGET_POPULATION; // as social housing is part of the housing stock, this makes it easier to interpret the BTL share
     }
     // ... number of normal (non-BTL) bidders with desired housing expenditure above the exponential moving average sale price
     int getnNonBTLBidsAboveExpAvSalePrice() { return nNonBTLBidsAboveExpAvSalePrice; }
@@ -1783,6 +1804,10 @@ public class HouseholdStats {
 
 	public double getMonthlyMedianIncome() {
 		return medianIncome;
+	}
+	
+	public double getMedianBankbalance() {
+		return medianBankbalance;
 	}
 	
 	public double getMedianDebtServiceRatio() {

@@ -22,9 +22,11 @@ public class MicroDataRecorder {
     private PrintWriter outfileNHousesOwned;
     private PrintWriter outfileSavingRate;
     private PrintWriter outfileMonthlyGrossTotalIncome;
+    private PrintWriter outfileMonthlyNetTotalIncome;
     private PrintWriter outfileMonthlyGrossEmploymentIncome;
     private PrintWriter outfileMonthlyGrossRentalIncome;
     private PrintWriter outfileMonthlyDisposableIncome;
+    private PrintWriter outfileMonthlyRentalPayments;
     private PrintWriter outfileMonthlyMortgagePayments;
     private PrintWriter outfileDebt;
     private PrintWriter outfileConsumption;
@@ -62,8 +64,8 @@ public class MicroDataRecorder {
 
     public void openSingleRunSingleVariableFiles(int nRun, boolean recordBankBalance, boolean recordInitTotalWealth,
                                                  boolean recordNHousesOwned, boolean recordSavingRate,
-                                                 boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
-                                                 boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome,
+                                                 boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyNetTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
+                                                 boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome, boolean recordMonthlyRentalPayments,
                                                  boolean recordMonthlyMortgagePayments, boolean recordDebt,
                                                  boolean recordConsumption, boolean recordIncomeConsumption,
                                                  boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
@@ -113,6 +115,14 @@ public class MicroDataRecorder {
         		e.printStackTrace();
         	}
         }
+        if(recordMonthlyNetTotalIncome) {
+        	try {
+        		outfileMonthlyNetTotalIncome = new PrintWriter(outputFolder + 
+        				"MonthlyNetTotalIncome-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
         if(recordMonthlyGrossEmploymentIncome) {
         	try {
         		outfileMonthlyGrossEmploymentIncome = new PrintWriter(outputFolder + 
@@ -125,6 +135,14 @@ public class MicroDataRecorder {
         	try {
         		outfileMonthlyDisposableIncome = new PrintWriter(outputFolder + 
         				"MonthlyDisposableIncome-run" + nRun + ".csv", "UTF-8");
+        	} catch(FileNotFoundException | UnsupportedEncodingException e) {
+        		e.printStackTrace();
+        	}
+        }
+        if(recordMonthlyRentalPayments) {
+        	try {
+        		outfileMonthlyRentalPayments = new PrintWriter(outputFolder + 
+        				"MonthlyRentalPayments-run" + nRun + ".csv", "UTF-8");
         	} catch(FileNotFoundException | UnsupportedEncodingException e) {
         		e.printStackTrace();
         	}
@@ -321,8 +339,8 @@ public class MicroDataRecorder {
 
     void timeStampSingleRunSingleVariableFiles(int time, boolean recordBankBalance, boolean recordHousingWealth,
                                                boolean recordNHousesOwned, boolean recordSavingRate, 
-                                               boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
-                                               boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome,
+                                               boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyNetTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
+                                               boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome, boolean recordMonthlyRentalPayments,
                                                boolean recordMonthlyMortgagePayments, boolean recordDebt,
                                                boolean recordConsumption, boolean recordIncomeConsumption,
                                                boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
@@ -364,6 +382,12 @@ public class MicroDataRecorder {
             	}
             	outfileMonthlyGrossTotalIncome.print(time);
             }
+            if (recordMonthlyNetTotalIncome) {
+            	if(time!=0) {
+            		outfileMonthlyNetTotalIncome.println("");
+            	}
+            	outfileMonthlyNetTotalIncome.print(time);
+            }
             if (recordMonthlyGrossEmploymentIncome) {
             	if(time!=0) {
             		outfileMonthlyGrossEmploymentIncome.println("");
@@ -381,6 +405,12 @@ public class MicroDataRecorder {
             		outfileMonthlyDisposableIncome.println("");
             	}
             	outfileMonthlyDisposableIncome.print(time);
+            }
+            if (recordMonthlyRentalPayments) {
+            	if (time != 0) {
+            		outfileMonthlyRentalPayments.println("");
+            	}
+            	outfileMonthlyRentalPayments.print(time);
             }
             if (recordMonthlyMortgagePayments) {
             	if (time != 0) {
@@ -539,6 +569,10 @@ public class MicroDataRecorder {
     	outfileMonthlyGrossTotalIncome.print(", " + round(monthlyGrossTotalIncome,3));
     }
     
+    void recordMonthlyNetTotalIncome(int time, double monthlyNetTotalIncome) {
+    	outfileMonthlyNetTotalIncome.print(", " + round(monthlyNetTotalIncome,3));
+    }
+    
     void recordMonthlyGrossEmploymentIncome(int time, double monthlyGrossEmploymentIncome) {
     	outfileMonthlyGrossEmploymentIncome.print(", " + round(monthlyGrossEmploymentIncome,3));
     }
@@ -549,6 +583,10 @@ public class MicroDataRecorder {
     
     void recordMonthlyDisposableIncome(int time, double monthlyDisposableIncome) {
     	outfileMonthlyDisposableIncome.print(", " + round(monthlyDisposableIncome,3));
+    }
+    
+    void recordMonthlyRentalPayments(int time, double monthlyRentalPayments) {
+    	outfileMonthlyRentalPayments.print(", " + round(monthlyRentalPayments,3));
     }
     
     void recordMonthlyMortgagePayments(int time, double monthlyMortgagePayments) {
@@ -633,8 +671,8 @@ public class MicroDataRecorder {
 
 
 	public void finishRun(boolean recordBankBalance, boolean recordHousingWealth, boolean recordNHousesOwned,
-                          boolean recordSavingRate, boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
-                          boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome,
+                          boolean recordSavingRate, boolean recordMonthlyGrossTotalIncome, boolean recordMonthlyNetTotalIncome, boolean recordMonthlyGrossEmploymentIncome,
+                          boolean recordMonthlyGrossRentalIncome, boolean recordMonthlyDisposableIncome, boolean recordMonthlyRentalPayments,
                           boolean recordMonthlyMortgagePayments, boolean recordDebt, boolean recordConsumption, 
                           boolean recordIncomeConsumption, boolean recordFinancialWealthConsumption, boolean recordHousingWealthConsumption,
                           boolean recordDebtConsumption, boolean recordSavingForDeleveraging, boolean recordBTL,
@@ -658,6 +696,9 @@ public class MicroDataRecorder {
         if (recordMonthlyGrossTotalIncome) {
         	outfileMonthlyGrossTotalIncome.close();
         }
+        if (recordMonthlyNetTotalIncome) {
+        	outfileMonthlyNetTotalIncome.close();
+        }
         if (recordMonthlyGrossEmploymentIncome) {
         	outfileMonthlyGrossEmploymentIncome.close();
         }
@@ -666,6 +707,9 @@ public class MicroDataRecorder {
         }
         if (recordMonthlyDisposableIncome) {
         	outfileMonthlyDisposableIncome.close();
+        }
+        if (recordMonthlyRentalPayments) {
+        	outfileMonthlyRentalPayments.close();
         }
         if (recordMonthlyMortgagePayments) {
         	outfileMonthlyMortgagePayments.close();

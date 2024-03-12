@@ -177,6 +177,7 @@ public class Recorder {
     					+ "creditSupplyTarget, newlyPaidDownPayments, cashPayments, newlyIssuedCredit, nNegativeEquity, "
     					+ "LTV FTB, LTV OO, LTV BTL, interestRateSpread, moneyOutflowToConstructionSector, "
     					+ "macropruLTVOnOff, medianDebtServiceRatio, medianDebtServiceRatioAdjusted, vulHH medianDSR, vulHH medianDSR adjusted, %vulHH of indebtedHH, medianAge vulHH, medianAge nonVulHH, Top 10% wealth share, "
+    					+ "medianBankBalance, "
     					// agent-specific aggregate consumption total and per Agent-class
     					+ "activeBTLConsumption, avActiveBTLConsumption, SSBConsumption, avSSBConsumption, "
     					+ "inFirstHomeConsumption, avInFirstHomeConsumption, renterConsumption, avRenterConsumption, "
@@ -413,6 +414,7 @@ public class Recorder {
 					Model.householdStats.getMedianAgeVulnerableHouseholds() + ", " +
 					Model.householdStats.getMedianAgeNonVulnerableHouseholds() + ", " +
 					Model.coreIndicators.getS90TotalNetWealth() + ", " + 
+					Model.householdStats.getMedianBankbalance() + ", " + 
 					// additional consumption parameters
 					// active BTL total and per BTL investor
 					(Model.householdStats.getActiveBTLIncomeConsumption() +

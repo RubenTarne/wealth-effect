@@ -39,9 +39,11 @@ public class Config {
     public boolean recordNHousesOwned;          // True to write individual household number of houses owned data (after market clearing)
     public boolean recordSavingRate;            // True to write individual household saving rate data [1 - (taxExpenses + housing expenses(except deposits) + essentialConsumption + nonEssentialConsumption)/monthlyGrossTotalIncome]
     public boolean recordMonthlyGrossTotalIncome; 	// True to write individual household monthly gross total income
+    public boolean recordMonthlyNetTotalIncome;
     public boolean recordMonthlyGrossEmploymentIncome; // True to write individual household monthly gross employment income
     public boolean recordMonthlyGrossRentalIncome;	// True to write individual household monthly gross rental income
     public boolean recordMonthlyDisposableIncome;	// True to write individual household monthly disposable income
+    public boolean recordMonthlyRentalPayments;
     public boolean recordMonthlyMortgagePayments;	// True to write individual households monthly mortgage payments (interest and principal)
     public boolean recordAgentData;					// True to write micro data for each agent each period
     public boolean recordAgentDecisions; 			// True to write data from agent decision methods
@@ -127,6 +129,7 @@ public class Config {
     public double RENTAL_PRICES_SCALE;          // Scale parameter for the log-normal distribution of house rental prices (logarithm of median house rental price = mean and median of logarithmic house rental prices)
     public double RENTAL_PRICES_SHAPE;          // Shape parameter for the log-normal distribution of house rental prices (standard deviation of logarithmic house rental prices)
     public double RENT_GROSS_YIELD;             // Profit margin for buy-to-let investors
+    public double socialHousingRent; 			// monthly rent paid by households in social housing
 
     // Demographic parameters
     public int TARGET_POPULATION;           // Target number of households
