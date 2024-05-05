@@ -144,3 +144,21 @@ Working paper drafts/Working-Paper-vulnerability-firstRevise.tex
 model_base_NDL_analysis_March23_III.csv
 
 RunningPapersExperimentsInBackground.R
+
+Working paper drafts/wp2_figures/
+
+Working paper drafts/Working-Paper-vulnerability-firstRevise_files/figure-latex/
+
+*.xlsx
+
+*.csv
+
+Working paper drafts/Working-Paper-vulnerability-firstRevise.nb.html
+
+*.rar
+
+Working paper drafts/ModelOverview.png
+
+Working paper drafts/Meine Bibliothek.bib
+
+Working paper drafts/latex-code.zip
